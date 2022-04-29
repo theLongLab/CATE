@@ -4,14 +4,14 @@ A fast and scalable CUDA implementation to conduct highly parallelized evolution
 
 ---
 
-```diff 
-- NOTE: BETA TESTING MODE 
+```diff
+- NOTE: BETA TESTING MODE
 ```
 
 ---
 #### Description
 
-The C.A.T.E (CUDA Accelerated Testing of Evolution) software is CUDA based solution to enable rapid processing of large scale VCF files to conduct a series of six different tests on evolution.
+The CATE software is CUDA based solution to enable rapid processing of large scale VCF files to conduct a series of six different tests on evolution.
 
 *Currently the program is under BETA testing for accuracy.*
 
@@ -37,3 +37,50 @@ The six tests on evolution are:
 4. McDonald–Kreitman test
 5. Fixation Index
 6. Extended Haplotype Homozygosity
+
+---
+Currently the program's executable is called:  
+>Test_Main
+
+To run the software you need a JSON style parameters file. An example is provided above as:
+
+> *parameters.json*.
+
+*The paramaters file is used to specify all input and output locations as well as the gene leist file locations. Each function's execution can be customised individually using the paramaters fie.*
+
+The typical syntax for program __execution__ is as follows (examle below shows running the Tajima's function):
+> program_executable -function paramter_file
+
+__Example:__
+
+>./Test_Main -t parameters.json
+
+The __HELP__ menu can be accessed by simply typing -h as the function as shown below:
+
+> ./Test_Main -h
+
+---
+
+MIT License
+
+Copyright (c) 2022 The Long Lab
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
