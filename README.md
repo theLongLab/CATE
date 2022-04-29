@@ -4,7 +4,7 @@ A fast and scalable CUDA implementation to conduct highly parallelized evolution
 
 ---
 
-#### <span style="color:red">NOTE: BETA TESTING MODE</span>
+#### ```diff - NOTE: BETA TESTING MODE ```
 
 ---
 #### Description
