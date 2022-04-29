@@ -1,0 +1,73 @@
+{
+    # Cuda device;
+    "CUDA Device ID":0,
+
+    # IO directory listings and universal file paths
+    # RECOMMENDS THE CREATION OF SEPERATE PARAMTER FILES WITH SEPERATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
+    "Input path":"results",
+    "Output path":"mk",
+    "Intermediate path":"intermediate",
+
+    # VCF sample details
+    "Ploidy":2,
+
+    # Protein information
+    # DNA INTERPRETATION SHOULD BE USED FOR START AND STOP CODONS
+    "Start codon(s)":"ATG",
+    "Stop codon(s)":"TAA,TAG,TGA",
+    "Genetic code":"A|GCT,GCC,GCA,GCG;R|CGT,CGC,CGA,CGG,AGA,AGG;N|AAT,AAC;D|GAT,GAC;B|AAT,AAC,GAT,GAC;C|TGT,TGC;Q|CAA,CAG;E|GAA,GAG;Z|CAA,CAG,GAA,GAG;G|GGT,GGC,GGA,GGG;H|CAT,CAC;M|ATG;I|ATT,ATC,ATA;L|CTT,CTC,CTA,CTG,TTA,TTG;K|AAA,AAG;F|TTT,TTC;P|CCT,CCC,CCA,CCG;S|TCT,TCC,TCA,TCG,AGT,AGC;T|ACT,ACC,ACA,ACG;W|TGG;Y|TAT,TAC;V|GTT,GTC,GTA,GTG;X|TAA,TGA,TAG",
+
+    # Any tab-deliminated text based formats such as but not limited to (*.txt, *.csv)
+    "Universal gene list":"genelist.txt",
+
+    # VCF split parameters
+    "Population file path":"/mnt/d/Deshan/Books/population/sample_population_codes.tsv",
+    "Reference allele count":1,
+    "Alternate allele count":1,
+    "SNP count per file":10000,
+
+    # FASTA split parameters
+    # REQUIRES SEPERATE INPUT, SINCE IT IS A SINGULAR INPUT
+    # IF ALL IS SET AS SEQUENCE THEN THE WHOLE FILE IS SPLIT. ELSE STATE THE SEQUENCE ID OF THE SEQUENCE THAT NEEDS TO BE SEPERATED
+    "Sequence":"All",
+    "Raw FASTA file":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_merge/One.fasta",
+
+    # FASTA merge parameters
+    # REQUIRES SEPERATE INPUT AND OUTPUT LOCATION
+    # ENSURE THE FASTA FILES HAVE THE APPROPRIATE EXTENSION: .fasta, .fna, .ffn, .faa, .frn, .fa
+    "FASTA files folder":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_Split/3",
+    "Merge FASTA path":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_Split/Three.fasta",
+
+    # Tajima's D
+    # File created would have the extension *.td (tab deliminated text file). File Name: CountryName_GeneListFileName.td
+    "Tajima gene list":"universal",
+
+    # Fu and Li
+    # File created would have the extension *.fl (tab deliminated text file). File Name: CountryName_GeneListFileName.fl
+    "Fu and Li gene list":"universal",
+
+    # Fay and Wu
+    # File created would have the extension *.fw (tab deliminated text file). File Name: CountryName_GeneListFileName.fw
+    "Fay and Wu gene list":"universal",
+
+    # McDonald–Kreitman
+    # REFERENCE GENOME FILE SHOULD BE THE SAME AS THAT USED TO GENERATE THE VCF FILE
+    # ALIGNMENT FILE SHOULD BE A PAIRWISE ALIGNMENT OF THE REFERENCE GENOME TO THE OUTGROUP GENOME. SHOULD BE IN .maf FORMAT
+    # File created would have the extension *.mk (tab deliminated text file). File Name: CountryName_GeneListFileName.mk
+    "Reference genome":"reference/Human_1.fasta",
+    "Alignment file":"reference/results.maf",
+    "McDonald–Kreitman gene list":"universal",
+
+    # Fst or Fixation Index
+    # Indexed population file should be a THREE column tab delimiated *.txt file with headings: Sample_name	population_ID	Super_population
+    # Ensure population_ID values are unique to each super population and do not overlap
+    "Population index file path":"fst_pop/population.txt",
+    "Fst gene list":"universal",
+    "Population ID":"GWD,ACB,PJL",
+
+    # EHH or Extended Haplotype Homozygosity
+    # Define the extended haplotype region specification mode by either using a seperate gene list file (FILE mode) or state the standard displacement value (FIXED mode) in bases
+    "Range mode":"FILE",
+    "EHH FILE path":"genelist_3.txt",
+    "FIXED mode":"+1000"
+}
