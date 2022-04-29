@@ -5,7 +5,7 @@ A fast and scalable CUDA implementation to conduct highly parallelized evolution
 ---
 
 ```diff
-- NOTE: BETA TESTING MODE
+- NOTE: CATE IS CURRENTLY IN IT'S ALPHA PHASE OF DEVELOPMENT
 ```
 
 ---
