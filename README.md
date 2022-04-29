@@ -55,7 +55,7 @@ __Example:__
 
 >./Test_Main -t parameters.json
 
-The __HELP__ menu can be accessed by simply typing -h as the function as shown below:
+The __HELP__ menu will list all available functions and how each function can be executed. It can be accessed by simply typing -h as the function as shown below:
 
 > ./Test_Main -h
 
