@@ -123,7 +123,7 @@ void fasta_splitter::split_all()
         {
             if (line.at(0) == '>')
             {
-                if (first = 1)
+                if (first == 1)
                 {
                     output.close();
                 }
