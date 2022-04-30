@@ -1,6 +1,6 @@
 # CATE (CUDA Accelerated Testing of Evolution)
 
-A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large scale genomic data.
+A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large-scale genomic data.
 
 ---
 
@@ -11,7 +11,7 @@ A fast and scalable CUDA implementation to conduct highly parallelized evolution
 ---
 #### Description
 
-The CATE software is CUDA based solution to enable rapid processing of large scale VCF files to conduct a series of six different tests on evolution.
+The CATE software is CUDA based solution to enable rapid processing of large-scale VCF files to conduct a series of six different tests on evolution.
 
 *Currently the program is under BETA testing for accuracy.*
 
@@ -20,7 +20,7 @@ The CATE software is CUDA based solution to enable rapid processing of large sca
 #### Prerequisites
 
 1. CUDA capable hardware
-2. LINUX or UNIX based kernal
+2. LINUX or UNIX based kernel
 3. NVIDIA's CUDA toolkit (nvcc compiler)
 4. C++ compiler (gcc compiler)
 
@@ -28,27 +28,27 @@ The CATE software is CUDA based solution to enable rapid processing of large sca
 
 #### How to RUN
 
-CATE is a command line based software. It's available functions include six different tests on evolution and a series of tools for editing and processing FASTA and VCF files.
+CATE is a command-line-based software. Its available functions include six different tests on evolution and a series of tools for editing and processing FASTA and VCF files.
 
 The six tests on evolution are:
 1. Tajima’s D
-2. Fu and Li's D, D*, F and F \*
+2. Fu and Li's D, D*, F, and F \*
 3. Fay and Wu’s H and E
 4. McDonald–Kreitman test
 5. Fixation Index
 6. Extended Haplotype Homozygosity
 
 ---
-Currently the program's executable is called:  
+Currently, the program's executable is called:  
 >Test_Main
 
-To run the software you need a JSON style parameters file. An example is provided above as:
+To run the software you need a JSON-style parameters file. An example is provided above:
 
 > *parameters.json*.
 
-*The paramaters file is used to specify all input and output locations as well as the gene leist file locations. Each function's execution can be customised individually using the paramaters fie.*
+*The parameters file is used to specify all input and output locations as well as the gene list file locations. Each function's execution can be customized individually using the parameters fie.*
 
-The typical syntax for program __execution__ is as follows (examle below shows running the Tajima's function):
+The typical syntax for program __execution__ is as follows (example below shows running the Tajima's function):
 > program_executable -function paramter_file
 
 __Example:__
