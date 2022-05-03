@@ -38,7 +38,6 @@ The six tests on evolution are:
 5. Fixation Index
 6. Extended Haplotype Homozygosity
 
----
 Currently, the program's executable is called:  
 >Test_Main
 
