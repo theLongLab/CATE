@@ -238,7 +238,7 @@ void mk_test::process_MK()
                     {
                         fstream get_Codon_coordinates;
                         get_Codon_coordinates.open(codon_Index_File_name, ios::in);
-                        cout << "Codon alignment index file found at " << codon_Index_File_name << endl;
+                        //cout << "Codon alignment index file found at " << codon_Index_File_name << endl;
                         string codon_Line_one;
                         getline(get_Codon_coordinates, codon_Line_one);
                         get_Codon_coordinates.close();
