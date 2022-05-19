@@ -24,7 +24,7 @@ vcf_splitter::vcf_splitter(char folder[], string vcf_Folder, string population_F
 void vcf_splitter::index_population()
 {
     cout << endl
-         << "Indexing Populations and Patients" << endl;
+         << "Indexing Population(s) and Patient(s)" << endl;
     fstream pop_File;
     pop_File.open(this->population_File, ios::in);
     if (pop_File.is_open())
@@ -47,7 +47,7 @@ void vcf_splitter::index_population()
     }
 
     int pop_Num = super_pops.size();
-    cout << pop_Num << " populations found\t: ";
+    cout << pop_Num << " population(s) found\t: ";
     int count = 0;
     for (auto pop : super_pops)
     {

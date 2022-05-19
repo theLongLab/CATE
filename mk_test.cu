@@ -226,11 +226,19 @@ void mk_test::process_MK()
                         write_Pn = "NA";
                         write_Ps = "NA";
                         write_NI = "NA";
+
+                        for (size_t i = 0; i < 3; i++)
+                        {
+                            codon_Coordinates.push_back("NA");
+                        }
+                        
+                        
                     }
                     else
                     {
                         fstream get_Codon_coordinates;
                         get_Codon_coordinates.open(codon_Index_File_name, ios::in);
+                        cout << "Codon alignment index file found at " << codon_Index_File_name << endl;
                         string codon_Line_one;
                         getline(get_Codon_coordinates, codon_Line_one);
                         get_Codon_coordinates.close();
@@ -1718,13 +1726,13 @@ void mk_test::reference_Prep(vector<pair<int, int>> TEMP_file_index)
                 {
                     ORF_search(start_ORFs, found, ORF_start, ORF_stop, end_Co);
                 }
-                //cout << endl;
+                // cout << endl;
                 if (found == 1)
                 {
                     cout << "Start codon location\t: " << setfill('0') << setw(to_string(ORF_stop + 1).length()) << ORF_start + 1
-                         << "\t Start Codon\t: " << full_Reference.at(ORF_start) << full_Reference.at(ORF_start + 1) << full_Reference.at(ORF_start + 2) << endl;
+                         << "\t Start Codon: " << full_Reference.at(ORF_start) << full_Reference.at(ORF_start + 1) << full_Reference.at(ORF_start + 2) << endl;
                     cout << "Stop codon location\t: " << ORF_stop + 1
-                         << "\t Stop Codon\t: " << full_Reference.at(ORF_stop) << full_Reference.at(ORF_stop + 1) << full_Reference.at(ORF_stop + 2) << endl;
+                         << "\t Stop Codon: " << full_Reference.at(ORF_stop) << full_Reference.at(ORF_stop + 1) << full_Reference.at(ORF_stop + 2) << endl;
                     cout << endl;
                     cout << "Fetching target ORF alignment:" << endl;
                     // vector<string> file_List = compound_Interpolation_folder(TEMP_file_index, ORF_start + 1, ORF_stop + 3);
