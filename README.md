@@ -13,7 +13,7 @@ A fast and scalable CUDA implementation to conduct highly parallelized evolution
 
 The CATE software is a CUDA based solution to enable rapid processing of large-scale VCF files to conduct a series of six different tests on evolution.
 
-*Currently the program is under BETA testing for accuracy.*
+*Currently the program is under ALPHA testing for accuracy.*
 
 ---
 
@@ -39,6 +39,7 @@ The six tests on evolution are:
 6. Extended Haplotype Homozygosity
 
 ---
+
 Currently, the program's executable is called:  
 >Test_Main
 
