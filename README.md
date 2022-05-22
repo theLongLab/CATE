@@ -50,7 +50,8 @@ To run the software you need a JSON-style parameters file. An example is provide
 *The parameters file is used to specify all input and output locations as well as the gene list file locations. Each function's execution can be customized individually using the parameters fie.*
 
 The typical syntax for program __execution__ is as follows (example below shows running the Tajima's function):
-> program_executable -function paramter_file
+> program_executable --function paramter_file
+> program_executable -f paramter_file
 
 __Example:__
 
