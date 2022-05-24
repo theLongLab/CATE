@@ -6,6 +6,7 @@
 #include "tajima.cuh"
 #include "fu_li.cuh"
 #include "fay_wu.cuh"
+#include "neutral.cuh"
 #include "ehh.cuh"
 #include "vcf_splitter.h"
 #include "mk_test.cuh"
@@ -156,6 +157,16 @@ int main(int argc, char *argv[])
 
                          cout << "CUDA powered Fay and Wu's normalized H and E calculator has been completed." << endl;
                     }
+                    else if (function == "--neutrality" || function == "-n")
+                    {
+                         string gene_List = properties.where("Neutrality gene list");
+                         if (gene_List == "universal")
+                         {
+                              gene_List = properties.where("Universal gene list");
+                         }
+                         neutral neutrality = neutral(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                         neutrality.ingress();
+                    }
                     else if (function == "--mk" || function == "-m")
                     {
                          string gene_List = properties.where("McDonald–Kreitman gene list");
@@ -287,9 +298,9 @@ void print_HELP()
           << "             \t\t  Ensure that the FASTA files have the APPROPRIATE extensions: .fasta, .fna, .ffn, .faa, .frn, .fa" << endl
           << endl
           << endl
-          << "NEUTRALITY TESTS:"
+          << "EVOLUTION TESTS:"
           << endl
-          << "Core functions optimized for conducting Neutrality tests on 1000 Genome VCF files." << endl
+          << "Core functions optimized for conducting Evolution tests on VCF files." << endl
           << endl
           << "-t or --tajima\t: Calculates the Tajima's D statistic (1989) for a predefined gene list using a (split) VCF (indexed) folder." << endl
           << "              \t  Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
@@ -304,6 +315,10 @@ void print_HELP()
           << "-w or --faywu\t: Calculates the Fay and Wu's normalized H and E statistics (2006) for a predefined gene list using a (split) VCF (indexed) folder." << endl
           << "              \t  Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "              \t  File format is *.fw (a tab deliminated text file)." << endl
+          << endl
+          << "-n or --neutrality: Calculates the above three Neutrality tests (Tajima's Fu and Li's and Fay and Wu's) at once." << endl
+          << "                    Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
+          << "                    File format is *.nt (a tab deliminated text file)." << endl
           << endl
           << "-m or --mk    \t: Calculates the McDonald–Kreitman Neutrality Index (NI) (1991) for a predefined gene list using a (split) vcf (indexed) folder." << endl
           << "              \t  The reference genome must be provided in a FASTA format file." << endl

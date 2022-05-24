@@ -222,7 +222,7 @@ void tajima::ingress()
 
                 function.process_Seg_sites_tajima(collect_Segregrating_sites, N, segregating_Sites, tot_pairwise_Differences, this->tot_Blocks, this->tot_ThreadsperBlock);
 
-                cout << endl;
+                cout << endl;  
                 //cout << "totDif " << tot_pairwise_Differences << endl;
                 float pi = 0;
                 //float pi_Test = 0;
