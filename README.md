@@ -1,3 +1,6 @@
+
+![alt text](https://github.com/theLongLab/CATE/blob/main/logo.png)
+
 # CATE (CUDA Accelerated Testing of Evolution)
 
 A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large-scale genomic data.
