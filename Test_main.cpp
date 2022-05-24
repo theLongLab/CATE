@@ -166,6 +166,8 @@ int main(int argc, char *argv[])
                          }
                          neutral neutrality = neutral(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
                          neutrality.ingress();
+
+                         cout << "CUDA powered complete neutrality test calculator has completed" << endl;
                     }
                     else if (function == "--mk" || function == "-m")
                     {
