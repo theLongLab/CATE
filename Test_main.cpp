@@ -9,6 +9,7 @@
 #include "neutral.cuh"
 #include "ehh.cuh"
 #include "vcf_splitter.h"
+#include "print_param.h"
 #include "mk_test.cuh"
 #include "fst.cuh"
 #include "fasta_splitter.h"
@@ -63,185 +64,196 @@ int main(int argc, char *argv[])
                     char tmp[256];
                     getcwd(tmp, 256);
 
-                    parameter properties = parameter(parameter_File);
-
-                    string output_Path = properties.where("Output path");
-                    if (filesystem::exists(output_Path) == 0)
+                    if (function == "--printparam" || function == "-pparam")
                     {
-                         cout << "Creating output folder: " << output_Path << endl;
+                         print_param print = print_param(parameter_File);
+                         print.ingress();
 
-                         filesystem::create_directory(output_Path);
+                         cout << endl
+                              << "Parameter Print has been completed." << endl;
                     }
                     else
                     {
-                         cout << "Output folder exists: " << output_Path << endl;
-                    }
+                         parameter properties = parameter(parameter_File);
 
-                    string intermediate_Path = properties.where("Intermediate path");
-                    if (filesystem::exists(intermediate_Path) == 0)
-                    {
-                         cout << "Creating intermediate folder: " << intermediate_Path << endl;
-
-                         filesystem::create_directory(intermediate_Path);
-                    }
-                    else
-                    {
-                         cout << "Intermediate folder exists: " << intermediate_Path << endl;
-                    }
-
-                    cout << endl;
-
-                    if (function == "--splitvcf" || function == "-svcf")
-                    {
-                         // string input = properties.where("Input folder entry");
-
-                         vcf_splitter split = vcf_splitter(tmp, properties.where("Input path"), properties.where("Population file path"), output_Path, properties.where_Int("Reference allele count"), properties.where_Int("Alternate allele count"), properties.where_Int("SNP count per file"));
-                         split.index_population();
-                         split.read_File();
-                         cout << endl
-                              << endl
-                              << "VCF split has been completed." << endl;
-                    }
-                    else if (function == "--splitfasta" || function == "-sfasta")
-                    {
-                         fasta_splitter split = fasta_splitter(properties.where("Raw FASTA file"), output_Path, properties.where("Sequence"));
-                         split.ingress();
-
-                         cout << endl
-                              << "FASTA split has been completed." << endl;
-                    }
-                    else if (function == "--mergefasta" || function == "-mfasta")
-                    {
-                         fasta_merge merge = fasta_merge(properties.where("FASTA files folder"), properties.where("Merge FASTA path"));
-                         merge.ingress();
-
-                         cout << endl
-                              << "FASTA merge has been completed." << endl;
-                    }
-                    else if (function == "--tajima" || function == "-t")
-                    {
-                         string gene_List = properties.where("Tajima gene list");
-                         if (gene_List == "universal")
+                         string output_Path = properties.where("Output path");
+                         if (filesystem::exists(output_Path) == 0)
                          {
-                              gene_List = properties.where("Universal gene list");
-                         }
-                         tajima tajimasD = tajima(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
-                         tajimasD.ingress();
+                              cout << "Creating output folder: " << output_Path << endl;
 
-                         cout << endl
-                              << "CUDA powered Tajima's D calculator has been completed." << endl;
-                    }
-
-                    else if (function == "--fuli" || function == "-f")
-                    {
-                         string gene_List = properties.where("Fu and Li gene list");
-                         if (gene_List == "universal")
-                         {
-                              gene_List = properties.where("Universal gene list");
-                         }
-                         fu_li fuli = fu_li(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
-                         fuli.ingress();
-
-                         cout << "CUDA powered Fu and Li's D, D*, F and F* calculator has been completed." << endl;
-                    }
-
-                    else if (function == "--faywu" || function == "-w")
-                    {
-                         string gene_List = properties.where("Fay and Wu gene list");
-                         if (gene_List == "universal")
-                         {
-                              gene_List = properties.where("Universal gene list");
-                         }
-                         fay_wu faywu = fay_wu(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
-                         faywu.ingress();
-
-                         cout << "CUDA powered Fay and Wu's normalized H and E calculator has been completed." << endl;
-                    }
-                    else if (function == "--neutrality" || function == "-n")
-                    {
-                         string gene_List = properties.where("Neutrality gene list");
-                         if (gene_List == "universal")
-                         {
-                              gene_List = properties.where("Universal gene list");
-                         }
-                         neutral neutrality = neutral(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
-                         neutrality.ingress();
-
-                         cout << "CUDA powered complete neutrality test calculator has completed" << endl;
-                    }
-                    else if (function == "--mk" || function == "-m")
-                    {
-                         string gene_List = properties.where("McDonald–Kreitman gene list");
-                         if (gene_List == "universal")
-                         {
-                              gene_List = properties.where("Universal gene list");
-                         }
-                         mk_test mk = mk_test(properties.where("Reference genome"), properties.where("Alignment file"), gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Genetic code"), properties.where("Start codon(s)"), properties.where("Stop codon(s)"));
-                         mk.ingress();
-
-                         cout << "CUDA powered McDonald–Kreitman Neutrality Index (NI) test has been completed." << endl;
-                    }
-                    else if (function == "--fst" || function == "-x")
-                    {
-                         string gene_List = properties.where("Fst gene list");
-                         if (gene_List == "universal")
-                         {
-                              gene_List = properties.where("Universal gene list");
-                         }
-
-                         fst fs = fst(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Population index file path"), properties.where("Population ID"));
-                         fs.ingress();
-
-                         cout << "CUDA powered Fst (Fixation Index) calculator has been completed." << endl;
-                    }
-                    else if (function == "--ehh" || function == "-e")
-                    {
-                         string mode = properties.where("Range mode");
-                         transform(mode.begin(), mode.end(), mode.begin(), ::toupper);
-
-                         // cout << mode << endl;
-
-                         string file_mode_Path = "NA";
-                         string fixed_mode_Value = "NA";
-
-                         string GO = "NO";
-
-                         if (mode == "FILE")
-                         {
-                              file_mode_Path = properties.where("EHH FILE path");
-                              if (file_mode_Path == "universal")
-                              {
-                                   file_mode_Path = properties.where("Universal gene list");
-                              }
-                              GO = "YES";
-                         }
-                         else if (mode == "FIXED")
-                         {
-                              file_mode_Path = properties.where("EHH FILE path");
-                              if (file_mode_Path == "universal")
-                              {
-                                   file_mode_Path = properties.where("Universal gene list");
-                              }
-                              fixed_mode_Value = properties.where("FIXED mode");
-                              GO = "YES";
-                         }
-
-                         if (GO == "YES")
-                         {
-                              ehh ehh_ = ehh(mode, file_mode_Path, fixed_mode_Value, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
-                              ehh_.ingress();
-
-                              cout << "CUDA powered Extended Haplotype Homozygosity (EHH) calculator has been completed." << endl;
+                              filesystem::create_directory(output_Path);
                          }
                          else
                          {
-                              cout << "RANGE MODE HAS AN INCORRECT VALUE. Should be either \"FILE\" or \"FIXED\"" << endl;
+                              cout << "Output folder exists: " << output_Path << endl;
                          }
-                    }
-                    else
-                    {
-                         cout << "INVALID FUNCTION PASSED AS A RUNTIME ARGUMENT" << endl
-                              << "To see available functions type --help or -h." << endl;
+
+                         string intermediate_Path = properties.where("Intermediate path");
+                         if (filesystem::exists(intermediate_Path) == 0)
+                         {
+                              cout << "Creating intermediate folder: " << intermediate_Path << endl;
+
+                              filesystem::create_directory(intermediate_Path);
+                         }
+                         else
+                         {
+                              cout << "Intermediate folder exists: " << intermediate_Path << endl;
+                         }
+
+                         cout << endl;
+
+                         if (function == "--splitvcf" || function == "-svcf")
+                         {
+                              // string input = properties.where("Input folder entry");
+
+                              vcf_splitter split = vcf_splitter(tmp, properties.where("Input path"), properties.where("Population file path"), output_Path, properties.where_Int("Reference allele count"), properties.where_Int("Alternate allele count"), properties.where_Int("SNP count per file"));
+                              split.index_population();
+                              split.read_File();
+                              cout << endl
+                                   << endl
+                                   << "VCF split has been completed." << endl;
+                         }
+                         else if (function == "--splitfasta" || function == "-sfasta")
+                         {
+                              fasta_splitter split = fasta_splitter(properties.where("Raw FASTA file"), output_Path, properties.where("Sequence"));
+                              split.ingress();
+
+                              cout << endl
+                                   << "FASTA split has been completed." << endl;
+                         }
+                         else if (function == "--mergefasta" || function == "-mfasta")
+                         {
+                              fasta_merge merge = fasta_merge(properties.where("FASTA files folder"), properties.where("Merge FASTA path"));
+                              merge.ingress();
+
+                              cout << endl
+                                   << "FASTA merge has been completed." << endl;
+                         }
+                         else if (function == "--tajima" || function == "-t")
+                         {
+                              string gene_List = properties.where("Tajima gene list");
+                              if (gene_List == "universal")
+                              {
+                                   gene_List = properties.where("Universal gene list");
+                              }
+                              tajima tajimasD = tajima(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                              tajimasD.ingress();
+
+                              cout << endl
+                                   << "CUDA powered Tajima's D calculator has been completed." << endl;
+                         }
+
+                         else if (function == "--fuli" || function == "-f")
+                         {
+                              string gene_List = properties.where("Fu and Li gene list");
+                              if (gene_List == "universal")
+                              {
+                                   gene_List = properties.where("Universal gene list");
+                              }
+                              fu_li fuli = fu_li(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                              fuli.ingress();
+
+                              cout << "CUDA powered Fu and Li's D, D*, F and F* calculator has been completed." << endl;
+                         }
+
+                         else if (function == "--faywu" || function == "-w")
+                         {
+                              string gene_List = properties.where("Fay and Wu gene list");
+                              if (gene_List == "universal")
+                              {
+                                   gene_List = properties.where("Universal gene list");
+                              }
+                              fay_wu faywu = fay_wu(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                              faywu.ingress();
+
+                              cout << "CUDA powered Fay and Wu's normalized H and E calculator has been completed." << endl;
+                         }
+                         else if (function == "--neutrality" || function == "-n")
+                         {
+                              string gene_List = properties.where("Neutrality gene list");
+                              if (gene_List == "universal")
+                              {
+                                   gene_List = properties.where("Universal gene list");
+                              }
+                              neutral neutrality = neutral(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                              neutrality.ingress();
+
+                              cout << "CUDA powered complete neutrality test calculator has completed" << endl;
+                         }
+                         else if (function == "--mk" || function == "-m")
+                         {
+                              string gene_List = properties.where("McDonald–Kreitman gene list");
+                              if (gene_List == "universal")
+                              {
+                                   gene_List = properties.where("Universal gene list");
+                              }
+                              mk_test mk = mk_test(properties.where("Reference genome"), properties.where("Alignment file"), gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Genetic code"), properties.where("Start codon(s)"), properties.where("Stop codon(s)"));
+                              mk.ingress();
+
+                              cout << "CUDA powered McDonald–Kreitman Neutrality Index (NI) test has been completed." << endl;
+                         }
+                         else if (function == "--fst" || function == "-x")
+                         {
+                              string gene_List = properties.where("Fst gene list");
+                              if (gene_List == "universal")
+                              {
+                                   gene_List = properties.where("Universal gene list");
+                              }
+
+                              fst fs = fst(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Population index file path"), properties.where("Population ID"));
+                              fs.ingress();
+
+                              cout << "CUDA powered Fst (Fixation Index) calculator has been completed." << endl;
+                         }
+                         else if (function == "--ehh" || function == "-e")
+                         {
+                              string mode = properties.where("Range mode");
+                              transform(mode.begin(), mode.end(), mode.begin(), ::toupper);
+
+                              // cout << mode << endl;
+
+                              string file_mode_Path = "NA";
+                              string fixed_mode_Value = "NA";
+
+                              string GO = "NO";
+
+                              if (mode == "FILE")
+                              {
+                                   file_mode_Path = properties.where("EHH FILE path");
+                                   if (file_mode_Path == "universal")
+                                   {
+                                        file_mode_Path = properties.where("Universal gene list");
+                                   }
+                                   GO = "YES";
+                              }
+                              else if (mode == "FIXED")
+                              {
+                                   file_mode_Path = properties.where("EHH FILE path");
+                                   if (file_mode_Path == "universal")
+                                   {
+                                        file_mode_Path = properties.where("Universal gene list");
+                                   }
+                                   fixed_mode_Value = properties.where("FIXED mode");
+                                   GO = "YES";
+                              }
+
+                              if (GO == "YES")
+                              {
+                                   ehh ehh_ = ehh(mode, file_mode_Path, fixed_mode_Value, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                                   ehh_.ingress();
+
+                                   cout << "CUDA powered Extended Haplotype Homozygosity (EHH) calculator has been completed." << endl;
+                              }
+                              else
+                              {
+                                   cout << "RANGE MODE HAS AN INCORRECT VALUE. Should be either \"FILE\" or \"FIXED\"" << endl;
+                              }
+                         }
+                         else
+                         {
+                              cout << "INVALID FUNCTION PASSED AS A RUNTIME ARGUMENT" << endl
+                                   << "To see available functions type --help or -h." << endl;
+                         }
                     }
                }
                else
@@ -299,6 +311,8 @@ void print_HELP()
           << "-mfasta or --mergefasta\t: Merge all FASTA files in a user specified folder to an individual FASTA file." << endl
           << "             \t\t  Ensure that the FASTA files have the APPROPRIATE extensions: .fasta, .fna, .ffn, .faa, .frn, .fa" << endl
           << endl
+          << "-pparam or --printparam : Prints a sample layout of the parameter file to the specified location." << endl
+          << "                          State the path with the name of the parameter file after the \"-pparam\" function." << endl
           << endl
           << "EVOLUTION TESTS:"
           << endl
