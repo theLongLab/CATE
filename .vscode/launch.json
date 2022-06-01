@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "args": ["-pparam","/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/parameter_Files/parameters_"],
+            "args": ["-pparam","/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/parameter_Files/param_test_"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
