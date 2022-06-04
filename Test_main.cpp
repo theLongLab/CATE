@@ -10,6 +10,7 @@
 #include "ehh.cuh"
 #include "vcf_splitter.h"
 #include "print_param.h"
+#include "gene_extract.h"
 #include "mk_test.cuh"
 #include "fst.cuh"
 #include "fasta_splitter.h"
@@ -129,6 +130,19 @@ int main(int argc, char *argv[])
                               cout << endl
                                    << "FASTA merge has been completed." << endl;
                          }
+                         else if (function == "--extractgenes" || function == "-egenes")
+                         {
+                              string gene_List = properties.where("Extract gene list");
+                              if (gene_List == "universal")
+                              {
+                                   gene_List = properties.where("Universal gene list");
+                              }
+                              gene_extract ge = gene_extract(gene_List, properties.where("Reference genome ex"), output_Path, intermediate_Path);
+                              ge.ingress();
+
+                              cout << endl
+                                   << "Gene extractor has been completed." << endl;
+                         }
                          else if (function == "--tajima" || function == "-t")
                          {
                               string gene_List = properties.where("Tajima gene list");
@@ -187,7 +201,7 @@ int main(int argc, char *argv[])
                               {
                                    gene_List = properties.where("Universal gene list");
                               }
-                              mk_test mk = mk_test(properties.where("Reference genome"), properties.where("Alignment file"), gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Genetic code"), properties.where("Start codon(s)"), properties.where("Stop codon(s)"));
+                              mk_test mk = mk_test(properties.where("Reference genome mk"), properties.where("Alignment file"), gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Genetic code"), properties.where("Start codon(s)"), properties.where("Stop codon(s)"));
                               mk.ingress();
 
                               cout << "CUDA powered McDonald–Kreitman Neutrality Index (NI) test has been completed." << endl;
@@ -310,6 +324,10 @@ void print_HELP()
           << endl
           << "-mfasta or --mergefasta\t: Merge all FASTA files in a user specified folder to an individual FASTA file." << endl
           << "             \t\t  Ensure that the FASTA files have the APPROPRIATE extensions: .fasta, .fna, .ffn, .faa, .frn, .fa" << endl
+          << endl
+          << "-egenes or --extractgenes : Reads the gene list file to extract the gene sequences from the reference genome." << endl
+          << "                            FASTA format reference genome must be specified." << endl
+          << "                            All gene sequences will be generated into seperate FASTA files." << endl
           << endl
           << "-pparam or --printparam : Prints a sample layout of the parameter file to the specified location." << endl
           << "                          State the path with the name of the parameter file after the \"-pparam\" function." << endl

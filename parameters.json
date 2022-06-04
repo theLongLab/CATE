@@ -5,7 +5,7 @@
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPERATE PARAMTER FILES WITH SEPERATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
     "Input path":"results",
-    "Output path":"mk",
+    "Output path":"genes",
     "Intermediate path":"intermediate",
 
     # VCF sample details
@@ -38,6 +38,11 @@
     "FASTA files folder":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_Split/3",
     "Merge FASTA path":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_Split/Three.fasta",
 
+    # Extract genes parameters
+    # Extract gene FASTA seqeunces from REFERENCE FASTA file and outputs them as seperate FASTA files
+    "Reference genome ex":"reference/Human_1.fasta",
+    "Extract gene list":"list.txt",
+
     # All Neutrality tests
     # Calculates all three neutrality tests (Tajima's D, Fay and Wu's and Fu and Li's) at once
     # File created would have the extension *.nt (tab deliminated text file). File Name: CountryName_GeneListFileName.nt
@@ -59,7 +64,7 @@
     # REFERENCE GENOME FILE SHOULD BE THE SAME AS THAT USED TO GENERATE THE VCF FILE
     # ALIGNMENT FILE SHOULD BE A PAIRWISE ALIGNMENT OF THE REFERENCE GENOME TO THE OUTGROUP GENOME. SHOULD BE IN .maf FORMAT
     # File created would have the extension *.mk (tab deliminated text file). File Name: CountryName_GeneListFileName.mk
-    "Reference genome":"reference/Human_1.fasta",
+    "Reference genome mk":"reference/Human_1.fasta",
     "Alignment file":"reference/results.maf",
     "McDonald–Kreitman gene list":"universal",
 

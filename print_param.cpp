@@ -45,8 +45,10 @@ void print_param::ingress()
                      << "    \"Genetic code\":\"A|GCT,GCC,GCA,GCG;R|CGT,CGC,CGA,CGG,AGA,AGG;N|AAT,AAC;D|GAT,GAC;B|AAT,AAC,GAT,GAC;C|TGT,TGC;Q|CAA,CAG;E|GAA,GAG;Z|CAA,CAG,GAA,GAG;G|GGT,GGC,GGA,GGG;H|CAT,CAC;M|ATG;I|ATT,ATC,ATA;L|CTT,CTC,CTA,CTG,TTA,TTG;K|AAA,AAG;F|TTT,TTC;P|CCT,CCC,CCA,CCG;S|TCT,TCC,TCA,TCG,AGT,AGC;T|ACT,ACC,ACA,ACG;W|TGG;Y|TAT,TAC;V|GTT,GTC,GTA,GTG;X|TAA,TGA,TAG\",\n\n";
 
               output << "    # Any tab-deliminated text based formats such as but not limited to (*.txt, *.csv)\n"
-                    // << "    \"Universal gene list\":\"" << ss.str() << ".txt\",\n\n";
-                     << "    \"Universal gene list\":\"" <<"sample.txt" << ".txt\",\n\n";
+                     // << "    \"Universal gene list\":\"" << ss.str() << ".txt\",\n\n";
+                     << "    \"Universal gene list\":\""
+                     << "sample.txt"
+                     << ".txt\",\n\n";
 
               output << "    # VCF split parameters\n"
                      << "    \"Population file path\":\"/work/long_lab/deshan/1000_Genome/Neutrality/testing/tests/full_tests/sample_population/sample_population_codes.tsv\",\n"
@@ -65,6 +67,11 @@ void print_param::ingress()
                      << "    # ENSURE THE FASTA FILES HAVE THE APPROPRIATE EXTENSION: .fasta, .fna, .ffn, .faa, .frn, .fa\n"
                      << "    \"FASTA files folder\":\"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_Split/3\",\n"
                      << "    \"Merge FASTA path\":\"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_Split/Three.fasta\",\n\n";
+
+              output << "    # Extract genes parameters\n";
+              output << "    # Extract gene FASTA seqeunces from REFERENCE FASTA file and outputs them as seperate FASTA files\n";
+              output << "    \"Reference genome ex\":\"reference/Human_1.fasta\",\n";
+              output << "    \"Extract gene list\":\"universal\",\n\n";
 
               output << "    # All Neutrality tests\n"
                         "    # Calculates all three neutrality tests (Tajima's D, Fay and Wu's and Fu and Li's) at once\n"
@@ -87,7 +94,7 @@ void print_param::ingress()
                      << "    # REFERENCE GENOME FILE SHOULD BE THE SAME AS THAT USED TO GENERATE THE VCF FILE\n"
                      << "    # ALIGNMENT FILE SHOULD BE A PAIRWISE ALIGNMENT OF THE REFERENCE GENOME TO THE OUTGROUP GENOME. SHOULD BE IN .maf FORMAT\n"
                      << "    # File created would have the extension *.mk (tab deliminated text file). File Name: CountryName_GeneListFileName.mk\n"
-                     << "    \"Reference genome\":\"reference/Human_1.fasta\",\n"
+                     << "    \"Reference genome mk\":\"reference/Human_1.fasta\",\n"
                      << "    \"Alignment file\":\"reference/results.maf\",\n"
                      << "    \"McDonald–Kreitman gene list\":\"universal\",\n\n";
 
