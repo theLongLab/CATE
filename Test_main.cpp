@@ -365,7 +365,8 @@ void print_HELP()
           << "              \t              Each gene's alignment file location must be provided as a third column in tab deliminated the gene list file." << endl
           << "              \t              Alignments must be provided in the blastn *.txt format." << endl
           << "              \t              PLEASE ensure that the REFERENCE gene sequence is the QUERY and OUTGROUP gene sequence is the SUBJECT." << endl
-          << "              \t              NCBI's online blastn (https://blast.ncbi.nlm.nih.gov/Blast.cgi) or command line BLAST+ (https://anaconda.org/bioconda/blast) can be used." << endl
+          << "              \t              NCBI's online blastn (https://blast.ncbi.nlm.nih.gov/Blast.cgi)" << endl
+          << "              \t              or command line BLAST+ (https://anaconda.org/bioconda/blast) can be used." << endl
           << "              \t  Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "              \t  File format is *.mc (a tab deliminated text file)." << endl
           << endl
