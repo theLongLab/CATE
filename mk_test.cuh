@@ -26,7 +26,11 @@ private:
     string reference_Path;
     string alignment_Path;
 
+    string primary_Intermediate_Path;
+
     int ploidy;
+
+    string mode;
 
     string genetic_Code;
     string start_Codons;
@@ -46,13 +50,19 @@ private:
     int reference_size;
 
 public:
-    mk_test(string reference_Path, string alignment_Path, string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string genetic_Code, string start_Codons, string stop_Codons);
+    mk_test(string reference_Path, string alignment_Path, string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string genetic_Code, string start_Codons, string stop_Codons, string mode);
 
     void ingress();
 
     void prepration();
+    // CHROM mode
     void reference_Prep(vector<pair<int, int>> TEMP_file_index);
     vector<pair<int, int>> alignment_Prep();
+
+    // GENE mode
+    void reference_Prep();
+    vector<pair<int, int>> alignment_Prep(string Gene_alignment_Path, string &full_Reference, int start_Co, string temp_index_Folder);
+
     void codon_Alignment_print(vector<string> file_List, int start_Codon, int end_Codon, string &temp_index_Folder, string &intermediate_Reference, string &file_Name);
 
     void process_Genetic_code();

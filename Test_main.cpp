@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
                               {
                                    gene_List = properties.where("Universal gene list");
                               }
-                              mk_test mk = mk_test(properties.where("Reference genome mk"), properties.where("Alignment file"), gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Genetic code"), properties.where("Start codon(s)"), properties.where("Stop codon(s)"));
+                              mk_test mk = mk_test(properties.where("Reference genome mk"), properties.where("Alignment file"), gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Genetic code"), properties.where("Start codon(s)"), properties.where("Stop codon(s)"), properties.where("Alignment mode"));
                               mk.ingress();
 
                               cout << "CUDA powered McDonald–Kreitman Neutrality Index (NI) test has been completed." << endl;
@@ -356,9 +356,16 @@ void print_HELP()
           << endl
           << "-m or --mk    \t: Calculates the McDonald–Kreitman Neutrality Index (NI) (1991) for a predefined gene list using a (split) vcf (indexed) folder." << endl
           << "              \t  The reference genome must be provided in a FASTA format file." << endl
-          << "              \t  Alignment file of the reference genome to the outgroup genome must also be provided in a *.maf format file." << endl
-          << "              \t  PLEASE ensure that the REFERENCE sequence is first and QUERY sequence is second in the MAF file." << endl
-          << "              \t  ** TIP: Chromosome wide whole genome alignment software: GSAlign (https://github.com/hsinnan75/GSAlign)." << endl
+          << "              \t  Two \"MODES\" exist. \"CHROM\" mode and \"GENE\" mode. Either must be specified" << endl
+          << "              \t  CHROM mode: Conducts the test on an alignment does across the entire chromosomes" << endl
+          << "              \t              Alignment file of the reference genome to the outgroup genome must also be provided in a *.maf format file." << endl
+          << "              \t              PLEASE ensure that the REFERENCE sequence is first and OUTGROUP sequence is second in the MAF file." << endl
+          << "              \t              ** TIP: Chromosome wide whole genome alignment software: GSAlign (https://github.com/hsinnan75/GSAlign)." << endl
+          << "              \t  GENE mode : Conducts the test on alignments per gene between the reference gene and the outgroup gene." << endl
+          << "              \t              Each gene's alignment file location must be provided as a third column in tab deliminated the gene list file." << endl
+          << "              \t              Alignments must be provided in the blastn *.txt format." << endl
+          << "              \t              PLEASE ensure that the REFERENCE gene sequence is the QUERY and OUTGROUP gene sequence is the SUBJECT." << endl
+          << "              \t              NCBI's online blastn (https://blast.ncbi.nlm.nih.gov/Blast.cgi) or command line BLAST+ (https://anaconda.org/bioconda/blast) can be used." << endl
           << "              \t  Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "              \t  File format is *.mc (a tab deliminated text file)." << endl
           << endl

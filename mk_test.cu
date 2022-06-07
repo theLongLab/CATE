@@ -1,19 +1,22 @@
 #include "mk_test.cuh"
 #include "functions.cuh"
 
-mk_test::mk_test(string reference_Path, string alignment_Path, string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string genetic_Code, string start_Codons, string stop_Codons)
+mk_test::mk_test(string reference_Path, string alignment_Path, string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string genetic_Code, string start_Codons, string stop_Codons, string mode)
 {
     cout << "Initiating CUDA powered McDonald–Kreitman Neutrality Index (NI) test calculator" << endl
          << endl;
     this->reference_Path = reference_Path;
     this->alignment_Path = alignment_Path;
     this->gene_List = gene_List;
-    cout << "Gene list file path\t: " << gene_List << endl
-         << endl;
+    cout << "Gene list file path: " << gene_List << endl;
     this->input_Folder = input_Folder;
     this->ouput_Path = ouput_Path;
     this->intermediate_Path = intermediate_Path;
     this->ploidy = ploidy;
+
+    this->mode = mode;
+    cout << "Alignment mode: " << mode << endl
+         << endl;
 
     this->genetic_Code = genetic_Code;
     this->start_Codons = start_Codons;
@@ -35,6 +38,32 @@ mk_test::mk_test(string reference_Path, string alignment_Path, string gene_List,
     this->tot_ThreadsperBlock = prop.maxThreadsPerBlock;
     cout << "GPU thread(s) per block\t: " << tot_ThreadsperBlock << endl
          << endl;
+
+    this->primary_Intermediate_Path = this->intermediate_Path + "/" + filesystem::path(this->gene_List).stem().string();
+    if (filesystem::exists(primary_Intermediate_Path) == 0)
+    {
+        cout << "Creating primary intermediate index folder: " << primary_Intermediate_Path << endl;
+        filesystem::create_directory(primary_Intermediate_Path);
+    }
+    else
+    {
+        cout << "Primary intermediate index folder exists" << endl;
+    }
+
+    if (mode == "GENE")
+    {
+        string alignments = this->primary_Intermediate_Path + "/alignments";
+        if (filesystem::exists(alignments) == 0)
+        {
+            cout << "Creating temporary alignment index folder: " << alignments << endl;
+            filesystem::create_directory(alignments);
+        }
+        else
+        {
+            cout << "Temporary alignment index folder exists" << endl;
+        }
+    }
+    cout << endl;
 }
 
 void mk_test::ingress()
@@ -64,6 +93,8 @@ void mk_test::ingress()
     cout << endl;
 
     prepration();
+    // REMOVE AFTER TESTING
+    // exit(0);
     process_Genetic_code();
     process_MK();
 }
@@ -104,7 +135,7 @@ void mk_test::process_Genetic_code()
 
 void mk_test::process_MK()
 {
-    string intermediate_Reference = this->intermediate_Path + "/" + filesystem::path(this->reference_Path).stem().string();
+    string intermediate_Reference = this->primary_Intermediate_Path + "/" + filesystem::path(this->reference_Path).stem().string();
     if (filesystem::exists(intermediate_Reference) == 0)
     {
         cout << "ERROR: Intermediate reference index folder, " << intermediate_Reference << " has not been found at path.\n";
@@ -231,14 +262,12 @@ void mk_test::process_MK()
                         {
                             codon_Coordinates.push_back("NA");
                         }
-                        
-                        
                     }
                     else
                     {
                         fstream get_Codon_coordinates;
                         get_Codon_coordinates.open(codon_Index_File_name, ios::in);
-                        //cout << "Codon alignment index file found at " << codon_Index_File_name << endl;
+                        // cout << "Codon alignment index file found at " << codon_Index_File_name << endl;
                         string codon_Line_one;
                         getline(get_Codon_coordinates, codon_Line_one);
                         get_Codon_coordinates.close();
@@ -1331,28 +1360,323 @@ void mk_test::prepration()
 
     if (log.size() > 0)
     {
-        if (log.find("reference_mapping_complete") != log.end())
+        if (mode == "CHROM")
         {
-            cout << "Reference mapping of codons has already been completed" << endl;
+            if (log.find("reference_mapping_complete") != log.end())
+            {
+                cout << "Reference mapping of codons has already been completed" << endl;
+            }
+            else if (log.find("alignment_prep_complete") != log.end())
+            {
+                // vector<pair<int, int>> TEMP_file_index = index_alignment_Folder();
+                cout << "Alignment file preperation has already been completed" << endl;
+                reference_Prep(index_alignment_Folder());
+            }
+            else
+            {
+                reference_Prep(alignment_Prep());
+                cout << "Chromosome wide reference mapping of codons complete" << endl;
+            }
         }
-        else if (log.find("alignment_prep_complete") != log.end())
+        else
         {
-            // vector<pair<int, int>> TEMP_file_index = index_alignment_Folder();
-            cout << "Alignment file preperation has already been completed" << endl;
-            reference_Prep(index_alignment_Folder());
+            if (log.find("reference_mapping_per_GENE_complete") != log.end())
+            {
+                cout << "Per gene reference mapping of codons has already been completed" << endl;
+            }
+            else
+            {
+                reference_Prep();
+                cout << "Per gene reference mapping of codons complete" << endl;
+            }
         }
     }
     else
     {
-        reference_Prep(alignment_Prep());
-        cout << "Reference mapping of codons complete" << endl;
+        if (mode == "CHROM")
+        {
+            reference_Prep(alignment_Prep());
+            cout << "Chromosome wide reference mapping of codons complete" << endl;
+        }
+        else
+        {
+            reference_Prep();
+            cout << "Per gene reference mapping of codons complete" << endl;
+        }
     }
+}
+
+void mk_test::reference_Prep()
+{
+    cout << "Preparing reference file: " << this->reference_Path << endl
+         << endl;
+
+    // string temp_index_Folder = this->primary_Intermediate_Path + "/" + filesystem::path(this->alignment_Path).stem().string();
+
+    functions function = functions();
+
+    string intermediate_Reference = this->primary_Intermediate_Path + "/" + filesystem::path(this->reference_Path).stem().string();
+    if (filesystem::exists(intermediate_Reference) == 0)
+    {
+        cout << "Creating intermediate reference index folder: " << intermediate_Reference << endl;
+        filesystem::create_directory(intermediate_Reference);
+    }
+    else
+    {
+        cout << "Intermediate reference index folder exists" << endl;
+    }
+
+    fstream reference;
+    reference.open(this->reference_Path, ios::in);
+
+    string full_Reference = "";
+
+    if (reference.is_open())
+    {
+        cout << endl
+             << "Loading reference file" << endl;
+        string line;
+        // skip header
+        getline(reference, line);
+        while (getline(reference, line))
+        {
+            full_Reference.append(line);
+        }
+        reference.close();
+    }
+
+    transform(full_Reference.begin(), full_Reference.end(), full_Reference.begin(), ::toupper);
+    char *reference_full;
+    reference_full = (char *)malloc((full_Reference.size() + 1) * sizeof(char));
+    cudaMallocManaged(&cuda_reference, (full_Reference.size() + 1) * sizeof(char));
+    this->reference_size = full_Reference.size();
+    strcpy(reference_full, full_Reference.c_str());
+    cudaMemcpy(cuda_reference, reference_full, (full_Reference.size() + 1) * sizeof(char), cudaMemcpyHostToDevice);
+
+    free(reference_full);
+
+    cout << "Reference file loaded" << endl;
+
+    // INDEX reference genome according to gene list ORF and codons.
+    fstream gene_File;
+    gene_File.open(this->gene_List, ios::in);
+
+    if (gene_File.is_open())
+    {
+        cout << endl
+             << "Indexing reference and alignments according to gene list: " << this->gene_List << endl
+             << endl;
+
+        string gene_Combo;
+
+        while (getline(gene_File, gene_Combo))
+        {
+            vector<string> split_Data;
+            function.split(split_Data, gene_Combo, "\t");
+
+            string alignment_File = split_Data[2];
+            string combination = split_Data[1];
+            string gene_Name = split_Data[0];
+            cout << "Gene name\t: " << gene_Name << endl;
+            string temp_index_Folder = this->primary_Intermediate_Path + "/alignments/" + gene_Name;
+            cout << "Alignment File\t: " << alignment_File << endl;
+            vector<string> coordinates;
+            function.split(coordinates, split_Data[1], ":");
+            // POS - 1 Since in FASTA 1st position is 1, but in C++ its 0
+            int start_Co = stoi(coordinates[1]) - 1;
+            int end_Co = stoi(coordinates[2]);
+            cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co + 1 << " End: " << end_Co << endl;
+
+            // replace(combination.begin(), combination.end(), ':', '_');
+            // string File = intermediate_Reference + "/" + split_Data[0] + "_" + combination + ".ca";
+            string file_Name = intermediate_Reference + "/" + gene_Name + "_" + coordinates[0] + "_" + to_string(start_Co + 1) + "_" + to_string(end_Co) + ".ca";
+
+            if (filesystem::exists(file_Name) == 0)
+            {
+                cout << endl
+                     << "Initiating Open Reading Frame (ORF) search:" << endl;
+
+                vector<int> start_ORFs;
+
+                for (int i = start_Co; i < end_Co; i++)
+                {
+                    if ((i + 3) < end_Co)
+                    {
+                        string check_Current{full_Reference.at(i), full_Reference.at(i + 1), full_Reference.at(i + 2)};
+                        for (string check : this->start_Codons_list)
+                        {
+                            if (check_Current == check)
+                            {
+                                start_ORFs.push_back(i);
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                int found = 0;
+
+                int ORF_start;
+                int ORF_stop;
+
+                if (start_ORFs.size() > 0)
+                {
+                    ORF_search(start_ORFs, found, ORF_start, ORF_stop, end_Co);
+                }
+
+                if (found == 1)
+                {
+                    cout << "Start codon location\t: " << setfill('0') << setw(to_string(ORF_stop + 1).length()) << ORF_start + 1
+                         << "\t Start Codon: " << full_Reference.at(ORF_start) << full_Reference.at(ORF_start + 1) << full_Reference.at(ORF_start + 2) << endl;
+                    cout << "Stop codon location\t: " << ORF_stop + 1
+                         << "\t Stop Codon: " << full_Reference.at(ORF_stop) << full_Reference.at(ORF_stop + 1) << full_Reference.at(ORF_stop + 2) << endl;
+                    cout << endl;
+
+                    // MODIFIED FOR PER GENE
+
+                    // int test_Pop = start_Co - 1 + 700;
+                    // int test_Pop = 896666;
+                    // cout << "Reference at 896666: " << full_Reference.at(test_Pop - 1) << endl;
+                    // cout << "Reference at 896667: " << full_Reference.at(test_Pop - 0) << endl;
+                    // cout << "Reference at 896668: " << full_Reference.at(test_Pop + 1) << endl;
+                    // cout << "Reference at 896669: " << full_Reference.at(test_Pop + 2) << endl;
+                    // cout << "Reference at 896670: " << full_Reference.at(test_Pop + 3) << endl;
+                    // for (size_t i = 0; i < TEMP_file_index.size(); i++)
+                    // {
+                    //     cout << TEMP_file_index[i].first << endl;
+                    // }
+
+                    cout << "Generating target ORF alignment:" << endl;
+                    codon_Alignment_print(compound_Interpolation_folder(alignment_Prep(alignment_File, full_Reference, start_Co, temp_index_Folder), ORF_start + 1, ORF_stop + 3), ORF_start + 1, ORF_stop + 3, temp_index_Folder, intermediate_Reference, file_Name);
+                    // PURGE THE TEMP FOLDER
+                }
+                else
+                {
+                    cout << "ORF NOT FOUND" << endl;
+                }
+            }
+            cout << endl;
+        }
+        gene_File.close();
+    }
+    cudaFree(cuda_stop_Codons);
+    cudaFree(cuda_reference);
+
+    cout << "Purging temporary alignment index: " << this->primary_Intermediate_Path + "/alignments" << endl
+         << endl;
+    filesystem::remove_all(this->primary_Intermediate_Path + "/alignments");
+
+    // REMOVE AFTER TEST
+    log_Write("reference_mapping_per_GENE_complete");
+}
+
+vector<pair<int, int>> mk_test::alignment_Prep(string Gene_alignment_Path, string &full_Reference, int start_Co, string temp_index_Folder)
+{
+    functions function = functions();
+
+    vector<pair<int, int>> TEMP_file_index;
+
+    cout << "STEP 1 OF 3: Processing alignment file" << endl;
+    fstream alignment_File;
+    alignment_File.open(Gene_alignment_Path, ios::in);
+
+    cout << "STEP 2 OF 3: Creating temporary index" << endl;
+    // string temp_index_Folder = this->intermediate_Path + "/" + gene_Name;
+    if (filesystem::exists(temp_index_Folder) != 0)
+    {
+        filesystem::remove_all(temp_index_Folder);
+    }
+    filesystem::create_directory(temp_index_Folder);
+
+    if (alignment_File.is_open())
+    {
+        string line;
+
+        while (getline(alignment_File, line))
+        {
+            if (line.length() > 0)
+            {
+                if (line.at(0) == '>')
+                {
+                    break;
+                }
+            }
+        }
+
+        while (getline(alignment_File, line))
+        {
+            if (line.find("Query") != string::npos)
+            {
+                string query = line;
+                getline(alignment_File, line);
+                string subject;
+                getline(alignment_File, subject);
+
+                // cout << query << endl
+                //      << subject << endl;
+                // cout << endl;
+
+                vector<string> split_Query;
+                function.split(split_Query, query, "  ");
+                transform(split_Query[2].begin(), split_Query[2].end(), split_Query[2].begin(), ::toupper);
+
+                vector<string> split_Subject;
+                function.split(split_Subject, subject, "  ");
+                transform(split_Subject[2].begin(), split_Subject[2].end(), split_Subject[2].begin(), ::toupper);
+
+                // cout << split_Query[1] << "\t" << split_Query[2] << endl
+                //      << split_Subject[1] << "\t" << split_Subject[2] << endl;
+                // cout << endl;
+
+                // int test_Pop = start_Co - 1 + 700;
+                int ref_Pos = start_Co - 1 + stoi(split_Query[1]);
+                int iterate_Value = ref_Pos + 1;
+
+                string temp_File_name = temp_index_Folder + "/" + to_string(iterate_Value) + ".temp";
+                fstream write_Temp;
+                write_Temp.open(temp_File_name, ios::out);
+
+                for (int i = 0; i < split_Query[2].length(); i++)
+                {
+                    if (split_Query[2].at(i) != '-')
+                    {
+                        if (split_Query[2].at(i) == 'A' || split_Query[2].at(i) == 'T' || split_Query[2].at(i) == 'G' || split_Query[2].at(i) == 'C')
+                        {
+                            if (split_Subject[2].at(i) == 'A' || split_Subject[2].at(i) == 'T' || split_Subject[2].at(i) == 'G' || split_Subject[2].at(i) == 'C')
+                            {
+                                // convert char to string
+                                string ref(1, split_Query[2].at(i));
+                                string query(1, split_Subject[2].at(i));
+                                write_Temp << to_string(iterate_Value) << "\t" << ref << "\t" << query << "\n";
+                            }
+                        }
+                        iterate_Value++;
+                    }
+                }
+                write_Temp.close();
+                string new_Name = temp_index_Folder + "/" + to_string(ref_Pos + 1) + "_" + to_string(iterate_Value - 1) + ".temp";
+                rename(temp_File_name.c_str(), new_Name.c_str());
+                TEMP_file_index.push_back(make_pair(ref_Pos + 1, iterate_Value - 1));
+            }
+        }
+        alignment_File.close();
+    }
+
+    sort(TEMP_file_index.begin(), TEMP_file_index.end());
+    cout << "STEP 3 OF 3: Completed alignment file processing" << endl;
+    cout << endl;
+
+    return TEMP_file_index;
 }
 
 vector<pair<int, int>> mk_test::index_alignment_Folder()
 {
     functions function = functions();
-    string temp_index_Folder = this->intermediate_Path + "/" + filesystem::path(this->alignment_Path).stem().string();
+    string temp_index_Folder = this->primary_Intermediate_Path + "/" + filesystem::path(this->alignment_Path).stem().string();
 
     vector<pair<int, int>> TEMP_file_index;
 
@@ -1472,7 +1796,7 @@ vector<pair<int, int>> mk_test::alignment_Prep()
     vector<pair<int, string>> sort_ref_query;
     set<char> bases;
 
-    string temp_index_Folder = this->intermediate_Path + "/" + filesystem::path(this->alignment_Path).stem().string();
+    string temp_index_Folder = this->primary_Intermediate_Path + "/" + filesystem::path(this->alignment_Path).stem().string();
     cout << "STEP 3 OF 5: Creating temporary alignment index folder: " << temp_index_Folder << endl;
 
     if (filesystem::exists(temp_index_Folder) != 0)
@@ -1539,11 +1863,11 @@ void mk_test::reference_Prep(vector<pair<int, int>> TEMP_file_index)
     cout << "Preparing reference file: " << this->reference_Path << endl
          << endl;
 
-    string temp_index_Folder = this->intermediate_Path + "/" + filesystem::path(this->alignment_Path).stem().string();
+    string temp_index_Folder = this->primary_Intermediate_Path + "/" + filesystem::path(this->alignment_Path).stem().string();
 
     functions function = functions();
 
-    string intermediate_Reference = this->intermediate_Path + "/" + filesystem::path(this->reference_Path).stem().string();
+    string intermediate_Reference = this->primary_Intermediate_Path + "/" + filesystem::path(this->reference_Path).stem().string();
     if (filesystem::exists(intermediate_Reference) == 0)
     {
         cout << "Creating intermediate reference index folder: " << intermediate_Reference << endl;
@@ -1901,6 +2225,7 @@ void mk_test::codon_Alignment_print(vector<string> file_List, int start_Codon, i
 
     for (string file : file_List)
     {
+        // cout << file << endl;
         fstream align_Index;
         align_Index.open(temp_index_Folder + "/" + file, ios::in);
         if (align_Index.is_open())
@@ -1945,7 +2270,7 @@ void mk_test::codon_Alignment_print(vector<string> file_List, int start_Codon, i
 
 vector<string> mk_test::compound_Interpolation_folder(vector<pair<int, int>> folder_Index, int start_Co, int end_Co)
 {
-    functions function = functions();
+    // functions function = functions();
     vector<string> file_List;
     int start = 0;
     int end = folder_Index.size() - 1;
@@ -1953,14 +2278,20 @@ vector<string> mk_test::compound_Interpolation_folder(vector<pair<int, int>> fol
     int low_Value = folder_Index[start].first;
     int high_Value = folder_Index[end].second;
 
-    while (start <= end && start_Co >= low_Value && start_Co <= high_Value)
+    // while (start <= end && start_Co >= low_Value && start_Co <= high_Value)
+    while (start <= end)
     {
         int pos = start + ((double)(end - start) / ((high_Value - low_Value)) * (start_Co - low_Value));
         int low_Value_atpos = folder_Index[pos].first;
         int high_Value_atpos = folder_Index[pos].second;
 
+        // cout << low_Value_atpos << "\t" << high_Value_atpos << endl;
+        // cout << start_Co << endl;
+        // cout << end_Co << endl;
+
         if ((start_Co >= low_Value_atpos && start_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co >= high_Value_atpos))
         {
+            // cout << "Caught: " << low_Value_atpos << endl;
             promise<vector<int>> backward;
             promise<vector<int>> forward;
 

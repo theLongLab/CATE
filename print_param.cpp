@@ -93,7 +93,9 @@ void print_param::ingress()
               output << "    # McDonald–Kreitman\n"
                      << "    # REFERENCE GENOME FILE SHOULD BE THE SAME AS THAT USED TO GENERATE THE VCF FILE\n"
                      << "    # ALIGNMENT FILE SHOULD BE A PAIRWISE ALIGNMENT OF THE REFERENCE GENOME TO THE OUTGROUP GENOME. SHOULD BE IN .maf FORMAT\n"
+                     << "    # GENE mode would require each gene to be seprately aligned and the location of each alignment file to be added as a third column to the gene list file.\n"
                      << "    # File created would have the extension *.mk (tab deliminated text file). File Name: CountryName_GeneListFileName.mk\n"
+                     << "    # CHROM mode would require the outgroup species chromosome's genome to be aligned with the entire chromosome of the query species reference genome.\n"
                      << "    \"Reference genome mk\":\"reference/Human_1.fasta\",\n"
                      << "    \"Alignment file\":\"reference/results.maf\",\n"
                      << "    \"McDonald–Kreitman gene list\":\"universal\",\n\n";

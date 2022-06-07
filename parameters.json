@@ -5,7 +5,7 @@
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPERATE PARAMTER FILES WITH SEPERATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
     "Input path":"results",
-    "Output path":"genes",
+    "Output path":"mk2",
     "Intermediate path":"intermediate",
 
     # VCF sample details
@@ -41,7 +41,7 @@
     # Extract genes parameters
     # Extract gene FASTA seqeunces from REFERENCE FASTA file and outputs them as seperate FASTA files
     "Reference genome ex":"reference/Human_1.fasta",
-    "Extract gene list":"list.txt",
+    "Extract gene list":"01.txt",
 
     # All Neutrality tests
     # Calculates all three neutrality tests (Tajima's D, Fay and Wu's and Fu and Li's) at once
@@ -63,10 +63,14 @@
     # McDonald–Kreitman
     # REFERENCE GENOME FILE SHOULD BE THE SAME AS THAT USED TO GENERATE THE VCF FILE
     # ALIGNMENT FILE SHOULD BE A PAIRWISE ALIGNMENT OF THE REFERENCE GENOME TO THE OUTGROUP GENOME. SHOULD BE IN .maf FORMAT
+    # Alignment can be gene wide (GENE mode) or chromosome (CHROM mode) wide.
+    # GENE mode would require each gene to be seprately aligned and the location of each alignment file to be added as a third column to the gene list file.
+    # CHROM mode would require the outgroup species chromosome's genome to be aligned with the entire chromosome of the query species reference genome.
     # File created would have the extension *.mk (tab deliminated text file). File Name: CountryName_GeneListFileName.mk
+    "Alignment mode":"GENE",
     "Reference genome mk":"reference/Human_1.fasta",
     "Alignment file":"reference/results.maf",
-    "McDonald–Kreitman gene list":"universal",
+    "McDonald–Kreitman gene list":"gene_4.txt",
 
     # Fst or Fixation Index
     # Indexed population file should be a THREE column tab delimiated *.txt file with headings: Sample_name	population_ID	Super_population
