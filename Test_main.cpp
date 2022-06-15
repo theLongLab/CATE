@@ -106,8 +106,7 @@ int main(int argc, char *argv[])
                          if (function == "--splitvcf" || function == "-svcf")
                          {
                               // string input = properties.where("Input folder entry");
-
-                              vcf_splitter split = vcf_splitter(tmp, properties.where("Input path"), properties.where("Population file path"), output_Path, properties.where_Int("Reference allele count"), properties.where_Int("Alternate allele count"), properties.where_Int("SNP count per file"));
+                              vcf_splitter split = vcf_splitter(tmp, properties.where("Input path"), properties.where("Population file path"), output_Path, properties.where_Int("Reference allele count"), properties.where_Int("Alternate allele count"), properties.where_Int("SNP count per file"), properties.where_Int("Sample_ID Column number"), properties.where_Int("Population_ID Column number"));
                               split.index_population();
                               split.read_File();
                               cout << endl

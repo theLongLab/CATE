@@ -88,6 +88,7 @@ void tajima::ingress()
         cout << endl;
         cout << "Writing to file\t: " << output_File << endl;
         cout << endl;
+
         if (gene_File.is_open())
         {
             string gene_Combo;

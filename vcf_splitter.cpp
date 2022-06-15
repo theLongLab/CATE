@@ -1,18 +1,20 @@
 #include "vcf_splitter.h"
 
-vcf_splitter::vcf_splitter(char folder[], string vcf_Folder, string population_File, string output_Path, int REF, int ALT, int snp_Count)
+vcf_splitter::vcf_splitter(char folder[], string vcf_Folder, string population_File, string output_Path, int REF, int ALT, int snp_Count, int sample_Column, int pop_Column)
 {
     cout << "Starting up VCF SPLITTER" << endl
          << endl;
     strcpy(this->folder, folder);
-    //cout << "Execution folder\t: " << folder << endl;
-    this->vcf_Folder =  vcf_Folder;
+    // cout << "Execution folder\t: " << folder << endl;
+    this->vcf_Folder = vcf_Folder;
     cout << "VCF folder path\t: " << this->vcf_Folder << endl;
     this->population_File = population_File;
     cout << "Population file path\t: " << this->population_File << endl;
     this->output_Path = output_Path;
     this->REF = REF;
     this->ALT = ALT;
+    this->sample_Column = sample_Column;
+    this->pop_Column = pop_Column;
     cout << endl
          << "Parameters:" << endl;
     cout << "Reference Allele(s)\t: " << REF << endl;
@@ -31,17 +33,17 @@ void vcf_splitter::index_population()
     {
 
         string line;
-        //skip heading
+        // skip heading
         getline(pop_File, line);
 
         while (getline(pop_File, line))
         {
             vector<string> line_Data;
             split(line_Data, line);
-            super_pops.insert(line_Data[5]);
-            //cout<<line_Data[0]<<endl<<line_Data[5]<<endl;
-            pop_Index.push_back(make_pair(line_Data[0], line_Data[5]));
-            //break;
+            super_pops.insert(line_Data[pop_Column - 1]);
+            // cout<<line_Data[0]<<endl<<line_Data[5]<<endl;
+            pop_Index.push_back(make_pair(line_Data[sample_Column - 1], line_Data[pop_Column - 1]));
+            // break;
         }
         pop_File.close();
     }
@@ -103,18 +105,18 @@ void vcf_splitter::read_File()
                     break;
                 }
             }
-            //cout << line << endl;
+            // cout << line << endl;
             vector<string> line_Data;
             split(line_Data, line);
             const int size = line_Data.size();
             vector<string> patient_Coutry;
-            //cout << line_Data[9];
+            // cout << line_Data[9];
 
             for (int c = 9; c < line_Data.size(); c++)
             {
                 string country = get_Country(line_Data[c]);
                 patient_Coutry.push_back(country);
-                //cout << line_Data[c] << "\t" << country<<endl;
+                // cout << line_Data[c] << "\t" << country<<endl;
             }
 
             myFile.close();
@@ -141,7 +143,7 @@ void vcf_splitter::write_Header(vector<string> &patient_Coutry, string &file, ve
             string check = "no";
             if (patient_Coutry[c - 9] == pop)
             {
-                //cout<<line_Data[c]<<endl;
+                // cout<<line_Data[c]<<endl;
                 check = "yes";
                 pop_File << line_Data_header[c];
             }
@@ -179,19 +181,19 @@ void vcf_splitter::write_File_SNP_only(vector<string> &patient_Coutry, string &f
         vector<string> line_Data_header;
         split(line_Data_header, line);
 
-        //here
-        //write_Header(patient_Coutry, file, line_Data_header);
+        // here
+        // write_Header(patient_Coutry, file, line_Data_header);
 
         int count = 0;
         string first_SNP_size;
         vector<string> line_Data;
         while (getline(myFile, line))
         {
-            //cout<<line;
+            // cout<<line;
             string check = split_check(line_Data, line);
             if (check != "no")
             {
-                //if count = 0 then write_Header(patient_Coutry,file,line_Data_header) with intial snp size;
+                // if count = 0 then write_Header(patient_Coutry,file,line_Data_header) with intial snp size;
                 if (count == 0)
                 {
                     first_SNP_size = line_Data[1];
@@ -213,7 +215,7 @@ void vcf_splitter::write_File_SNP_only(vector<string> &patient_Coutry, string &f
                         string check = "no";
                         if (patient_Coutry[c - 9] == pop)
                         {
-                            //cout<<line_Data[c]<<endl;
+                            // cout<<line_Data[c]<<endl;
                             check = "yes";
                             pop_File << line_Data[c];
                         }
@@ -228,7 +230,7 @@ void vcf_splitter::write_File_SNP_only(vector<string> &patient_Coutry, string &f
                 }
                 count++;
             }
-            //if count = snp_count then rename all pop files with the first and last size value and count = 0;
+            // if count = snp_count then rename all pop files with the first and last size value and count = 0;
             if (count == snp_Count)
             {
                 string last_SNP_size = line_Data[1];
@@ -251,7 +253,7 @@ void vcf_splitter::write_File_SNP_only(vector<string> &patient_Coutry, string &f
                 count = 0;
             }
         }
-        //if count less than 100 then rename all pop files with remaining last snp and finish
+        // if count less than 100 then rename all pop files with remaining last snp and finish
         if (count < snp_Count)
         {
             string last_SNP_size = line_Data[1];
@@ -276,24 +278,24 @@ string vcf_splitter::split_check(vector<string> &line_Data, string &line)
     char *convert;
     string capture(line);
     convert = &capture[0];
-    //cout<<convert;
+    // cout<<convert;
 
     char *split_data;
     split_data = strtok(convert, "\t");
     while (split_data != NULL)
     {
-        //cout<<split_data<<endl;
+        // cout<<split_data<<endl;
         string char2string;
         char2string.append(split_data);
-        //cout << char2string << endl;
+        // cout << char2string << endl;
         line_Data.push_back(char2string);
 
         if (line_Data.size() == 5)
         {
             if ((line_Data[3].length()) != REF || line_Data[4].length() != ALT)
             {
-                //cout << line_Data[3] << "\t" << line_Data[4] << endl;
-                //cout << line_Data[3].length() << "\t" << line_Data[4].length() << endl;
+                // cout << line_Data[3] << "\t" << line_Data[4] << endl;
+                // cout << line_Data[3].length() << "\t" << line_Data[4].length() << endl;
                 check = "no";
                 break;
             }
@@ -312,7 +314,7 @@ string vcf_splitter::get_Country(string &ID)
     {
         if (check.first == ID)
         {
-            //cout << check.first << "\t" << check.second << endl;
+            // cout << check.first << "\t" << check.second << endl;
             country = check.second;
             break;
         }
@@ -327,23 +329,23 @@ void vcf_splitter::split(vector<string> &line_Data, string &line)
     char *convert;
     string capture(line);
     convert = &capture[0];
-    //cout<<convert;
+    // cout<<convert;
 
     char *split_data;
     split_data = strtok(convert, "\t");
 
     while (split_data != NULL)
     {
-        //cout<<split_data<<endl;
+        // cout<<split_data<<endl;
         string char2string;
         char2string.append(split_data);
-        //cout << char2string << endl;
+        // cout << char2string << endl;
         line_Data.push_back(char2string);
         split_data = strtok(NULL, "\t");
     }
 
-    //delete convert;
-    //delete split_data;
+    // delete convert;
+    // delete split_data;
 }
 
 void vcf_splitter::find_VCF(string &vcf_Folder_Path, list<string> &vcf_Files)
@@ -351,7 +353,7 @@ void vcf_splitter::find_VCF(string &vcf_Folder_Path, list<string> &vcf_Files)
 
     for (const auto &entry : filesystem::directory_iterator(vcf_Folder_Path))
     {
-        //cout << entry.path().filename().extension() <<endl;
+        // cout << entry.path().filename().extension() <<endl;
         string extension = entry.path().filename().extension().string();
         if (extension == ".vcf")
         {
@@ -359,5 +361,5 @@ void vcf_splitter::find_VCF(string &vcf_Folder_Path, list<string> &vcf_Files)
         }
     }
 
-    //cout<<vcf_Folder_Path<<endl;
+    // cout<<vcf_Folder_Path<<endl;
 }

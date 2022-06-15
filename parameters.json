@@ -22,6 +22,8 @@
 
     # VCF split parameters
     "Population file path":"/mnt/d/Deshan/Books/population/sample_population_codes.tsv",
+    "Sample_ID Column number":1,
+    "Population_ID Column number":6,
     "Reference allele count":1,
     "Alternate allele count":1,
     "SNP count per file":10000,

@@ -19,14 +19,18 @@ private:
     string vcf_Folder;
     string output_Path;
     string population_File;
+
+    int sample_Column;int pop_Column;
+
     set<string> super_pops;
     vector<pair<string, string>> pop_Index;
+    
     int REF;
     int ALT;
     int snp_Count;
 
 public:
-    vcf_splitter(char folder[], string vcf_Folder, string population_File, string output_Path, int REF, int ALT, int snp_Count);
+    vcf_splitter(char folder[], string vcf_Folder, string population_File, string output_Path, int REF, int ALT, int snp_Count,int sample_Column,int pop_Column);
     void read_File();
     void index_population();
     void find_VCF(string &vcf_Folder_Path, list<string> &vcf_Files);
