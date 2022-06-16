@@ -21,6 +21,7 @@
     "Universal gene list":"genelist.txt",
 
     # VCF split parameters
+    # Column numbers are non zero digits, i.e. Column numbers start with one
     "Population file path":"/mnt/d/Deshan/Books/population/sample_population_codes.tsv",
     "Sample_ID Column number":1,
     "Population_ID Column number":6,
@@ -44,6 +45,10 @@
     # Extract gene FASTA seqeunces from REFERENCE FASTA file and outputs them as seperate FASTA files
     "Reference genome ex":"reference/Human_1.fasta",
     "Extract gene list":"01.txt",
+
+    # GFF to Genes parameters
+    # REQUIRES SEPERATE INPUT, SINCE IT IS A SINGULAR INPUT
+    "GFF file":"01.gff",
 
     # All Neutrality tests
     # Calculates all three neutrality tests (Tajima's D, Fay and Wu's and Fu and Li's) at once

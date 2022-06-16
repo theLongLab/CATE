@@ -7,6 +7,7 @@
 #include "fu_li.cuh"
 #include "fay_wu.cuh"
 #include "neutral.cuh"
+#include "gff2gene.cuh"
 #include "ehh.cuh"
 #include "vcf_splitter.h"
 #include "print_param.h"
@@ -142,6 +143,16 @@ int main(int argc, char *argv[])
                               cout << endl
                                    << "Gene extractor has been completed." << endl;
                          }
+                         else if (function == "--gff2gene" || function == "-g2g")
+                         {
+                              // gff2gene(string input_File, string output_Path);
+                              gff2gene g2g = gff2gene(properties.where("GFF file"), output_Path);
+                              g2g.ingress();
+
+                              cout << endl
+                                   << "Completed GFF to Gene list" << endl;
+                         }
+
                          else if (function == "--tajima" || function == "-t")
                          {
                               string gene_List = properties.where("Tajima gene list");
@@ -327,6 +338,9 @@ void print_HELP()
           << "-egenes or --extractgenes : Reads the gene list file to extract the gene sequences from the reference genome." << endl
           << "                            FASTA format reference genome must be specified." << endl
           << "                            All gene sequences will be generated into seperate FASTA files." << endl
+          << endl
+          << "--gff2gene or -g2g        : Creates the gene list file in a *.txt format from the input GFF3 file." << endl
+          << "                            Note that only regions annotated as genes will be extracted." << endl
           << endl
           << "-pparam or --printparam : Prints a sample layout of the parameter file to the specified location." << endl
           << "                          State the path with the name of the parameter file after the \"-pparam\" function." << endl

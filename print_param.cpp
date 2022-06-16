@@ -51,7 +51,10 @@ void print_param::ingress()
                      << ".txt\",\n\n";
 
               output << "    # VCF split parameters\n"
+                     << "    # Column numbers are non zero digits, i.e. Column numbers start with one\n"
                      << "    \"Population file path\":\"/work/long_lab/deshan/1000_Genome/Neutrality/testing/tests/full_tests/sample_population/sample_population_codes.tsv\",\n"
+                     << "    \"Sample_ID Column number\":1,\n"
+                     << "    \"Population_ID Column number\":6,\n"
                      << "    \"Reference allele count\":1,\n"
                      << "    \"Alternate allele count\":1,\n"
                      << "    \"SNP count per file\":10000,\n\n";
