@@ -17,6 +17,11 @@ cudaDevices::cudaDevices()
         size_t l_Total = 0;
         cudaError_t error_id = cudaMemGetInfo(&l_free, &l_Total);
         cout << "GPU memory (GB)\t: " << l_Total / (1000 * 1000 * 1000) << endl;
+        cout << "GPU number of multiprocessor(s)\t: " << prop.multiProcessorCount << endl;
+        cout << "GPU block(s) per multiprocessor\t: " << prop.maxBlocksPerMultiProcessor << endl;
+        cout << "GPU thread(s) per block\t: " << prop.maxThreadsPerBlock << endl;
+        cout << endl;
+        
         cudaError_t err = cudaGetLastError();
 
         if (err != cudaSuccess)
@@ -25,9 +30,5 @@ cudaDevices::cudaDevices()
 
             // Possibly: exit(-1) if program cannot continue....
         }
-        cout << "GPU number of multiprocessor(s)\t: " << prop.multiProcessorCount << endl;
-        cout << "GPU block(s) per multiprocessor\t: " << prop.maxBlocksPerMultiProcessor << endl;
-        cout << "GPU thread(s) per block\t: " << prop.maxThreadsPerBlock << endl;
-        cout << endl;
     }
 }
