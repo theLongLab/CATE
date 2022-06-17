@@ -40,6 +40,10 @@ void vcf_splitter::index_population()
         {
             vector<string> line_Data;
             split(line_Data, line);
+
+            line_Data[pop_Column - 1].erase(remove(line_Data[pop_Column - 1].begin(), line_Data[pop_Column - 1].end(), '\r'), line_Data[pop_Column - 1].end());
+            line_Data[sample_Column - 1].erase(remove(line_Data[sample_Column - 1].begin(), line_Data[sample_Column - 1].end(), '\r'), line_Data[sample_Column - 1].end());
+            
             super_pops.insert(line_Data[pop_Column - 1]);
             // cout<<line_Data[0]<<endl<<line_Data[5]<<endl;
             pop_Index.push_back(make_pair(line_Data[sample_Column - 1], line_Data[pop_Column - 1]));

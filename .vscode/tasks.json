@@ -3,7 +3,7 @@
         {
             "type": "cppbuild",
             "label": "C/C++: g++ build active file",
-            "command": "/usr/local/cuda-11.7/bin/nvcc",
+            "command": "/usr/local/cuda-11.4/bin/nvcc",
             "args": [
                 //"-fdiagnostics-color=always",
                 // "--std",

@@ -4,12 +4,12 @@
 
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPERATE PARAMTER FILES WITH SEPERATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
-    "Input path":"results",
-    "Output path":"mk2",
+    "Input path":"ON_neutral",
+    "Output path":"Omicron_results",
     "Intermediate path":"intermediate",
 
     # VCF sample details
-    "Ploidy":2,
+    "Ploidy":1,
 
     # Protein information
     # DNA INTERPRETATION SHOULD BE USED FOR START AND STOP CODONS
@@ -18,16 +18,16 @@
     "Genetic code":"A|GCT,GCC,GCA,GCG;R|CGT,CGC,CGA,CGG,AGA,AGG;N|AAT,AAC;D|GAT,GAC;B|AAT,AAC,GAT,GAC;C|TGT,TGC;Q|CAA,CAG;E|GAA,GAG;Z|CAA,CAG,GAA,GAG;G|GGT,GGC,GGA,GGG;H|CAT,CAC;M|ATG;I|ATT,ATC,ATA;L|CTT,CTC,CTA,CTG,TTA,TTG;K|AAA,AAG;F|TTT,TTC;P|CCT,CCC,CCA,CCG;S|TCT,TCC,TCA,TCG,AGT,AGC;T|ACT,ACC,ACA,ACG;W|TGG;Y|TAT,TAC;V|GTT,GTC,GTA,GTG;X|TAA,TGA,TAG",
 
     # Any tab-deliminated text based formats such as but not limited to (*.txt, *.csv)
-    "Universal gene list":"genelist.txt",
+    "Universal gene list":"cov.txt",
 
     # VCF split parameters
     # Column numbers are non zero digits, i.e. Column numbers start with one
-    "Population file path":"/mnt/d/Deshan/Books/population/sample_population_codes.tsv",
+    "Population file path":"Onid.txt",
     "Sample_ID Column number":1,
-    "Population_ID Column number":6,
+    "Population_ID Column number":2,
     "Reference allele count":1,
     "Alternate allele count":1,
-    "SNP count per file":10000,
+    "SNP count per file":1000,
 
     # FASTA split parameters
     # REQUIRES SEPERATE INPUT, SINCE IT IS A SINGULAR INPUT

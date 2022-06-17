@@ -403,6 +403,7 @@ vector<pair<string, string>> functions::index_Folder(string &country)
 
     for (const auto &entry : filesystem::directory_iterator(country))
     {
+        
         string coordinates = entry.path().string();
         int trim_start = coordinates.find(country_Only + "_") + country_Only.length() + 1;
         int trim_end = coordinates.find_last_of(".") - trim_start;
