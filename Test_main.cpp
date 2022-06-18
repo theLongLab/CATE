@@ -339,8 +339,8 @@ void print_HELP()
           << "                            FASTA format reference genome must be specified." << endl
           << "                            All gene sequences will be generated into seperate FASTA files." << endl
           << endl
-          << "--gff2gene or -g2g        : Creates the gene list file in a *.txt format from the input GFF3 file." << endl
-          << "                            Note that only regions annotated as genes will be extracted." << endl
+          << "--gff2gene or -g2g      : Creates the gene list file in a *.txt format from the input GFF3 file." << endl
+          << "                          Note that only regions annotated as genes will be extracted." << endl
           << endl
           << "-pparam or --printparam : Prints a sample layout of the parameter file to the specified location." << endl
           << "                          State the path with the name of the parameter file after the \"-pparam\" function." << endl
