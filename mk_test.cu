@@ -1268,7 +1268,7 @@ void mk_test::process_ORF(vector<pair<int, string>> &collect_Segregrating_site_P
     Ps = (int *)malloc(num_of_Codons * sizeof(int));
 
     // Fix seg sites only catch cause Allele freq does not matter.
-    // GPU load here ***Lord help me***
+    // GPU load here 
     // cuda_process_Codons(int codon_Number, int *positions, char *REF, char *Outgroup, char *seg_REF, char *seg_ALT, int SEG_size, int *SEG_positions, int *seg_REF_count, int *seg_ALT_count, int codon_Start, int size_of_alignment_File, int genetic_Code_size, char *index_Genetic_code, int *VALID_or_NOT, int *Ds, int *Dn, int *Ps, int *Pn)
 
     cout << "             Launching GPU" << endl;

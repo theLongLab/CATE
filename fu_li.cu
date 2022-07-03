@@ -1,10 +1,33 @@
 #include "fu_li.cuh"
 #include "functions.cuh"
+#include "prometheus.cuh"
 
 fu_li::fu_li(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
     cout << "Initiating CUDA powered Fu and Li's D, D*, F and F* calculator" << endl
          << endl;
+
+    set_Values(gene_List, input_Folder, ouput_Path, cuda_ID, intermediate_Path, ploidy);
+}
+
+fu_li::fu_li(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run)
+{
+    // PROMETHEUS Constructor
+    cout << "Initiating CUDA powered Fu and Li's D, D*, F and F* calculator on PROMETHEUS" << endl
+         << endl;
+
+    set_Values(gene_List, input_Folder, ouput_Path, cuda_ID, intermediate_Path, ploidy);
+
+    this->prometheus_Activate = "YES";
+    this->CPU_cores = CPU_cores;
+    this->SNPs_per_Run = SNPs_per_Run;
+    transform(Multi_read.begin(), Multi_read.end(), Multi_read.begin(), ::toupper);
+    this->Multi_read = Multi_read;
+    this->number_of_genes = number_of_genes;
+}
+
+void fu_li::set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
+{
     this->gene_List = gene_List;
     cout << "Gene list file path\t: " << gene_List << endl
          << endl;
@@ -66,12 +89,12 @@ void fu_li::ingress()
         cout << "Number of sequences in " << country.substr(country.find_last_of("/") + 1, country.length()) << " population [ " << samples << " x " << ploidy << " ] (N)\t: " << N << endl;
         long int combinations = function.combos_N(N);
         cout << "Pairwise combinations\t: " << combinations << endl;
-        //float soft_Singl = 1 / N_float;
-        //string SOFT_singleton_MAF = function.roundoff(soft_Singl, 4);
-        //cout << "Singleton MAF\t: " << SOFT_singleton_MAF << endl;
+        // float soft_Singl = 1 / N_float;
+        // string SOFT_singleton_MAF = function.roundoff(soft_Singl, 4);
+        // cout << "Singleton MAF\t: " << SOFT_singleton_MAF << endl;
         cout << endl;
 
-        //calculate prerequisites
+        // calculate prerequisites
         float an, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star;
         calc_Pre(N, an, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star);
 
@@ -120,196 +143,266 @@ void fu_li::ingress()
             output.open(output_File, ios::app);
             intermediate.open(intermediate_File, ios::app);
 
-            while (getline(gene_File, gene_Combo))
+            if (prometheus_Activate == "YES")
             {
-                vector<string> split_Data;
-                function.split(split_Data, gene_Combo, "\t");
-                string gene_Name = split_Data[0];
-                cout << "Gene name\t: " << gene_Name << endl;
-                vector<string> coordinates;
-                function.split(coordinates, split_Data[1], ":");
-                int start_Co = stoi(coordinates[1]);
-                int end_Co = stoi(coordinates[2]);
-                cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
+                string test = "FU";
+                cout << "Initializing Prometheus:" << endl
+                     << endl;
 
-                float tot_pairwise_Differences = 0;
-                int segregating_Sites = 0;
-                int singletons_ns = 0;
-                int singletons_ne = 0;
+                prometheus pro_Fu_Li = prometheus(folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run,number_of_genes, N, combinations, an, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star);
+                vector<string> gene_Collect;
 
-                vector<string> file_List;
-                cout << endl;
-                cout << "System is retrieving file(s)" << endl;
-                if (folder_Index.size() > 1)
+                while (getline(gene_File, gene_Combo))
                 {
-                    file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
-                }
-                else
-                {
-                    file_List.push_back(folder_Index[0].second);
-                }
-                cout << "System has retrieved all file(s)" << endl;
-                cout << "System is collecting segregrating site(s)" << endl;
-                vector<string> collect_Segregrating_sites;
-
-                for (string files : file_List)
-                {
-                    //cout << files << endl;
-                    fstream file;
-                    file.open(files, ios::in);
-                    if (file.is_open())
+                    gene_Collect.push_back(gene_Combo);
+                    if (gene_Collect.size() == number_of_genes)
                     {
-                        string line;
-                        getline(file, line); //skip first header line
-                        while (getline(file, line))
+                        cout << "Prometheus batch intialized" << endl;
+                        cout << "From: " << gene_Collect[0] << endl;
+                        cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
+                             << endl;
+                        // launch prometheus
+                        vector<string> write_Lines = pro_Fu_Li.collection_Engine(gene_Collect, test);
+                        // print
+                        cout << "System is writing Fu and Li results" << endl;
+                        for (size_t i = 0; i < write_Lines.size(); i++)
                         {
-                            vector<string> positions;
-                            function.split_getPos_ONLY(positions, line, "\t");
-                            int pos = stoi(positions[1]);
-
-                            if (pos >= start_Co && pos <= end_Co)
-                            {
-                                collect_Segregrating_sites.push_back(line);
-                                // string check_0 = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF=0";
-                                // string seg_Check = "GO";
-                                // vector<string> info;
-                                // function.split(info, positions[7], ";");
-                                // for (string AF_check : info)
-                                // {
-                                //     if (AF_check == check_0)
-                                //     {
-                                //         seg_Check = "NO";
-                                //         break;
-                                //     }
-                                // }
-                                // if (seg_Check == "GO")
-                                // {
-                                //     string check_AF_country = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF";
-                                //     float MAF_float = 0.0000;
-                                //     segregating_Sites = segregating_Sites + 1;
-                                //     for (string AF_check : info)
-                                //     {
-                                //         vector<string> split_info;
-                                //         function.split(split_info, AF_check, "=");
-                                //         if (split_info[0] == check_AF_country)
-                                //         {
-                                //             MAF_float = stof(split_info[1]);
-                                //             string MAF = split_info[1];
-                                //             string singleton_MAF;
-                                //             string check;
-                                //             if (MAF_float > 0.5)
-                                //             {
-                                //                 MAF_float = 1 - MAF_float;
-                                //                 //singleton_MAF = function.roundoff(soft_Singl, MAF.length() - 2);
-                                //                 string new_MAF = function.roundoff(MAF_float, MAF.length() - 2);
-                                //                 check = check_AF_country + "=" + new_MAF;
-                                //             }
-                                //             else
-                                //             {
-                                //                 //MAF = split_info[1];
-                                //                 check = AF_check;
-                                //             }
-
-                                //             singleton_MAF = function.roundoff(soft_Singl, MAF.length() - 2);
-                                //             string check_singleton = check_AF_country + "=" + singleton_MAF;
-                                //             if (check == check_singleton)
-                                //             {
-                                //                 //cout << "Singleton MAF check\t: " << check_singleton << "\t" << AF_check << endl;
-                                //                 singletons_ns = singletons_ns + 1;
-                                //                 singletons_ne = singletons_ne + outgroup_Singleton(info, positions);
-                                //             }
-                                //             break;
-                                //         }
-                                //     }
-                                //     //int pairwise_Differences = function.calc_Pairwise(line, N, this->tot_Blocks, this->tot_ThreadsperBlock);
-                                //     tot_pairwise_Differences = tot_pairwise_Differences + (MAF_float * (1 - MAF_float) * pow(N_float, 2));
-                                //     //break;
-                                // }
-                            }
-                            else if (pos > end_Co)
-                            {
-                                break;
-                            }
+                            output << write_Lines[i] << "\n";
+                            intermediate << gene_Combo << "\n";
                         }
-                        file.close();
+                        // clear prometheus
+                        output.flush();
+                        intermediate.flush();
+                        pro_Fu_Li.erase();
+                        gene_Collect.clear();
+                        cout << endl;
                     }
                 }
 
-                function.process_Seg_sites_fu_li(collect_Segregrating_sites, N_float, segregating_Sites, tot_pairwise_Differences, singletons_ne, singletons_ns, this->tot_Blocks, this->tot_ThreadsperBlock);
-
-                cout << endl;
-
-                //test
-                // segregating_Sites = 18;
-                // singletons_ne = 9;
-                // singletons_ns = 10;
-                //"Gene_name\tCoordinates\tPi\tS\tne\tns\tD\tD_star\tF\tF_star"
-                cout << "Total segregating sites (S)\t: " << segregating_Sites << endl;
-
-                string Fu_Li_D;
-                string Fu_Li_D_star;
-                string Fu_Li_F;
-                string Fu_Li_F_star;
-                float pi = 0;
-
-                if (segregating_Sites != 0)
+                if (gene_Collect.size() != 0)
                 {
-                    //test
-                    //N_float = 24.0;
-                    float D = (float)(segregating_Sites - (an * singletons_ne)) / sqrt(((ud * segregating_Sites) + (vd * (pow(segregating_Sites, 2)))));
-                    float D_star = (float)(((N_float / (N_float - 1)) * segregating_Sites) - (an * singletons_ns)) / sqrt(((ud_star * segregating_Sites) + (vd_star * (pow(segregating_Sites, 2.0)))));
+                    // RUN PROMETHEUS for remaining
+                    // launch prometheus
+                    cout << "Prometheus batch intialized" << endl;
+                    cout << "From: " << gene_Collect[0] << endl;
+                    cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
+                         << endl;
 
-                    pi = (float)tot_pairwise_Differences / combinations;
-                    //test
-                    //pi = 3.16;
-
-                    cout << "Average pairwise polymorphisms (pi)\t: " << pi << endl;
-                    cout << "Total ns singletons\t: " << singletons_ns << endl;
-                    cout << "Total ne singletons\t: " << singletons_ne << endl;
+                    vector<string> write_Lines = pro_Fu_Li.collection_Engine(gene_Collect,test);
+                    // print
+                    cout << "System is writing Fu and Li results" << endl;
+                    for (size_t i = 0; i < write_Lines.size(); i++)
+                    {
+                        if (write_Lines[i] != "")
+                        {
+                            output << write_Lines[i] << "\n";
+                            intermediate << gene_Combo << "\n";
+                        }
+                    }
                     cout << endl;
-
-                    float F = (float)(pi - singletons_ne) / sqrt(((uf * segregating_Sites) + (vf * (pow(segregating_Sites, 2)))));
-                    float F_star = (float)(pi - (((N_float - 1) / N_float) * singletons_ns)) / sqrt(((uf_star * segregating_Sites) + (vf_star * (pow(segregating_Sites, 2.0)))));
-
-                    Fu_Li_D = to_string(D);
-                    Fu_Li_D_star = to_string(D_star);
-                    Fu_Li_F = to_string(F);
-                    Fu_Li_F_star = to_string(F_star);
-
-                    cout << "Fu and Li's D\t: " << Fu_Li_D << endl;
-                    cout << "Fu and Li's D*\t: " << Fu_Li_D_star << endl;
-                    cout << "Fu and Li's F\t: " << Fu_Li_F << endl;
-                    cout << "Fu and Li's F*\t: " << Fu_Li_F_star << endl;
-                }
-                else
-                {
-                    cout << endl;
-                    Fu_Li_D = "NA";
-                    Fu_Li_D_star = "NA";
-                    Fu_Li_F = "NA";
-                    Fu_Li_F_star = "NA";
-                    cout << "Fu and Li's D, D*, F and F*\t: "
-                         << "Not Available" << endl;
                 }
 
-                cout << endl;
-                //"Gene_name\tCoordinates\tPi\tS\tne\tns\tD\tD_star\tF\tF_star"
-                output << gene_Name << "\t"
-                       << coordinates[0] << ":" << to_string(start_Co) << ":" << to_string(end_Co)
-                       << "\t" << to_string(pi)
-                       << "\t" << to_string(segregating_Sites)
-
-                       << "\t" << to_string(singletons_ne)
-                       << "\t" << to_string(singletons_ns)
-
-                       << "\t" << Fu_Li_D
-                       << "\t" << Fu_Li_D_star
-                       << "\t" << Fu_Li_F
-                       << "\t" << Fu_Li_F_star << "\n";
-
-                intermediate << gene_Combo << "\n";
                 output.flush();
                 intermediate.flush();
+                pro_Fu_Li.erase();
+                gene_Collect.clear();
+
+                //cout << endl;
+            }
+            else
+            {
+
+                while (getline(gene_File, gene_Combo))
+                {
+                    vector<string> split_Data;
+                    function.split(split_Data, gene_Combo, "\t");
+                    string gene_Name = split_Data[0];
+                    cout << "Gene name\t: " << gene_Name << endl;
+                    vector<string> coordinates;
+                    function.split(coordinates, split_Data[1], ":");
+                    int start_Co = stoi(coordinates[1]);
+                    int end_Co = stoi(coordinates[2]);
+                    cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
+
+                    float tot_pairwise_Differences = 0;
+                    int segregating_Sites = 0;
+                    int singletons_ns = 0;
+                    int singletons_ne = 0;
+
+                    vector<string> file_List;
+                    cout << endl;
+                    cout << "System is retrieving file(s)" << endl;
+                    if (folder_Index.size() > 1)
+                    {
+                        file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
+                    }
+                    else
+                    {
+                        file_List.push_back(folder_Index[0].second);
+                    }
+                    cout << "System has retrieved all file(s)" << endl;
+                    cout << "System is collecting segregrating site(s)" << endl;
+                    vector<string> collect_Segregrating_sites;
+
+                    for (string files : file_List)
+                    {
+                        // cout << files << endl;
+                        fstream file;
+                        file.open(files, ios::in);
+                        if (file.is_open())
+                        {
+                            string line;
+                            getline(file, line); // skip first header line
+                            while (getline(file, line))
+                            {
+                                vector<string> positions;
+                                function.split_getPos_ONLY(positions, line, "\t");
+                                int pos = stoi(positions[1]);
+
+                                if (pos >= start_Co && pos <= end_Co)
+                                {
+                                    collect_Segregrating_sites.push_back(line);
+                                    // string check_0 = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF=0";
+                                    // string seg_Check = "GO";
+                                    // vector<string> info;
+                                    // function.split(info, positions[7], ";");
+                                    // for (string AF_check : info)
+                                    // {
+                                    //     if (AF_check == check_0)
+                                    //     {
+                                    //         seg_Check = "NO";
+                                    //         break;
+                                    //     }
+                                    // }
+                                    // if (seg_Check == "GO")
+                                    // {
+                                    //     string check_AF_country = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF";
+                                    //     float MAF_float = 0.0000;
+                                    //     segregating_Sites = segregating_Sites + 1;
+                                    //     for (string AF_check : info)
+                                    //     {
+                                    //         vector<string> split_info;
+                                    //         function.split(split_info, AF_check, "=");
+                                    //         if (split_info[0] == check_AF_country)
+                                    //         {
+                                    //             MAF_float = stof(split_info[1]);
+                                    //             string MAF = split_info[1];
+                                    //             string singleton_MAF;
+                                    //             string check;
+                                    //             if (MAF_float > 0.5)
+                                    //             {
+                                    //                 MAF_float = 1 - MAF_float;
+                                    //                 //singleton_MAF = function.roundoff(soft_Singl, MAF.length() - 2);
+                                    //                 string new_MAF = function.roundoff(MAF_float, MAF.length() - 2);
+                                    //                 check = check_AF_country + "=" + new_MAF;
+                                    //             }
+                                    //             else
+                                    //             {
+                                    //                 //MAF = split_info[1];
+                                    //                 check = AF_check;
+                                    //             }
+
+                                    //             singleton_MAF = function.roundoff(soft_Singl, MAF.length() - 2);
+                                    //             string check_singleton = check_AF_country + "=" + singleton_MAF;
+                                    //             if (check == check_singleton)
+                                    //             {
+                                    //                 //cout << "Singleton MAF check\t: " << check_singleton << "\t" << AF_check << endl;
+                                    //                 singletons_ns = singletons_ns + 1;
+                                    //                 singletons_ne = singletons_ne + outgroup_Singleton(info, positions);
+                                    //             }
+                                    //             break;
+                                    //         }
+                                    //     }
+                                    //     //int pairwise_Differences = function.calc_Pairwise(line, N, this->tot_Blocks, this->tot_ThreadsperBlock);
+                                    //     tot_pairwise_Differences = tot_pairwise_Differences + (MAF_float * (1 - MAF_float) * pow(N_float, 2));
+                                    //     //break;
+                                    // }
+                                }
+                                else if (pos > end_Co)
+                                {
+                                    break;
+                                }
+                            }
+                            file.close();
+                        }
+                    }
+
+                    function.process_Seg_sites_fu_li(collect_Segregrating_sites, N_float, segregating_Sites, tot_pairwise_Differences, singletons_ne, singletons_ns, this->tot_Blocks, this->tot_ThreadsperBlock);
+
+                    cout << endl;
+
+                    // test
+                    //  segregating_Sites = 18;
+                    //  singletons_ne = 9;
+                    //  singletons_ns = 10;
+                    //"Gene_name\tCoordinates\tPi\tS\tne\tns\tD\tD_star\tF\tF_star"
+                    cout << "Total segregating sites (S)\t: " << segregating_Sites << endl;
+
+                    string Fu_Li_D;
+                    string Fu_Li_D_star;
+                    string Fu_Li_F;
+                    string Fu_Li_F_star;
+                    float pi = 0;
+
+                    if (segregating_Sites != 0)
+                    {
+                        // test
+                        // N_float = 24.0;
+                        float D = (float)(segregating_Sites - (an * singletons_ne)) / sqrt(((ud * segregating_Sites) + (vd * (pow(segregating_Sites, 2)))));
+                        float D_star = (float)(((N_float / (N_float - 1)) * segregating_Sites) - (an * singletons_ns)) / sqrt(((ud_star * segregating_Sites) + (vd_star * (pow(segregating_Sites, 2.0)))));
+
+                        pi = (float)tot_pairwise_Differences / combinations;
+                        // test
+                        // pi = 3.16;
+
+                        cout << "Average pairwise polymorphisms (pi)\t: " << pi << endl;
+                        cout << "Total ns singletons\t: " << singletons_ns << endl;
+                        cout << "Total ne singletons\t: " << singletons_ne << endl;
+                        cout << endl;
+
+                        float F = (float)(pi - singletons_ne) / sqrt(((uf * segregating_Sites) + (vf * (pow(segregating_Sites, 2)))));
+                        float F_star = (float)(pi - (((N_float - 1) / N_float) * singletons_ns)) / sqrt(((uf_star * segregating_Sites) + (vf_star * (pow(segregating_Sites, 2.0)))));
+
+                        Fu_Li_D = to_string(D);
+                        Fu_Li_D_star = to_string(D_star);
+                        Fu_Li_F = to_string(F);
+                        Fu_Li_F_star = to_string(F_star);
+
+                        cout << "Fu and Li's D\t: " << Fu_Li_D << endl;
+                        cout << "Fu and Li's D*\t: " << Fu_Li_D_star << endl;
+                        cout << "Fu and Li's F\t: " << Fu_Li_F << endl;
+                        cout << "Fu and Li's F*\t: " << Fu_Li_F_star << endl;
+                    }
+                    else
+                    {
+                        cout << endl;
+                        Fu_Li_D = "NA";
+                        Fu_Li_D_star = "NA";
+                        Fu_Li_F = "NA";
+                        Fu_Li_F_star = "NA";
+                        cout << "Fu and Li's D, D*, F and F*\t: "
+                             << "Not Available" << endl;
+                    }
+
+                    cout << endl;
+                    //"Gene_name\tCoordinates\tPi\tS\tne\tns\tD\tD_star\tF\tF_star"
+                    output << gene_Name << "\t"
+                           << coordinates[0] << ":" << to_string(start_Co) << ":" << to_string(end_Co)
+                           << "\t" << to_string(pi)
+                           << "\t" << to_string(segregating_Sites)
+
+                           << "\t" << to_string(singletons_ne)
+                           << "\t" << to_string(singletons_ns)
+
+                           << "\t" << Fu_Li_D
+                           << "\t" << Fu_Li_D_star
+                           << "\t" << Fu_Li_F
+                           << "\t" << Fu_Li_F_star << "\n";
+
+                    intermediate << gene_Combo << "\n";
+                    output.flush();
+                    intermediate.flush();
+                }
             }
             output.close();
             intermediate.close();
@@ -333,10 +426,10 @@ int fu_li::outgroup_Singleton(vector<string> &info, vector<string> &positions)
         function.split(AA_check, info_Data, "=");
         if (AA_check[0] == "AA")
         {
-            //cout << "AA: " << AA_check[1].at(0) << endl;
+            // cout << "AA: " << AA_check[1].at(0) << endl;
             if ((toupper(AA_check[1].at(0)) == 'A') || (toupper(AA_check[1].at(0)) == 'T') || (toupper(AA_check[1].at(0)) == 'G') || (toupper(AA_check[1].at(0)) == 'C'))
             {
-                //cout << "AA Caught: " << AA_check[1].at(0) << endl;
+                // cout << "AA Caught: " << AA_check[1].at(0) << endl;
                 AA = AA_check[1].at(0);
                 present = "true";
             }
@@ -417,9 +510,9 @@ __global__ void fuli_Calculation(int N, float *a1_CUDA, float *a2_CUDA)
 
 void fu_li::calc_Pre(int N_tot, float &an, float &vd, float &ud, float &vd_star, float &ud_star, float &uf, float &vf, float &uf_star, float &vf_star)
 {
-    //functions function = functions();
-    //test
-    //N_tot = 24;
+    // functions function = functions();
+    // test
+    // N_tot = 24;
     int N = N_tot - 1;
     float *a1_CUDA, *a2_CUDA;
     float *a1_partial, *a2_partial, bn;
@@ -457,29 +550,29 @@ void fu_li::calc_Pre(int N_tot, float &an, float &vd, float &ud, float &vd_star,
     float N_float = (float)N;
 
     float an_plus_1 = (float)an + (1 / N_float_tot);
-    //cout << "an+1: " << an_plus_1 << endl;
+    // cout << "an+1: " << an_plus_1 << endl;
     float cn = (float)2 * (((N_float_tot * an) - (2 * N_float)) / (N_float * (N_float_tot - 2)));
     float an_square = (float)pow(an, 2.0);
 
-    //float test = (N_float_tot_float + 1) / N_float_float;
-    //cout << "test: " << test << endl;
+    // float test = (N_float_tot_float + 1) / N_float_float;
+    // cout << "test: " << test << endl;
 
     vd = (float)1 + ((an_square / (bn + an_square)) * (cn - (N_float_tot + 1) / N_float));
     ud = (float)an - 1 - vd;
 
     float dn = (float)cn + ((N_float_tot - 2) / pow(N_float, 2.0)) + ((2 / N_float) * (1.5 - (((2 * an_plus_1) - 3) / (N_float_tot - 2)) - (1 / N_float_tot)));
-    //cout << "dn: " << dn << endl;
+    // cout << "dn: " << dn << endl;
     vd_star = (float)((pow((N_float_tot / N_float), 2.0) * bn) + (pow(an, 2.0) * dn) - (2 * ((N_float_tot * an * (an + 1)) / (pow(N_float, 2.0))))) / (pow(an, 2.0) + bn);
     ud_star = (float)N_float_tot / N_float * (an - (N_float_tot / N_float)) - vd_star;
 
     vf = (float)(cn + ((2 * (pow(N_float_tot, 2) + N_float_tot + 3)) / (9 * N_float_tot * N_float)) - (2 / N_float)) / (pow(an, 2) + bn);
     uf = (float)((1 + ((N_float_tot + 1) / (3 * N_float)) - ((4 * ((N_float_tot + 1) / pow(N_float, 2))) * (an_plus_1 - ((2 * N_float_tot) / (N_float_tot + 1))))) / an) - vf;
 
-    //Original papers incorrect equations due to paper's typos
-    //vf_star = (float)(dn + ((2 * (pow(N_float_tot, 2) + N_float_tot + 3)) / (9 * N_float_tot * N_float)) - ((2 * (1 / N_float)) * ((4 * bn) - 6 + (8 / N_float_tot)))) / (pow(an, 2) + bn);
-    //uf_star = (float)(((N_float_tot / N_float) + ((N_float_tot + 1) / (3 * N_float)) - (2 * (2 / (N_float_tot * N_float))) + ((2 * ((N_float_tot + 1) / pow(N_float, 2))) * (an_plus_1 - ((2 * N_float_tot) / (N_float_tot + 1))))) / an) - vf_star;
+    // Original papers incorrect equations due to paper's typos
+    // vf_star = (float)(dn + ((2 * (pow(N_float_tot, 2) + N_float_tot + 3)) / (9 * N_float_tot * N_float)) - ((2 * (1 / N_float)) * ((4 * bn) - 6 + (8 / N_float_tot)))) / (pow(an, 2) + bn);
+    // uf_star = (float)(((N_float_tot / N_float) + ((N_float_tot + 1) / (3 * N_float)) - (2 * (2 / (N_float_tot * N_float))) + ((2 * ((N_float_tot + 1) / pow(N_float, 2))) * (an_plus_1 - ((2 * N_float_tot) / (N_float_tot + 1))))) / an) - vf_star;
 
-    //corrected equations Simonsen et al 1995
+    // corrected equations Simonsen et al 1995
     vf_star = (float)((((2 * pow(N_float_tot, 3.0)) + (110 * pow(N_float_tot, 2.0)) - (225 * N_float_tot) + 153) / (9 * pow(N_float_tot, 2.0) * N_float)) + ((2 * N_float * an) / (pow(N_float_tot, 2.0))) - ((8 * bn) / N_float_tot)) / (pow(an, 2.0) + bn);
     uf_star = (float)((((4 * pow(N_float_tot, 2.0)) + (19 * N_float_tot) + 3 - (12 * (N_float_tot + 1) * an_plus_1)) / (3 * N_float_tot * (N_float))) / an) - vf_star;
 

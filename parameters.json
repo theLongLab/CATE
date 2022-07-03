@@ -4,12 +4,22 @@
 
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPERATE PARAMTER FILES WITH SEPERATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
-    "Input path":"ON_neutral",
-    "Output path":"Omicron_results",
+    "Input path":"results_2",
+    "Output path":"pro_test",
     "Intermediate path":"intermediate",
 
+    # Prometheus settings
+    # User is capable of determining the number of gene combinations and number of SNPs to be processed by CATE.
+    # When setting these parameters be mindful of system hardware availability.
+    # WARNING: Multi read CAN CAUSE A BOTTLENECK IF HARDWARE DOES NOT SUPPORT IT. NVMe DRIVES CONNECTED VIA PCIe BUS WILL SUPPORT MULTI READ. TYPICAL HDD DRIVES DO NOT.
+    "Prometheus activate":"Yes",
+    "CPU cores":10,
+    "SNPs per time":1000,
+    "Number of genes":2,
+    "Multi read":"No",
+
     # VCF sample details
-    "Ploidy":1,
+    "Ploidy":2,
 
     # Protein information
     # DNA INTERPRETATION SHOULD BE USED FOR START AND STOP CODONS
@@ -18,7 +28,7 @@
     "Genetic code":"A|GCT,GCC,GCA,GCG;R|CGT,CGC,CGA,CGG,AGA,AGG;N|AAT,AAC;D|GAT,GAC;B|AAT,AAC,GAT,GAC;C|TGT,TGC;Q|CAA,CAG;E|GAA,GAG;Z|CAA,CAG,GAA,GAG;G|GGT,GGC,GGA,GGG;H|CAT,CAC;M|ATG;I|ATT,ATC,ATA;L|CTT,CTC,CTA,CTG,TTA,TTG;K|AAA,AAG;F|TTT,TTC;P|CCT,CCC,CCA,CCG;S|TCT,TCC,TCA,TCG,AGT,AGC;T|ACT,ACC,ACA,ACG;W|TGG;Y|TAT,TAC;V|GTT,GTC,GTA,GTG;X|TAA,TGA,TAG",
 
     # Any tab-deliminated text based formats such as but not limited to (*.txt, *.csv)
-    "Universal gene list":"cov.txt",
+    "Universal gene list":"genelist.txt",
 
     # VCF split parameters
     # Column numbers are non zero digits, i.e. Column numbers start with one

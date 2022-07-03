@@ -26,9 +26,16 @@ private:
     int tot_Blocks;
     int tot_ThreadsperBlock;
 
+    string prometheus_Activate = "NO";
+    string Multi_read = "NO";
+    int number_of_genes = 0;
+    int CPU_cores = 0;
+    int SNPs_per_Run = 0;
+
 public:
     tajima();
     tajima(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy);
+    tajima(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run);
     void ingress();
 
     vector<string> get_Countries();
@@ -39,7 +46,7 @@ public:
     vector<int> backward_Search(int pos, vector<pair<string, string>> folder_Index, int start_Co, int end_Co);
 
     int getN_Split(string file);
-    void calc_Pre(int &N_tot, float &a1, float &e1, float &e2); //calc a1 to e2
+    void calc_Pre(int &N_tot, float &a1, float &e1, float &e2); // calc a1 to e2
     int calc_Pairwise(string &line, int pair_Count);
 
     void split(vector<string> &line_Data, string line, string delim);

@@ -1,10 +1,57 @@
 #include "fay_wu.cuh"
 #include "functions.cuh"
+#include "prometheus.cuh"
 
 fay_wu::fay_wu(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
      cout << "Initiating CUDA powered Fay and Wu's normalized H and E calculator" << endl
           << endl;
+
+     set_Values(gene_List, input_Folder, ouput_Path, cuda_ID, intermediate_Path, ploidy);
+     // this->gene_List = gene_List;
+     // cout << "Gene list file path\t: " << gene_List << endl
+     //      << endl;
+     // this->input_Folder = input_Folder;
+     // this->ouput_Path = ouput_Path;
+     // this->intermediate_Path = intermediate_Path;
+     // this->ploidy = ploidy;
+
+     // cudaSetDevice(cuda_ID);
+     // cout << "Properties of selected CUDA GPU:" << endl;
+     // cudaDeviceProp prop;
+     // cudaGetDeviceProperties(&prop, cuda_ID);
+     // cout << "GPU number\t: " << cuda_ID << endl;
+     // cout << "GPU name\t: " << prop.name << endl;
+     // size_t l_free = 0;
+     // size_t l_Total = 0;
+     // cudaError_t error_id = cudaMemGetInfo(&l_free, &l_Total);
+     // cout << "GPU memory (GB)\t: " << l_Total / (1000 * 1000 * 1000) << endl;
+     // cout << "GPU number of multiprocessor(s)\t: " << prop.multiProcessorCount << endl;
+     // cout << "GPU block(s) per multiprocessor\t: " << prop.maxBlocksPerMultiProcessor << endl;
+     // this->tot_Blocks = prop.maxBlocksPerMultiProcessor;
+     // this->tot_ThreadsperBlock = prop.maxThreadsPerBlock;
+     // cout << "GPU thread(s) per block\t: " << tot_ThreadsperBlock << endl
+     //      << endl;
+}
+
+fay_wu::fay_wu(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run)
+{
+     // PROMETHEUS CONSTRUCTOR
+     cout << "Initiating CUDA powered Fay and Wu's normalized H and E calculator on PROMETHEUS" << endl
+          << endl;
+
+     set_Values(gene_List, input_Folder, ouput_Path, cuda_ID, intermediate_Path, ploidy);
+
+     this->prometheus_Activate = "YES";
+     this->CPU_cores = CPU_cores;
+     this->SNPs_per_Run = SNPs_per_Run;
+     transform(Multi_read.begin(), Multi_read.end(), Multi_read.begin(), ::toupper);
+     this->Multi_read = Multi_read;
+     this->number_of_genes = number_of_genes;
+}
+
+void fay_wu::set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
+{
      this->gene_List = gene_List;
      cout << "Gene list file path\t: " << gene_List << endl
           << endl;
@@ -119,153 +166,220 @@ void fay_wu::ingress()
                output.open(output_File, ios::app);
                intermediate.open(intermediate_File, ios::app);
 
-               while (getline(gene_File, gene_Combo))
+               // PROMETHEUS HERE
+               if (prometheus_Activate == "YES")
                {
-                    vector<string> split_Data;
-                    function.split(split_Data, gene_Combo, "\t");
-                    string gene_Name = split_Data[0];
-                    cout << "Gene name\t: " << gene_Name << endl;
-                    vector<string> coordinates;
-                    function.split(coordinates, split_Data[1], ":");
-                    int start_Co = stoi(coordinates[1]);
-                    int end_Co = stoi(coordinates[2]);
-                    cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
+                    string test = "FA";
+                    cout << "Initializing Prometheus:" << endl
+                         << endl;
 
-                    float tot_pairwise_Differences = 0;
-                    vector<string> collect_Segregrating_sites;
+                    prometheus pro_Fay_Wu = prometheus(folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, bn, bn_plus1);
+                    vector<string> gene_Collect;
 
-                    vector<string> file_List;
-                    cout << endl;
-                    cout << "System is retrieving file(s)" << endl;
-                    if (folder_Index.size() > 1)
+                    while (getline(gene_File, gene_Combo))
                     {
-                         file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
-                    }
-                    else
-                    {
-                         file_List.push_back(folder_Index[0].second);
-                    }
-                    cout << "System has retrieved all file(s)" << endl;
-                    cout << endl;
-
-                    cout << "System is collecting segregrating site(s)" << endl;
-                    for (string files : file_List)
-                    {
-                         fstream file;
-                         file.open(files, ios::in);
-                         if (file.is_open())
+                         gene_Collect.push_back(gene_Combo);
+                         if (gene_Collect.size() == number_of_genes)
                          {
-                              string line;
-                              getline(file, line); //skip first header line
-                              while (getline(file, line))
+                              cout << "Prometheus batch intialized" << endl;
+                              cout << "From: " << gene_Collect[0] << endl;
+                              cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
+                                   << endl;
+                              // launch prometheus
+                              vector<string> write_Lines = pro_Fay_Wu.collection_Engine(gene_Collect, test);
+                              // print
+                              cout << "System is writing Fay and Wu results" << endl;
+                              for (size_t i = 0; i < write_Lines.size(); i++)
                               {
-                                   vector<string> positions;
-                                   function.split_getPos_ONLY(positions, line, "\t");
-                                   int pos = stoi(positions[1]);
-
-                                   if (pos >= start_Co && pos <= end_Co)
-                                   {
-                                        collect_Segregrating_sites.push_back(line);
-
-                                        // string check_0 = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF=0";
-                                        // string seg_Check = "GO";
-                                        // vector<string> info;
-                                        // function.split(info, positions[7], ";");
-                                        // for (string AF_check : info)
-                                        // {
-                                        //      if (AF_check == check_0)
-                                        //      {
-                                        //           seg_Check = "NO";
-                                        //           break;
-                                        //      }
-                                        // }
-                                        // if (seg_Check == "GO")
-                                        // {
-                                        //      string check_AF_country = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF";
-                                        //      float MAF_float = 0.0000;
-                                        //      // collect_Segregrating_sites.push_back(line);
-                                        //      for (string AF_check : info)
-                                        //      {
-                                        //           vector<string> split_info;
-                                        //           function.split(split_info, AF_check, "=");
-                                        //           if (split_info[0] == check_AF_country)
-                                        //           {
-                                        //                MAF_float = stof(split_info[1]);
-                                        //                if (MAF_float > 0.5)
-                                        //                {
-                                        //                     MAF_float = 1 - MAF_float;
-                                        //                }
-                                        //                break;
-                                        //           }
-                                        //      }
-                                        //      tot_pairwise_Differences = tot_pairwise_Differences + (MAF_float * (1 - MAF_float) * pow(N_float, 2));
-                                        // }
-                                   }
-                                   else if (pos > end_Co)
-                                   {
-                                        break;
-                                   }
+                                   output << write_Lines[i] << "\n";
+                                   intermediate << gene_Combo << "\n";
                               }
-                              file.close();
+                              // clear prometheus
+                              output.flush();
+                              intermediate.flush();
+                              pro_Fay_Wu.erase();
+                              gene_Collect.clear();
+                              cout << endl;
                          }
                     }
-
-                    int num_segregrating_Sites;
-                    string Fay_Wu_H, Fay_Wu_E;
-                    float pi = 0.0;
-                    int Total_iEi = 0;
-
-                    float theta_L = calc_theta_L(collect_Segregrating_sites, N_float, num_segregrating_Sites, Total_iEi, tot_pairwise_Differences);
-
-                    cout << "Total segregating sites (S)\t: " << num_segregrating_Sites << endl;
-                    cout << endl;
-                    if (num_segregrating_Sites != 0)
+                    if (gene_Collect.size() != 0)
                     {
-                         float S = (float)num_segregrating_Sites;
-                         float theta_squared = (float)(S * (S - 1)) / (pow(an, 2) + bn);
-                         cout << "Theta_squared\t: " << theta_squared << endl;
-                         cout << "Theta_L\t: " << theta_L << endl;
-                         float theta_W = (float)S / an;
-                         cout << "Theta_W\t: " << theta_W << endl;
-                         pi = (float)tot_pairwise_Differences / combinations;
-                         cout << "Average pairwise polymorphisms (pi)\t: " << pi << endl;
+                         // RUN PROMETHEUS for remaining
+                         // launch prometheus
+                         cout << "Prometheus batch intialized" << endl;
+                         cout << "From: " << gene_Collect[0] << endl;
+                         cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
+                              << endl;
+
+                         vector<string> write_Lines = pro_Fay_Wu.collection_Engine(gene_Collect, test);
+                         // print
+                         cout << "System is writing Fay and Wu results" << endl;
+                         for (size_t i = 0; i < write_Lines.size(); i++)
+                         {
+                              if (write_Lines[i] != "")
+                              {
+                                   output << write_Lines[i] << "\n";
+                                   intermediate << gene_Combo << "\n";
+                              }
+                         }
                          cout << endl;
-
-                         float VAR_pi_MINUS_theta_L = (float)(((N_float - 2.0) / (6.0 * (N_float - 1.0))) * theta_W) + ((((18.0 * pow(N_float, 2) * ((3.0 * N_float) + 2.0) * bn_plus1) - ((88.0 * pow(N_float, 3)) + (9.0 * pow(N_float, 2)) - (13.0 * N_float) + 6.0)) / (9.0 * N_float * pow(N_float - 1, 2))) * theta_squared);
-                         //cout << "VAR_pi_MINUS_theta_L: " << VAR_pi_MINUS_theta_L << endl;
-                         float VAR_theta_L_MINUS_theta_W = (float)(((N_float / (2.0 * (N_float - 1.0))) - (1.0 / an)) * theta_W) + (((bn / (pow(an, 2))) + (2.0 * pow((N_float / (N_float - 1.0)), 2) * bn) - ((2.0 * ((N_float * bn) - N_float + 1.0)) / ((N_float - 1.0) * an)) - (((3.0 * N_float) + 1) / (N_float - 1.0))) * theta_squared);
-                         //cout << "VAR_theta_L_MINUS_theta_W: " << VAR_theta_L_MINUS_theta_W << endl;
-
-                         float H = (float)(pi - theta_L) / (sqrt(VAR_pi_MINUS_theta_L));
-                         Fay_Wu_H = to_string(H);
-                         cout << "Fay and Wu's normalized H\t: " << Fay_Wu_H << endl;
-                         float E = (float)(theta_L - theta_W) / (sqrt(VAR_theta_L_MINUS_theta_W));
-                         Fay_Wu_E = to_string(E);
-                         cout << "Fay and Wu's normalized E\t: " << Fay_Wu_E << endl;
-                    }
-                    else
-                    {
-                         cout << "Fay and Wu's H and E\t: "
-                              << "Not Available" << endl;
-                         Fay_Wu_H = "NA";
-                         Fay_Wu_E = "NA";
                     }
 
-                    cout << endl;
-
-                    //Gene_name\tCoordinates\tPi\tS\tTotal_iEi\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E
-                    output << gene_Name << "\t"
-                           << coordinates[0] << ":" << to_string(start_Co) << ":" << to_string(end_Co)
-                           << "\t" << to_string(pi)
-                           << "\t" << to_string(num_segregrating_Sites)
-                           << "\t" << to_string(Total_iEi)
-
-                           << "\t" << Fay_Wu_H
-                           << "\t" << Fay_Wu_E << "\n";
-
-                    intermediate << gene_Combo << "\n";
                     output.flush();
                     intermediate.flush();
+                    pro_Fay_Wu.erase();
+                    gene_Collect.clear();
+               }
+               else
+               {
+                    while (getline(gene_File, gene_Combo))
+                    {
+                         vector<string> split_Data;
+                         function.split(split_Data, gene_Combo, "\t");
+                         string gene_Name = split_Data[0];
+                         cout << "Gene name\t: " << gene_Name << endl;
+                         vector<string> coordinates;
+                         function.split(coordinates, split_Data[1], ":");
+                         int start_Co = stoi(coordinates[1]);
+                         int end_Co = stoi(coordinates[2]);
+                         cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
+
+                         float tot_pairwise_Differences = 0;
+                         vector<string> collect_Segregrating_sites;
+
+                         vector<string> file_List;
+                         cout << endl;
+                         cout << "System is retrieving file(s)" << endl;
+                         if (folder_Index.size() > 1)
+                         {
+                              file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
+                         }
+                         else
+                         {
+                              file_List.push_back(folder_Index[0].second);
+                         }
+                         cout << "System has retrieved all file(s)" << endl;
+                         cout << endl;
+
+                         cout << "System is collecting segregrating site(s)" << endl;
+                         for (string files : file_List)
+                         {
+                              fstream file;
+                              file.open(files, ios::in);
+                              if (file.is_open())
+                              {
+                                   string line;
+                                   getline(file, line); // skip first header line
+                                   while (getline(file, line))
+                                   {
+                                        vector<string> positions;
+                                        function.split_getPos_ONLY(positions, line, "\t");
+                                        int pos = stoi(positions[1]);
+
+                                        if (pos >= start_Co && pos <= end_Co)
+                                        {
+                                             collect_Segregrating_sites.push_back(line);
+
+                                             // string check_0 = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF=0";
+                                             // string seg_Check = "GO";
+                                             // vector<string> info;
+                                             // function.split(info, positions[7], ";");
+                                             // for (string AF_check : info)
+                                             // {
+                                             //      if (AF_check == check_0)
+                                             //      {
+                                             //           seg_Check = "NO";
+                                             //           break;
+                                             //      }
+                                             // }
+                                             // if (seg_Check == "GO")
+                                             // {
+                                             //      string check_AF_country = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF";
+                                             //      float MAF_float = 0.0000;
+                                             //      // collect_Segregrating_sites.push_back(line);
+                                             //      for (string AF_check : info)
+                                             //      {
+                                             //           vector<string> split_info;
+                                             //           function.split(split_info, AF_check, "=");
+                                             //           if (split_info[0] == check_AF_country)
+                                             //           {
+                                             //                MAF_float = stof(split_info[1]);
+                                             //                if (MAF_float > 0.5)
+                                             //                {
+                                             //                     MAF_float = 1 - MAF_float;
+                                             //                }
+                                             //                break;
+                                             //           }
+                                             //      }
+                                             //      tot_pairwise_Differences = tot_pairwise_Differences + (MAF_float * (1 - MAF_float) * pow(N_float, 2));
+                                             // }
+                                        }
+                                        else if (pos > end_Co)
+                                        {
+                                             break;
+                                        }
+                                   }
+                                   file.close();
+                              }
+                         }
+
+                         int num_segregrating_Sites;
+                         string Fay_Wu_H, Fay_Wu_E;
+                         float pi = 0.0;
+                         int Total_iEi = 0;
+
+                         float theta_L = calc_theta_L(collect_Segregrating_sites, N_float, num_segregrating_Sites, Total_iEi, tot_pairwise_Differences);
+
+                         cout << "Total segregating sites (S)\t: " << num_segregrating_Sites << endl;
+                         cout << endl;
+                         if (num_segregrating_Sites != 0)
+                         {
+                              float S = (float)num_segregrating_Sites;
+                              float theta_squared = (float)(S * (S - 1)) / (pow(an, 2) + bn);
+                              cout << "Theta_squared\t: " << theta_squared << endl;
+                              cout << "Theta_L\t: " << theta_L << endl;
+                              float theta_W = (float)S / an;
+                              cout << "Theta_W\t: " << theta_W << endl;
+                              pi = (float)tot_pairwise_Differences / combinations;
+                              cout << "Average pairwise polymorphisms (pi)\t: " << pi << endl;
+                              cout << endl;
+
+                              float VAR_pi_MINUS_theta_L = (float)(((N_float - 2.0) / (6.0 * (N_float - 1.0))) * theta_W) + ((((18.0 * pow(N_float, 2) * ((3.0 * N_float) + 2.0) * bn_plus1) - ((88.0 * pow(N_float, 3)) + (9.0 * pow(N_float, 2)) - (13.0 * N_float) + 6.0)) / (9.0 * N_float * pow(N_float - 1, 2))) * theta_squared);
+                              // cout << "VAR_pi_MINUS_theta_L: " << VAR_pi_MINUS_theta_L << endl;
+                              float VAR_theta_L_MINUS_theta_W = (float)(((N_float / (2.0 * (N_float - 1.0))) - (1.0 / an)) * theta_W) + (((bn / (pow(an, 2))) + (2.0 * pow((N_float / (N_float - 1.0)), 2) * bn) - ((2.0 * ((N_float * bn) - N_float + 1.0)) / ((N_float - 1.0) * an)) - (((3.0 * N_float) + 1) / (N_float - 1.0))) * theta_squared);
+                              // cout << "VAR_theta_L_MINUS_theta_W: " << VAR_theta_L_MINUS_theta_W << endl;
+
+                              float H = (float)(pi - theta_L) / (sqrt(VAR_pi_MINUS_theta_L));
+                              Fay_Wu_H = to_string(H);
+                              cout << "Fay and Wu's normalized H\t: " << Fay_Wu_H << endl;
+                              float E = (float)(theta_L - theta_W) / (sqrt(VAR_theta_L_MINUS_theta_W));
+                              Fay_Wu_E = to_string(E);
+                              cout << "Fay and Wu's normalized E\t: " << Fay_Wu_E << endl;
+                         }
+                         else
+                         {
+                              cout << "Fay and Wu's H and E\t: "
+                                   << "Not Available" << endl;
+                              Fay_Wu_H = "NA";
+                              Fay_Wu_E = "NA";
+                         }
+
+                         cout << endl;
+
+                         // Gene_name\tCoordinates\tPi\tS\tTotal_iEi\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E
+                         output << gene_Name << "\t"
+                                << coordinates[0] << ":" << to_string(start_Co) << ":" << to_string(end_Co)
+                                << "\t" << to_string(pi)
+                                << "\t" << to_string(num_segregrating_Sites)
+                                << "\t" << to_string(Total_iEi)
+
+                                << "\t" << Fay_Wu_H
+                                << "\t" << Fay_Wu_E << "\n";
+
+                         intermediate << gene_Combo << "\n";
+                         output.flush();
+                         intermediate.flush();
+                    }
                }
                output.close();
                intermediate.close();
@@ -373,8 +487,8 @@ __global__ void cuda_theta_L(char *sites, int *index, int num_Segregrating_sites
                AA = REF;
           }
 
-          //printf("AA: %c\n", AA);
-          //printf("\n");
+          // printf("AA: %c\n", AA);
+          // printf("\n");
 
           // printf("%c", sites[i]);
 
@@ -387,7 +501,7 @@ __global__ void cuda_theta_L(char *sites, int *index, int num_Segregrating_sites
                i++;
           }
 
-          //printf("Column 1: %c\n", sites[i]);
+          // printf("Column 1: %c\n", sites[i]);
 
           int ALT_count = 0;
           int REF_count = 0;
@@ -433,7 +547,7 @@ __global__ void cuda_theta_L(char *sites, int *index, int num_Segregrating_sites
                     theta_Partial = MA_count[tid];
                }
 
-               //printf("theta partial: %d\n", theta_Partial);
+               // printf("theta partial: %d\n", theta_Partial);
 
                theta_Partials[tid] = theta_Partial;
           }
@@ -482,13 +596,13 @@ float fay_wu::calc_theta_L(vector<string> &total_Segregrating_sites, float N_tot
           Seg_sites.append(total_Segregrating_sites[i]);
           site_Index[i + 1] = site_Index[i] + total_Segregrating_sites[i].size();
      }
-     //cout << "copy string done" << endl;
-     //cout << "Seg size : " << Seg_sites.size() << endl;
+     // cout << "copy string done" << endl;
+     // cout << "Seg size : " << Seg_sites.size() << endl;
      char *full_Char;
      full_Char = (char *)malloc((Seg_sites.size() + 1) * sizeof(char));
-     //cout << "copy char " << endl;
+     // cout << "copy char " << endl;
      strcpy(full_Char, Seg_sites.c_str());
-     //cout << "copy char done" << endl;
+     // cout << "copy char done" << endl;
      total_Segregrating_sites.clear();
 
      char *cuda_full_Char;
@@ -510,7 +624,7 @@ float fay_wu::calc_theta_L(vector<string> &total_Segregrating_sites, float N_tot
 
      cudaMemcpy(cuda_full_Char, full_Char, (Seg_sites.size() + 1) * sizeof(char), cudaMemcpyHostToDevice);
      cudaMemcpy(cuda_site_Index, site_Index, (num_segregrating_Sites + 1) * sizeof(int), cudaMemcpyHostToDevice);
-     //cout << "GPU" << endl;
+     // cout << "GPU" << endl;
      cuda_theta_L<<<tot_Blocks, tot_ThreadsperBlock>>>(cuda_full_Char, cuda_site_Index, num_segregrating_Sites, cuda_Theta_partials, cuda_VALID_or_NOT, cuda_MA_Count);
      cudaDeviceSynchronize();
 
@@ -525,7 +639,7 @@ float fay_wu::calc_theta_L(vector<string> &total_Segregrating_sites, float N_tot
      cudaFree(cuda_VALID_or_NOT);
      cudaFree(cuda_Theta_partials);
 
-     //replace with CUDA addition
+     // replace with CUDA addition
      real_segregrating_Sites = 0;
      tot_pairwise_Differences = 0;
      int total_iTheta = 0;
@@ -540,13 +654,13 @@ float fay_wu::calc_theta_L(vector<string> &total_Segregrating_sites, float N_tot
                total_iTheta = total_iTheta + Theta_partials[i];
           }
      }
-     //cout << "GPU DONE" << endl;
-     //cout << "total iTheta: " << total_iTheta << endl;
+     // cout << "GPU DONE" << endl;
+     // cout << "total iTheta: " << total_iTheta << endl;
 
      Total_iEi = total_iTheta;
      theta_L = (float)(1 / (N_tot - 1)) * (float)total_iTheta;
 
-     //cout << "Theta_L: " << theta_L << endl;
+     // cout << "Theta_L: " << theta_L << endl;
 
      free(Theta_partials);
      free(MA_Count);

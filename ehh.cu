@@ -540,7 +540,7 @@ void ehh::process_EHH(vector<string> &total_Segregrating_sites, vector<int> &cor
     // int **snp_N_grid;
     char **cuda_snp_N_grid;
 
-    // snp_N_grid = (int **)malloc(num_segregrating_Sites * sizeof(int *));
+    // snp_N_grid = (int **)malloc(num_segregrating_Sites * sizeof(int *));**
     // for (int i = 0; i < num_segregrating_Sites; i++)
     // {
     //     snp_N_grid[i] = (int *)malloc(N * sizeof(int));

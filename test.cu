@@ -28,6 +28,54 @@ test::test()
     // cout << device << endl;
 }
 
+void test::thread_test()
+{
+    cout << "THREADING" << endl;
+    int *x;
+    x = (int *)malloc(5 * sizeof(int));
+    x[0] = 10;
+    pointer_check(x);
+    // for (size_t i = 0; i < 100; i++)
+    // {
+    //     /* code */
+
+    //     vector<thread> threads_vec;
+
+    //     for (int i = 0; i < 10; i++)
+    //     {
+    //         threads_vec.push_back(thread{&test::add_val, this});
+    //     }
+
+    //     for (thread &t : threads_vec)
+    //     {
+    //         if (t.joinable())
+    //         {
+    //             t.join();
+    //         }
+    //     }
+    //     cout << values.size() << endl;
+    //     values.clear();
+    // }
+}
+
+void test::pointer_check(int *x)
+{
+    cout << x[0] << endl;
+}
+
+void test::add_val()
+{
+    // int add = 0;
+    for (size_t i = 0; i < 100; i++)
+    {
+        unique_lock<shared_mutex> ul(g_mutex);
+        // g_mutex.lock();
+        values.insert(i);
+        // g_mutex.unlock();
+    }
+    // cout << thread_Num << " thread : " << add << endl;
+}
+
 __global__ void cuda_hello(int n, float *x, float *y)
 {
     // printf("Yes\n");

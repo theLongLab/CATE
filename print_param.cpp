@@ -35,6 +35,16 @@ void print_param::ingress()
                      << "    \"Output path\":\"test_results\",\n"
                      << "    \"Intermediate path\":\"intermediate\",\n\n";
 
+              output << "    # Prometheus settings\n"
+                     << "    # User is capable of determining the number of gene combinations and number of SNPs to be processed by CATE.\n"
+                     << "    # When setting these parameters be mindful of system hardware availability.\n"
+                     << "    # WARNING: Multi read CAN CAUSE A BOTTLENECK IF HARDWARE DOES NOT SUPPORT IT. NVMe DRIVES CONNECTED VIA PCIe BUS WILL SUPPORT MULTI READ. TYPICAL HDD DRIVES DO NOT.\n"
+                     << "    \"Prometheus activate\":\"Yes\",\n"
+                     << "    \"CPU cores\":10,\n"
+                     << "    \"SNPs per time\":100000,\n"
+                     << "    \"Number of genes\":500,\n"
+                     << "    \"Multi read\":\"No\",\n\n";
+
               output << "    # VCF sample details\n"
                      << "    \"Ploidy\":2,\n\n";
 

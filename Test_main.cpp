@@ -1,5 +1,6 @@
 #include <iostream>
 #include <filesystem>
+#include <algorithm>
 #include <unistd.h>
 #include "test.cuh"
 #include "cudaDevices.cuh"
@@ -49,7 +50,8 @@ int main(int argc, char *argv[])
           else if (function == "--godmode")
           {
                test try_something = test();
-               try_something.run();
+               try_something.thread_test();
+               ;
           }
           else if (function == "--cuda" || function == "-c")
           {
@@ -160,8 +162,20 @@ int main(int argc, char *argv[])
                               {
                                    gene_List = properties.where("Universal gene list");
                               }
-                              tajima tajimasD = tajima(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
-                              tajimasD.ingress();
+
+                              string prometheus_Activate = properties.where("Prometheus activate");
+                              transform(prometheus_Activate.begin(), prometheus_Activate.end(), prometheus_Activate.begin(), ::toupper);
+
+                              if (prometheus_Activate != "YES")
+                              {
+                                   tajima tajimasD = tajima(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                                   tajimasD.ingress();
+                              }
+                              else
+                              {
+                                   tajima tajimasD_Prometheus = tajima(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
+                                   tajimasD_Prometheus.ingress();
+                              }
 
                               cout << endl
                                    << "CUDA powered Tajima's D calculator has been completed." << endl;
@@ -174,8 +188,20 @@ int main(int argc, char *argv[])
                               {
                                    gene_List = properties.where("Universal gene list");
                               }
-                              fu_li fuli = fu_li(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
-                              fuli.ingress();
+
+                              string prometheus_Activate = properties.where("Prometheus activate");
+                              transform(prometheus_Activate.begin(), prometheus_Activate.end(), prometheus_Activate.begin(), ::toupper);
+
+                              if (prometheus_Activate != "YES")
+                              {
+                                   fu_li fuli = fu_li(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                                   fuli.ingress();
+                              }
+                              else
+                              {
+                                   fu_li fuli_Prometheus = fu_li(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
+                                   fuli_Prometheus.ingress();
+                              }
 
                               cout << "CUDA powered Fu and Li's D, D*, F and F* calculator has been completed." << endl;
                          }
@@ -187,8 +213,20 @@ int main(int argc, char *argv[])
                               {
                                    gene_List = properties.where("Universal gene list");
                               }
-                              fay_wu faywu = fay_wu(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
-                              faywu.ingress();
+
+                              string prometheus_Activate = properties.where("Prometheus activate");
+                              transform(prometheus_Activate.begin(), prometheus_Activate.end(), prometheus_Activate.begin(), ::toupper);
+
+                              if (prometheus_Activate != "YES")
+                              {
+                                   fay_wu faywu = fay_wu(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                                   faywu.ingress();
+                              }
+                              else
+                              {
+                                   fay_wu faywu_Prometheus = fay_wu(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
+                                   faywu_Prometheus.ingress();
+                              }
 
                               cout << "CUDA powered Fay and Wu's normalized H and E calculator has been completed." << endl;
                          }
@@ -199,8 +237,20 @@ int main(int argc, char *argv[])
                               {
                                    gene_List = properties.where("Universal gene list");
                               }
-                              neutral neutrality = neutral(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
-                              neutrality.ingress();
+
+                              string prometheus_Activate = properties.where("Prometheus activate");
+                              transform(prometheus_Activate.begin(), prometheus_Activate.end(), prometheus_Activate.begin(), ::toupper);
+
+                              if (prometheus_Activate != "YES")
+                              {
+                                   neutral neutrality = neutral(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                                   neutrality.ingress();
+                              }
+                              else
+                              {
+                                   neutral neutrality_Prometheus = neutral(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
+                                   neutrality_Prometheus.ingress();
+                              }
 
                               cout << "CUDA powered complete neutrality test calculator has completed" << endl;
                          }
@@ -300,17 +350,16 @@ int main(int argc, char *argv[])
 void print_Cate()
 {
 
-cout<<"________/\\\\\\\\\\\\\\\\\\_____/\\\\\\\\\\\\\\\\\\_____/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\__/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\_"<<endl;       
-cout<<" _____/\\\\\\////////____/\\\\\\\\\\\\\\\\\\\\\\\\\\__\\///////\\\\\\/////__\\/\\\\\\///////////__"<<endl;       
-cout<<"  ___/\\\\\\/____________/\\\\\\/////////\\\\\\_______\\/\\\\\\_______\\/\\\\\\_____________"<<endl;      
-cout<<"   __/\\\\\\_____________\\/\\\\\\_______\\/\\\\\\_______\\/\\\\\\_______\\/\\\\\\\\\\\\\\\\\\\\\\_____"<<endl;     
-cout<<"    _\\/\\\\\\_____________\\/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\_______\\/\\\\\\_______\\/\\\\\\///////______"<<endl;    
-cout<<"     _\\//\\\\\\____________\\/\\\\\\/////////\\\\\\_______\\/\\\\\\_______\\/\\\\\\_____________"<<endl;   
-cout<<"      __\\///\\\\\\__________\\/\\\\\\_______\\/\\\\\\_______\\/\\\\\\_______\\/\\\\\\_____________"<<endl;  
-cout<<"       ____\\////\\\\\\\\\\\\\\\\\\_\\/\\\\\\_______\\/\\\\\\_______\\/\\\\\\_______\\/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\_"<<endl; 
-cout<<"        _______\\/////////__\\///________\\///________\\///________\\///////////////__"<<endl;
-cout<<endl;
-
+     cout << "   /\\\\\\\\\\\\\\\\\\     /\\\\\\\\\\\\\\\\\\     /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\  /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ " << endl;
+     cout << " /\\\\\\////////    /\\\\\\\\\\\\\\\\\\\\\\\\\\  \\///////\\\\\\/////  \\/\\\\\\///////////  " << endl;
+     cout << "/\\\\\\/            /\\\\\\/////////\\\\\\       \\/\\\\\\       \\/\\\\\\             " << endl;
+     cout << "/\\\\\\             \\/\\\\\\       \\/\\\\\\       \\/\\\\\\       \\/\\\\\\\\\\\\\\\\\\\\\\     " << endl;
+     cout << "\\/\\\\\\             \\/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\       \\/\\\\\\       \\/\\\\\\///////      " << endl;
+     cout << " \\//\\\\\\            \\/\\\\\\/////////\\\\\\       \\/\\\\\\       \\/\\\\\\             " << endl;
+     cout << "   \\///\\\\\\          \\/\\\\\\       \\/\\\\\\       \\/\\\\\\       \\/\\\\\\             " << endl;
+     cout << "      \\////\\\\\\\\\\\\\\\\\\ \\/\\\\\\       \\/\\\\\\       \\/\\\\\\       \\/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ " << endl;
+     cout << "          \\/////////  \\///        \\///        \\///        \\///////////////  " << endl;
+     cout << endl;
 
      // cout << "   0000000    00000   0000000   0000000" << endl;
      // cout << "  0000       00   00    000     00" << endl;
@@ -331,6 +380,14 @@ void print_HELP()
           << "Excecution format: \"[--function or -f] properties_file.json\"" << endl
           << endl
           << "** Available functions are (not CaSe sensitive) **" << endl
+          << endl
+          << "MODES:"
+          << endl
+          << "A high performance and fully customizable mode called PROMETHEUS is available." << endl
+          << "PROMETHEUS is available for the three neutrality tests (Tajima's D, Fay and Wu tests and Fu and Li tests)." << endl
+          << "PROMETHEUS is designed for power users on (High Performance Computing) HPC systems." << endl
+          << "PROMETHEUS is activated via the parameters file. All other protocols of test execution remains the same." << endl
+          << "PROMETHEUS uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << endl
           << "TOOLS:"
           << endl
