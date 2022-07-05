@@ -9,6 +9,7 @@
     "Intermediate path":"intermediate",
 
     # Prometheus settings
+    # Prometheus is a high performance mode in CATE. It is greedy on hardware resources but has extremely fast processing speeds.
     # User is capable of determining the number of gene combinations and number of SNPs to be processed by CATE.
     # When setting these parameters be mindful of system hardware availability.
     # WARNING: Multi read CAN CAUSE A BOTTLENECK IF HARDWARE DOES NOT SUPPORT IT. NVMe DRIVES CONNECTED VIA PCIe BUS WILL SUPPORT MULTI READ. TYPICAL HDD DRIVES DO NOT.

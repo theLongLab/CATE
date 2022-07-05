@@ -69,12 +69,12 @@ private:
 
     vector<string> write_Lines;
 
-    // vector<string> concat_Segs;
-    // vector<int *> all_site_Index;
+    vector<string> concat_Segs;
+    vector<int *> all_site_Index;
 
-    vector<int *> all_end_Index;
-    vector<char **> all_segs_Matrix;
-    vector<int> max_Track;
+    // vector<int *> all_end_Index;
+    // vector<char **> all_segs_Matrix;
+    // vector<int> max_Track;
 
 public:
     // TAJIMA
@@ -107,12 +107,12 @@ public:
     void process_Fay_Wu();
     void process_Neutrality();
 
-    // void seg_Concat(int round_ID, int start_Seg, int stop_Seg);
-    void seg_Concat_New(int round_ID, int start_Seg, int stop_Seg);
+    void seg_Concat(int round_ID, int start_Seg, int stop_Seg);
+    // void seg_Concat_New(int round_ID, int start_Seg, int stop_Seg);
     void seg_Search_catch_point(int gene_ID);
     void seg_Search_forward(int gene_ID);
     void seg_Search_backward(int gene_ID);
-    void seg_Indexer(int start_Seg, int stop_Seg, char **full_Char, int *VALID_or_NOT, int *pos_start_Index, int *pos_end_Index, int start);
+    void seg_Indexer(int start_Seg, int stop_Seg, char *full_Char, int *VALID_or_NOT, int *pos_start_Index, int *pos_end_Index, int start);
 
     void calc_Tajima_Segs(int gene_ID, int *MA_Count);
     void calc_Fu_Li_Segs(int gene_ID, int *MA_Count, int *ne, int *ns);

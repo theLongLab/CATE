@@ -90,7 +90,7 @@ void prometheus::set_Values(vector<pair<string, string>> folder_Index, int tot_B
     this->CPU_cores = CPU_cores - 1;
     this->SNPs_per_Run = SNPs_per_Run;
 
-    cout << "Processing on " << this->CPU_cores << " CPU cores" << endl;
+    cout << "Processing on " << this->CPU_cores + 1 << " CPU cores" << endl;
     cout << "Processing " << number_of_genes << " genes at a time" << endl;
     cout << "Processing " << this->SNPs_per_Run << " SNPs at a time" << endl;
     if (this->Multi_read == "YES")
@@ -268,16 +268,16 @@ vector<string> prometheus::collection_Engine(vector<string> &gene_Collect, strin
 
     for (int rounds = 0; rounds < start_stop.size(); rounds++)
     {
-        // concat_Segs.push_back("");
+        concat_Segs.push_back("");
         int *row;
-        // all_site_Index.push_back(row);
+        all_site_Index.push_back(row);
 
-        all_end_Index.push_back(row);
-        char **matrix;
-        all_segs_Matrix.push_back(matrix);
-        max_Track.push_back(0);
+        // all_end_Index.push_back(row);
+        // char **matrix;
+        // all_segs_Matrix.push_back(matrix);
+        // max_Track.push_back(0);
 
-        threads_vec.push_back(thread{&prometheus::seg_Concat_New, this, rounds, start_stop[rounds].first, start_stop[rounds].second});
+        threads_vec.push_back(thread{&prometheus::seg_Concat, this, rounds, start_stop[rounds].first, start_stop[rounds].second});
     }
 
     for (thread &t : threads_vec)
@@ -314,22 +314,21 @@ vector<string> prometheus::collection_Engine(vector<string> &gene_Collect, strin
     return write_Lines;
 }
 
-__global__ void cuda_neutrality_Prometheus(char **segs_Matrix, int *end_index, int num_Segregrating_sites, int *theta_Partials, int *VALID_or_NOT, int *MA_count, int *ne, int *ns, int *cuda_pos_start_Index, int *cuda_pos_end_Index, int start)
+__global__ void cuda_neutrality_Prometheus(char *sites, int *index, int num_Segregrating_sites, int *theta_Partials, int *VALID_or_NOT, int *MA_count, int *ne, int *ns, int *cuda_pos_start_Index, int *cuda_pos_end_Index, int start)
 {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
     while (tid < num_Segregrating_sites)
     {
         int column = 0;
-        // int site_Start = index[tid];
-        int site_Start = 0;
-        int site_End = end_index[tid];
+        int site_Start = index[tid];
+        int site_End = index[tid + 1];
 
         int i = site_Start;
 
         while (column < 1)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -340,7 +339,7 @@ __global__ void cuda_neutrality_Prometheus(char **segs_Matrix, int *end_index, i
         cuda_pos_start_Index[tid] = i;
         while (column < 2)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -353,39 +352,39 @@ __global__ void cuda_neutrality_Prometheus(char **segs_Matrix, int *end_index, i
         char REF = 'N';
         while (column < 3)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
             i++;
         }
 
-        if (segs_Matrix[tid][i] >= 97)
+        if (sites[i] >= 97)
         {
-            REF = segs_Matrix[tid][i] - 32;
+            REF = sites[i] - 32;
         }
         else
         {
-            REF = segs_Matrix[tid][i];
+            REF = sites[i];
         }
 
         char ALT = 'N';
         while (column < 4)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
             i++;
         }
 
-        if (segs_Matrix[tid][i] >= 97)
+        if (sites[i] >= 97)
         {
-            ALT = segs_Matrix[tid][i] - 32;
+            ALT = sites[i] - 32;
         }
         else
         {
-            ALT = segs_Matrix[tid][i];
+            ALT = sites[i];
         }
 
         // printf("REF: %c", REF);
@@ -395,7 +394,7 @@ __global__ void cuda_neutrality_Prometheus(char **segs_Matrix, int *end_index, i
 
         while (column < 7)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -406,17 +405,17 @@ __global__ void cuda_neutrality_Prometheus(char **segs_Matrix, int *end_index, i
 
         while (column < 8)
         {
-            if ((segs_Matrix[tid][i] == 'A' && segs_Matrix[tid][i + 1] == 'A' && segs_Matrix[tid][i + 2] == '=') || (segs_Matrix[tid][i] == 'a' && segs_Matrix[tid][i + 1] == 'a' && segs_Matrix[tid][i + 2] == '='))
+            if ((sites[i] == 'A' && sites[i + 1] == 'A' && sites[i + 2] == '=') || (sites[i] == 'a' && sites[i + 1] == 'a' && sites[i + 2] == '='))
             {
                 char CHECK = 'N';
 
-                if (segs_Matrix[tid][i + 3] >= 97)
+                if (sites[i + 3] >= 97)
                 {
-                    CHECK = segs_Matrix[tid][i + 3] - 32;
+                    CHECK = sites[i + 3] - 32;
                 }
                 else
                 {
-                    CHECK = segs_Matrix[tid][i + 3];
+                    CHECK = sites[i + 3];
                 }
 
                 if (CHECK == 'A' || CHECK == 'T' || CHECK == 'G' || CHECK == 'C')
@@ -425,7 +424,7 @@ __global__ void cuda_neutrality_Prometheus(char **segs_Matrix, int *end_index, i
                 }
             }
 
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -439,7 +438,7 @@ __global__ void cuda_neutrality_Prometheus(char **segs_Matrix, int *end_index, i
 
         while (column < 9)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -450,11 +449,11 @@ __global__ void cuda_neutrality_Prometheus(char **segs_Matrix, int *end_index, i
         int REF_count = 0;
         while (i < site_End)
         {
-            if (segs_Matrix[tid][i] == '1')
+            if (sites[i] == '1')
             {
                 ALT_count = ALT_count + 1;
             }
-            else if (segs_Matrix[tid][i] == '0')
+            else if (sites[i] == '0')
             {
                 REF_count = REF_count + 1;
             }
@@ -536,33 +535,24 @@ void prometheus::process_Neutrality()
 
     for (int rounds = 0; rounds < start_stop.size(); rounds++)
     {
+        string Seg_sites = concat_Segs[rounds];
+        int *site_Index = all_site_Index[rounds];
+
         int start = start_stop[rounds].first;
         int stop = start_stop[rounds].second;
 
         int total_Segs = stop - start;
 
-        char **cuda_seg_Matrix;
-        cudaMallocManaged(&cuda_seg_Matrix, total_Segs * max_Track[rounds] * sizeof(char));
-        char **tmp_2 = (char **)malloc(total_Segs * sizeof(tmp_2[0]));
-        for (size_t i = 0; i < total_Segs; i++)
-        {
-            cudaMalloc((void **)&tmp_2[i], max_Track[rounds] * sizeof(tmp_2[0][0]));
-        }
-        cudaMemcpy(cuda_seg_Matrix, tmp_2, total_Segs * sizeof(char *), cudaMemcpyHostToDevice);
+        char *full_Char;
+        full_Char = (char *)malloc((Seg_sites.size() + 1) * sizeof(char));
+        strcpy(full_Char, Seg_sites.c_str());
 
-        char **segs_Matrix = all_segs_Matrix[rounds];
-
-        for (size_t i = 0; i < total_Segs; i++)
-        {
-            cudaMemcpy(tmp_2[i], segs_Matrix[i], max_Track[rounds] * sizeof(cuda_seg_Matrix[0][0]), cudaMemcpyHostToDevice);
-        }
-
-        free(tmp_2);
-
-        int *end_Index = all_end_Index[rounds];
-        int *cuda_end_Index;
-        cudaMallocManaged(&cuda_end_Index, total_Segs * sizeof(int));
-        cudaMemcpy(cuda_end_Index, end_Index, total_Segs * sizeof(int), cudaMemcpyHostToDevice);
+        char *cuda_full_Char;
+        cudaMallocManaged(&cuda_full_Char, (Seg_sites.size() + 1) * sizeof(char));
+        int *cuda_site_Index;
+        cudaMallocManaged(&cuda_site_Index, (total_Segs + 1) * sizeof(int));
+        cudaMemcpy(cuda_full_Char, full_Char, (Seg_sites.size() + 1) * sizeof(char), cudaMemcpyHostToDevice);
+        cudaMemcpy(cuda_site_Index, site_Index, (total_Segs + 1) * sizeof(int), cudaMemcpyHostToDevice);
 
         int *cuda_VALID_or_NOT, *VALID_or_NOT;
         cudaMallocManaged(&cuda_VALID_or_NOT, total_Segs * sizeof(int));
@@ -574,7 +564,7 @@ void prometheus::process_Neutrality()
         pos_start_Index = (int *)malloc(total_Segs * sizeof(int));
         pos_end_Index = (int *)malloc(total_Segs * sizeof(int));
 
-        cuda_neutrality_Prometheus<<<tot_Blocks, tot_ThreadsperBlock>>>(cuda_seg_Matrix, cuda_end_Index, total_Segs, cuda_Theta_partials, cuda_VALID_or_NOT, cuda_MA_Count, ne_CUDA, ns_CUDA, cuda_pos_start_Index, cuda_pos_end_Index, start);
+        cuda_neutrality_Prometheus<<<tot_Blocks, tot_ThreadsperBlock>>>(cuda_full_Char, cuda_site_Index, total_Segs, cuda_Theta_partials, cuda_VALID_or_NOT, cuda_MA_Count, ne_CUDA, ns_CUDA, cuda_pos_start_Index, cuda_pos_end_Index, start);
         cudaError_t err = cudaGetLastError();
 
         if (err != cudaSuccess)
@@ -589,8 +579,8 @@ void prometheus::process_Neutrality()
         cudaMemcpy(pos_start_Index, cuda_pos_start_Index, total_Segs * sizeof(int), cudaMemcpyDeviceToHost);
         cudaMemcpy(pos_end_Index, cuda_pos_end_Index, total_Segs * sizeof(int), cudaMemcpyDeviceToHost);
 
-        cudaFree(cuda_end_Index);
-        cudaFree(cuda_seg_Matrix);
+        cudaFree(cuda_site_Index);
+        cudaFree(cuda_full_Char);
         cudaFree(cuda_VALID_or_NOT);
         cudaFree(cuda_pos_start_Index);
         cudaFree(cuda_pos_end_Index);
@@ -605,7 +595,7 @@ void prometheus::process_Neutrality()
             int start_Seg = core_ID * segs_per_Thread;
             int stop_Seg = start_Seg + segs_per_Thread;
 
-            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, segs_Matrix, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
+            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, full_Char, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
         }
 
         if (remainder != 0)
@@ -613,7 +603,7 @@ void prometheus::process_Neutrality()
             int start_Seg = total_Segs - remainder;
             int stop_Seg = total_Segs;
 
-            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, segs_Matrix, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
+            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, full_Char, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
         }
 
         for (thread &t : threads_vec)
@@ -626,8 +616,8 @@ void prometheus::process_Neutrality()
 
         threads_vec.clear();
 
-        free(end_Index);
-        free(segs_Matrix);
+        free(full_Char);
+        free(site_Index);
         free(VALID_or_NOT);
         free(pos_start_Index);
         free(pos_end_Index);
@@ -805,22 +795,21 @@ void prometheus::calc_Neutrality_Segs(int gene_ID, int *MA_Count, int *ne, int *
     write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
 }
 
-__global__ void cuda_fay_wu_Prometheus(char **segs_Matrix, int *end_index, int num_Segregrating_sites, int *theta_Partials, int *VALID_or_NOT, int *MA_count, int *cuda_pos_start_Index, int *cuda_pos_end_Index, int start)
+__global__ void cuda_fay_wu_Prometheus(char *sites, int *index, int num_Segregrating_sites, int *theta_Partials, int *VALID_or_NOT, int *MA_count, int *cuda_pos_start_Index, int *cuda_pos_end_Index, int start)
 {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
     while (tid < num_Segregrating_sites)
     {
         int column = 0;
-        // int site_Start = index[tid];
-        int site_Start = 0;
-        int site_End = end_index[tid];
+        int site_Start = index[tid];
+        int site_End = index[tid + 1];
 
         int i = site_Start;
 
         while (column < 1)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -831,7 +820,7 @@ __global__ void cuda_fay_wu_Prometheus(char **segs_Matrix, int *end_index, int n
         cuda_pos_start_Index[tid] = i;
         while (column < 2)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -844,44 +833,44 @@ __global__ void cuda_fay_wu_Prometheus(char **segs_Matrix, int *end_index, int n
         char REF = 'N';
         while (column < 3)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
             i++;
         }
 
-        if (segs_Matrix[tid][i] >= 97)
+        if (sites[i] >= 97)
         {
-            REF = segs_Matrix[tid][i] - 32;
+            REF = sites[i] - 32;
         }
         else
         {
-            REF = segs_Matrix[tid][i];
+            REF = sites[i];
         }
 
         char ALT = 'N';
         while (column < 4)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
             i++;
         }
 
-        if (segs_Matrix[tid][i] >= 97)
+        if (sites[i] >= 97)
         {
-            ALT = segs_Matrix[tid][i] - 32;
+            ALT = sites[i] - 32;
         }
         else
         {
-            ALT = segs_Matrix[tid][i];
+            ALT = sites[i];
         }
 
         while (column < 7)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -892,17 +881,17 @@ __global__ void cuda_fay_wu_Prometheus(char **segs_Matrix, int *end_index, int n
 
         while (column < 8)
         {
-            if ((segs_Matrix[tid][i] == 'A' && segs_Matrix[tid][i + 1] == 'A' && segs_Matrix[tid][i + 2] == '=') || (segs_Matrix[tid][i] == 'a' && segs_Matrix[tid][i + 1] == 'a' && segs_Matrix[tid][i + 2] == '='))
+            if ((sites[i] == 'A' && sites[i + 1] == 'A' && sites[i + 2] == '=') || (sites[i] == 'a' && sites[i + 1] == 'a' && sites[i + 2] == '='))
             {
                 char CHECK = 'N';
 
-                if (segs_Matrix[tid][i + 3] >= 97)
+                if (sites[i + 3] >= 97)
                 {
-                    CHECK = segs_Matrix[tid][i + 3] - 32;
+                    CHECK = sites[i + 3] - 32;
                 }
                 else
                 {
-                    CHECK = segs_Matrix[tid][i + 3];
+                    CHECK = sites[i + 3];
                 }
 
                 if (CHECK == 'A' || CHECK == 'T' || CHECK == 'G' || CHECK == 'C')
@@ -911,7 +900,7 @@ __global__ void cuda_fay_wu_Prometheus(char **segs_Matrix, int *end_index, int n
                 }
             }
 
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -925,7 +914,7 @@ __global__ void cuda_fay_wu_Prometheus(char **segs_Matrix, int *end_index, int n
 
         while (column < 9)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -936,11 +925,11 @@ __global__ void cuda_fay_wu_Prometheus(char **segs_Matrix, int *end_index, int n
         int REF_count = 0;
         while (i < site_End)
         {
-            if (segs_Matrix[tid][i] == '1')
+            if (sites[i] == '1')
             {
                 ALT_count = ALT_count + 1;
             }
-            else if (segs_Matrix[tid][i] == '0')
+            else if (sites[i] == '0')
             {
                 REF_count = REF_count + 1;
             }
@@ -997,33 +986,24 @@ void prometheus::process_Fay_Wu()
 
     for (int rounds = 0; rounds < start_stop.size(); rounds++)
     {
+        string Seg_sites = concat_Segs[rounds];
+        int *site_Index = all_site_Index[rounds];
+
         int start = start_stop[rounds].first;
         int stop = start_stop[rounds].second;
 
         int total_Segs = stop - start;
 
-        char **cuda_seg_Matrix;
-        cudaMallocManaged(&cuda_seg_Matrix, total_Segs * max_Track[rounds] * sizeof(char));
-        char **tmp_2 = (char **)malloc(total_Segs * sizeof(tmp_2[0]));
-        for (size_t i = 0; i < total_Segs; i++)
-        {
-            cudaMalloc((void **)&tmp_2[i], max_Track[rounds] * sizeof(tmp_2[0][0]));
-        }
-        cudaMemcpy(cuda_seg_Matrix, tmp_2, total_Segs * sizeof(char *), cudaMemcpyHostToDevice);
+        char *full_Char;
+        full_Char = (char *)malloc((Seg_sites.size() + 1) * sizeof(char));
+        strcpy(full_Char, Seg_sites.c_str());
 
-        char **segs_Matrix = all_segs_Matrix[rounds];
-
-        for (size_t i = 0; i < total_Segs; i++)
-        {
-            cudaMemcpy(tmp_2[i], segs_Matrix[i], max_Track[rounds] * sizeof(cuda_seg_Matrix[0][0]), cudaMemcpyHostToDevice);
-        }
-
-        free(tmp_2);
-
-        int *end_Index = all_end_Index[rounds];
-        int *cuda_end_Index;
-        cudaMallocManaged(&cuda_end_Index, total_Segs * sizeof(int));
-        cudaMemcpy(cuda_end_Index, end_Index, total_Segs * sizeof(int), cudaMemcpyHostToDevice);
+        char *cuda_full_Char;
+        cudaMallocManaged(&cuda_full_Char, (Seg_sites.size() + 1) * sizeof(char));
+        int *cuda_site_Index;
+        cudaMallocManaged(&cuda_site_Index, (total_Segs + 1) * sizeof(int));
+        cudaMemcpy(cuda_full_Char, full_Char, (Seg_sites.size() + 1) * sizeof(char), cudaMemcpyHostToDevice);
+        cudaMemcpy(cuda_site_Index, site_Index, (total_Segs + 1) * sizeof(int), cudaMemcpyHostToDevice);
 
         int *cuda_VALID_or_NOT, *VALID_or_NOT;
         cudaMallocManaged(&cuda_VALID_or_NOT, total_Segs * sizeof(int));
@@ -1035,7 +1015,7 @@ void prometheus::process_Fay_Wu()
         pos_start_Index = (int *)malloc(total_Segs * sizeof(int));
         pos_end_Index = (int *)malloc(total_Segs * sizeof(int));
 
-        cuda_fay_wu_Prometheus<<<tot_Blocks, tot_ThreadsperBlock>>>(cuda_seg_Matrix, cuda_end_Index, total_Segs, cuda_Theta_partials, cuda_VALID_or_NOT, cuda_MA_Count, cuda_pos_start_Index, cuda_pos_end_Index, start);
+        cuda_fay_wu_Prometheus<<<tot_Blocks, tot_ThreadsperBlock>>>(cuda_full_Char, cuda_site_Index, total_Segs, cuda_Theta_partials, cuda_VALID_or_NOT, cuda_MA_Count, cuda_pos_start_Index, cuda_pos_end_Index, start);
         cudaError_t err = cudaGetLastError();
 
         if (err != cudaSuccess)
@@ -1050,8 +1030,8 @@ void prometheus::process_Fay_Wu()
         cudaMemcpy(pos_start_Index, cuda_pos_start_Index, total_Segs * sizeof(int), cudaMemcpyDeviceToHost);
         cudaMemcpy(pos_end_Index, cuda_pos_end_Index, total_Segs * sizeof(int), cudaMemcpyDeviceToHost);
 
-        cudaFree(cuda_end_Index);
-        cudaFree(cuda_seg_Matrix);
+        cudaFree(cuda_site_Index);
+        cudaFree(cuda_full_Char);
         cudaFree(cuda_VALID_or_NOT);
         cudaFree(cuda_pos_start_Index);
         cudaFree(cuda_pos_end_Index);
@@ -1066,7 +1046,7 @@ void prometheus::process_Fay_Wu()
             int start_Seg = core_ID * segs_per_Thread;
             int stop_Seg = start_Seg + segs_per_Thread;
 
-            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, segs_Matrix, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
+            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, full_Char, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
         }
 
         if (remainder != 0)
@@ -1074,7 +1054,7 @@ void prometheus::process_Fay_Wu()
             int start_Seg = total_Segs - remainder;
             int stop_Seg = total_Segs;
 
-            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, segs_Matrix, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
+            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, full_Char, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
         }
 
         for (thread &t : threads_vec)
@@ -1087,8 +1067,8 @@ void prometheus::process_Fay_Wu()
 
         threads_vec.clear();
 
-        free(end_Index);
-        free(segs_Matrix);
+        free(full_Char);
+        free(site_Index);
         free(VALID_or_NOT);
         free(pos_start_Index);
         free(pos_end_Index);
@@ -1226,22 +1206,21 @@ void prometheus::calc_Fay_Wu_Segs(int gene_ID, int *MA_Count, int *Theta_partial
     write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
 }
 
-__global__ void cuda_fu_li_Prometheus(char **segs_Matrix, int *end_index, int tot_Segregrating_sites, int *VALID_or_NOT, int *MA_count, int *ne, int *ns, int *cuda_pos_start_Index, int *cuda_pos_end_Index, int start)
+__global__ void cuda_fu_li_Prometheus(char *sites, int *index, int tot_Segregrating_sites, int *VALID_or_NOT, int *MA_count, int *ne, int *ns, int *cuda_pos_start_Index, int *cuda_pos_end_Index, int start)
 {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
     while (tid < tot_Segregrating_sites)
     {
         int column = 0;
-        // int site_Start = index[tid];
-        int site_Start = 0;
-        int site_End = end_index[tid];
+        int site_Start = index[tid];
+        int site_End = index[tid + 1];
 
         int i = site_Start;
 
         while (column < 1)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -1252,7 +1231,7 @@ __global__ void cuda_fu_li_Prometheus(char **segs_Matrix, int *end_index, int to
         cuda_pos_start_Index[tid] = i;
         while (column < 2)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -1265,44 +1244,44 @@ __global__ void cuda_fu_li_Prometheus(char **segs_Matrix, int *end_index, int to
         char REF = 'N';
         while (column < 3)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
             i++;
         }
 
-        if (segs_Matrix[tid][i] >= 97)
+        if (sites[i] >= 97)
         {
-            REF = segs_Matrix[tid][i] - 32;
+            REF = sites[i] - 32;
         }
         else
         {
-            REF = segs_Matrix[tid][i];
+            REF = sites[i];
         }
 
         char ALT = 'N';
         while (column < 4)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
             i++;
         }
 
-        if (segs_Matrix[tid][i] >= 97)
+        if (sites[i] >= 97)
         {
-            ALT = segs_Matrix[tid][i] - 32;
+            ALT = sites[i] - 32;
         }
         else
         {
-            ALT = segs_Matrix[tid][i];
+            ALT = sites[i];
         }
 
         while (column < 7)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -1313,17 +1292,17 @@ __global__ void cuda_fu_li_Prometheus(char **segs_Matrix, int *end_index, int to
 
         while (column < 8)
         {
-            if ((segs_Matrix[tid][i] == 'A' && segs_Matrix[tid][i + 1] == 'A' && segs_Matrix[tid][i + 2] == '=') || (segs_Matrix[tid][i] == 'a' && segs_Matrix[tid][i + 1] == 'a' && segs_Matrix[tid][i + 2] == '='))
+            if ((sites[i] == 'A' && sites[i + 1] == 'A' && sites[i + 2] == '=') || (sites[i] == 'a' && sites[i + 1] == 'a' && sites[i + 2] == '='))
             {
                 char CHECK = 'N';
 
-                if (segs_Matrix[tid][i + 3] >= 97)
+                if (sites[i + 3] >= 97)
                 {
-                    CHECK = segs_Matrix[tid][i + 3] - 32;
+                    CHECK = sites[i + 3] - 32;
                 }
                 else
                 {
-                    CHECK = segs_Matrix[tid][i + 3];
+                    CHECK = sites[i + 3];
                 }
 
                 if (CHECK == 'A' || CHECK == 'T' || CHECK == 'G' || CHECK == 'C')
@@ -1332,7 +1311,7 @@ __global__ void cuda_fu_li_Prometheus(char **segs_Matrix, int *end_index, int to
                 }
             }
 
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -1346,7 +1325,7 @@ __global__ void cuda_fu_li_Prometheus(char **segs_Matrix, int *end_index, int to
 
         while (column < 9)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -1357,11 +1336,11 @@ __global__ void cuda_fu_li_Prometheus(char **segs_Matrix, int *end_index, int to
         int REF_count = 0;
         while (i < site_End)
         {
-            if (segs_Matrix[tid][i] == '1')
+            if (sites[i] == '1')
             {
                 ALT_count = ALT_count + 1;
             }
-            else if (segs_Matrix[tid][i] == '0')
+            else if (sites[i] == '0')
             {
                 REF_count = REF_count + 1;
             }
@@ -1433,49 +1412,25 @@ void prometheus::process_Fu_Li()
 
     for (int rounds = 0; rounds < start_stop.size(); rounds++)
     {
+        string Seg_sites = concat_Segs[rounds];
+        // cout << Seg_sites << endl;
+        int *site_Index = all_site_Index[rounds];
 
         int start = start_stop[rounds].first;
         int stop = start_stop[rounds].second;
 
         int total_Segs = stop - start;
 
-        // string Seg_sites = concat_Segs[rounds];
-        // // cout << Seg_sites << endl;
-        // int *site_Index = all_site_Index[rounds];
+        char *full_Char;
+        full_Char = (char *)malloc((Seg_sites.size() + 1) * sizeof(char));
+        strcpy(full_Char, Seg_sites.c_str());
 
-        // char *full_Char;
-        // full_Char = (char *)malloc((Seg_sites.size() + 1) * sizeof(char));
-        // strcpy(full_Char, Seg_sites.c_str());
-
-        // char *cuda_full_Char;
-        // cudaMallocManaged(&cuda_full_Char, (Seg_sites.size() + 1) * sizeof(char));
-        // int *cuda_site_Index;
-        // cudaMallocManaged(&cuda_site_Index, (total_Segs + 1) * sizeof(int));
-        // cudaMemcpy(cuda_full_Char, full_Char, (Seg_sites.size() + 1) * sizeof(char), cudaMemcpyHostToDevice);
-        // cudaMemcpy(cuda_site_Index, site_Index, (total_Segs + 1) * sizeof(int), cudaMemcpyHostToDevice);
-
-        char **cuda_seg_Matrix;
-        cudaMallocManaged(&cuda_seg_Matrix, total_Segs * max_Track[rounds] * sizeof(char));
-        char **tmp_2 = (char **)malloc(total_Segs * sizeof(tmp_2[0]));
-        for (size_t i = 0; i < total_Segs; i++)
-        {
-            cudaMalloc((void **)&tmp_2[i], max_Track[rounds] * sizeof(tmp_2[0][0]));
-        }
-        cudaMemcpy(cuda_seg_Matrix, tmp_2, total_Segs * sizeof(char *), cudaMemcpyHostToDevice);
-
-        char **segs_Matrix = all_segs_Matrix[rounds];
-
-        for (size_t i = 0; i < total_Segs; i++)
-        {
-            cudaMemcpy(tmp_2[i], segs_Matrix[i], max_Track[rounds] * sizeof(cuda_seg_Matrix[0][0]), cudaMemcpyHostToDevice);
-        }
-
-        free(tmp_2);
-
-        int *end_Index = all_end_Index[rounds];
-        int *cuda_end_Index;
-        cudaMallocManaged(&cuda_end_Index, total_Segs * sizeof(int));
-        cudaMemcpy(cuda_end_Index, end_Index, total_Segs * sizeof(int), cudaMemcpyHostToDevice);
+        char *cuda_full_Char;
+        cudaMallocManaged(&cuda_full_Char, (Seg_sites.size() + 1) * sizeof(char));
+        int *cuda_site_Index;
+        cudaMallocManaged(&cuda_site_Index, (total_Segs + 1) * sizeof(int));
+        cudaMemcpy(cuda_full_Char, full_Char, (Seg_sites.size() + 1) * sizeof(char), cudaMemcpyHostToDevice);
+        cudaMemcpy(cuda_site_Index, site_Index, (total_Segs + 1) * sizeof(int), cudaMemcpyHostToDevice);
 
         int *cuda_VALID_or_NOT, *VALID_or_NOT;
         cudaMallocManaged(&cuda_VALID_or_NOT, total_Segs * sizeof(int));
@@ -1487,7 +1442,7 @@ void prometheus::process_Fu_Li()
         pos_start_Index = (int *)malloc(total_Segs * sizeof(int));
         pos_end_Index = (int *)malloc(total_Segs * sizeof(int));
 
-        cuda_fu_li_Prometheus<<<tot_Blocks, tot_ThreadsperBlock>>>(cuda_seg_Matrix, cuda_end_Index, total_Segs, cuda_VALID_or_NOT, cuda_MA_Count, ne_CUDA, ns_CUDA, cuda_pos_start_Index, cuda_pos_end_Index, start);
+        cuda_fu_li_Prometheus<<<tot_Blocks, tot_ThreadsperBlock>>>(cuda_full_Char, cuda_site_Index, total_Segs, cuda_VALID_or_NOT, cuda_MA_Count, ne_CUDA, ns_CUDA, cuda_pos_start_Index, cuda_pos_end_Index, start);
         cudaError_t err = cudaGetLastError();
 
         if (err != cudaSuccess)
@@ -1502,10 +1457,8 @@ void prometheus::process_Fu_Li()
         cudaMemcpy(pos_start_Index, cuda_pos_start_Index, total_Segs * sizeof(int), cudaMemcpyDeviceToHost);
         cudaMemcpy(pos_end_Index, cuda_pos_end_Index, total_Segs * sizeof(int), cudaMemcpyDeviceToHost);
 
-        cudaFree(cuda_end_Index);
-        cudaFree(cuda_seg_Matrix);
-        // cudaFree(cuda_site_Index);
-        // cudaFree(cuda_full_Char);
+        cudaFree(cuda_site_Index);
+        cudaFree(cuda_full_Char);
         cudaFree(cuda_VALID_or_NOT);
         cudaFree(cuda_pos_start_Index);
         cudaFree(cuda_pos_end_Index);
@@ -1520,7 +1473,7 @@ void prometheus::process_Fu_Li()
             int start_Seg = core_ID * segs_per_Thread;
             int stop_Seg = start_Seg + segs_per_Thread;
 
-            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, segs_Matrix, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
+            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, full_Char, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
         }
 
         if (remainder != 0)
@@ -1528,7 +1481,7 @@ void prometheus::process_Fu_Li()
             int start_Seg = total_Segs - remainder;
             int stop_Seg = total_Segs;
 
-            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, segs_Matrix, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
+            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, full_Char, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
         }
 
         for (thread &t : threads_vec)
@@ -1541,10 +1494,8 @@ void prometheus::process_Fu_Li()
 
         threads_vec.clear();
 
-        free(end_Index);
-        free(segs_Matrix);
-        // free(full_Char);
-        // free(site_Index);
+        free(full_Char);
+        free(site_Index);
         free(VALID_or_NOT);
         free(pos_start_Index);
         free(pos_end_Index);
@@ -1786,16 +1737,16 @@ void prometheus::erase()
     all_Files_index.clear();
     position_index_Segs.clear();
 
-    // concat_Segs.clear();
-    // all_site_Index.clear();
+    concat_Segs.clear();
+    all_site_Index.clear();
     start_stop.clear();
 
-    all_end_Index.clear();
-    all_segs_Matrix.clear();
-    max_Track.clear();
+    // all_end_Index.clear();
+    // all_segs_Matrix.clear();
+    // max_Track.clear();
 }
 
-__global__ void cuda_tajima_Prometheus(char **segs_Matrix, int *end_index, int tot_Segregrating_sites, int *VALID_or_NOT, int *MA_count, int *cuda_pos_start_Index, int *cuda_pos_end_Index, int start)
+__global__ void cuda_tajima_Prometheus(char *sites, int *index, int tot_Segregrating_sites, int *VALID_or_NOT, int *MA_count, int *cuda_pos_start_Index, int *cuda_pos_end_Index, int start)
 {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -1803,15 +1754,14 @@ __global__ void cuda_tajima_Prometheus(char **segs_Matrix, int *end_index, int t
     {
         // printf("run\n");
         int column = 0;
-        // int site_Start = index[tid];
-        int site_Start = 0;
-        int site_End = end_index[tid];
+        int site_Start = index[tid];
+        int site_End = index[tid + 1];
 
         int i = site_Start;
 
         while (column < 1)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -1822,7 +1772,7 @@ __global__ void cuda_tajima_Prometheus(char **segs_Matrix, int *end_index, int t
         cuda_pos_start_Index[tid] = i;
         while (column < 2)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -1834,7 +1784,7 @@ __global__ void cuda_tajima_Prometheus(char **segs_Matrix, int *end_index, int t
 
         while (column < 9)
         {
-            if (segs_Matrix[tid][i] == '\t')
+            if (sites[i] == '\t')
             {
                 column++;
             }
@@ -1847,11 +1797,11 @@ __global__ void cuda_tajima_Prometheus(char **segs_Matrix, int *end_index, int t
         int REF_count = 0;
         while (i < site_End)
         {
-            if (segs_Matrix[tid][i] == '1')
+            if (sites[i] == '1')
             {
                 ALT_count = ALT_count + 1;
             }
-            else if (segs_Matrix[tid][i] == '0')
+            else if (sites[i] == '0')
             {
                 REF_count = REF_count + 1;
             }
@@ -1882,94 +1832,74 @@ __global__ void cuda_tajima_Prometheus(char **segs_Matrix, int *end_index, int t
     }
 }
 
-void prometheus::seg_Concat_New(int round_ID, int start_Seg, int stop_Seg)
-{
-    int *end_Index;
-    char **seg_Matrix;
-    int max = 0;
-
-    int total_Segs = stop_Seg - start_Seg;
-    end_Index = (int *)malloc(total_Segs * sizeof(int));
-
-    // rows = number of Segs
-    seg_Matrix = (char **)malloc(total_Segs * sizeof(char *));
-
-    // columns = each char
-    for (int i = start_Seg; i < stop_Seg; i++)
-    {
-        seg_Matrix[i - start_Seg] = (char *)malloc((all_Lines[i].size() + 1) * sizeof(char));
-        end_Index[i - start_Seg] = all_Lines[i].size();
-
-        char *full_Char;
-        full_Char = (char *)malloc((all_Lines[i].size() + 1) * sizeof(char));
-        strcpy(full_Char, all_Lines[i].c_str());
-
-        seg_Matrix[i - start_Seg] = full_Char;
-
-        if (all_Lines[i].size() > max)
-        {
-            max = all_Lines[i].size();
-        }
-    }
-
-    unique_lock<shared_mutex> ul(g_mutex);
-    all_end_Index[round_ID] = end_Index;
-    all_segs_Matrix[round_ID] = seg_Matrix;
-    if (max > max_Track[round_ID])
-    {
-        max_Track[round_ID] = max;
-    }
-}
-
-// void prometheus::seg_Concat(int round_ID, int start_Seg, int stop_Seg)
+// void prometheus::seg_Concat_New(int round_ID, int start_Seg, int stop_Seg)
 // {
-//     int *site_Index;
-//     string Seg_sites = "";
+//     int *end_Index;
+//     char **seg_Matrix;
+//     int max = 0;
 
 //     int total_Segs = stop_Seg - start_Seg;
+//     end_Index = (int *)malloc(total_Segs * sizeof(int));
 
-//     site_Index = (int *)malloc((total_Segs + 1) * sizeof(int));
-//     site_Index[0] = 0;
+//     // rows = number of Segs
+//     seg_Matrix = (char **)malloc(total_Segs * sizeof(char *));
 
-//     // vector<string> total_Segregrating_sites = all_Lines;
-//     for (size_t i = start_Seg; i < stop_Seg; i++)
+//     // columns = each char
+//     for (int i = start_Seg; i < stop_Seg; i++)
 //     {
-//         Seg_sites.append(all_Lines[i]);
-//         site_Index[i + 1 - start_Seg] = site_Index[i - start_Seg] + all_Lines[i].size();
-//         // if (round_ID == 1)
-//         // {
-//         //     cout << site_Index[i] << endl;
-//         // }
+//         seg_Matrix[i - start_Seg] = (char *)malloc((all_Lines[i].size() + 1) * sizeof(char));
+//         end_Index[i - start_Seg] = all_Lines[i].size();
+
+//         char *full_Char;
+//         full_Char = (char *)malloc((all_Lines[i].size() + 1) * sizeof(char));
+//         strcpy(full_Char, all_Lines[i].c_str());
+
+//         seg_Matrix[i - start_Seg] = full_Char;
+
+//         if (all_Lines[i].size() > max)
+//         {
+//             max = all_Lines[i].size();
+//         }
 //     }
 
 //     unique_lock<shared_mutex> ul(g_mutex);
-//     all_site_Index[round_ID] = site_Index;
-//     concat_Segs[round_ID] = Seg_sites;
+//     all_end_Index[round_ID] = end_Index;
+//     all_segs_Matrix[round_ID] = seg_Matrix;
+//     if (max > max_Track[round_ID])
+//     {
+//         max_Track[round_ID] = max;
+//     }
 // }
+
+void prometheus::seg_Concat(int round_ID, int start_Seg, int stop_Seg)
+{
+    int *site_Index;
+    string Seg_sites = "";
+
+    int total_Segs = stop_Seg - start_Seg;
+
+    site_Index = (int *)malloc((total_Segs + 1) * sizeof(int));
+    site_Index[0] = 0;
+
+    // vector<string> total_Segregrating_sites = all_Lines;
+    for (size_t i = start_Seg; i < stop_Seg; i++)
+    {
+        Seg_sites.append(all_Lines[i]);
+        site_Index[i + 1 - start_Seg] = site_Index[i - start_Seg] + all_Lines[i].size();
+        // if (round_ID == 1)
+        // {
+        //     cout << site_Index[i] << endl;
+        // }
+    }
+
+    unique_lock<shared_mutex> ul(g_mutex);
+    all_site_Index[round_ID] = site_Index;
+    concat_Segs[round_ID] = Seg_sites;
+}
 
 void prometheus::process_Tajima()
 {
-    // MODIFY TO GET POS POINTS AND REMOVE THE GENE ID INDEX - DONE
-
     vector<thread> threads_vec;
-
-    // for (int rounds = 0; rounds < start_stop.size(); rounds++)
-    // {
-    //     concat_Segs.push_back("");
-    //     int *row;
-    //     all_site_Index.push_back(row);
-    //     threads_vec.push_back(thread{&prometheus::seg_Concat, this, rounds, start_stop[rounds].first, start_stop[rounds].second});
-    // }
-
-    // for (thread &t : threads_vec)
-    // {
-    //     if (t.joinable())
-    //     {
-    //         t.join();
-    //     }
-    // }
-
-    // threads_vec.clear();
 
     int *cuda_MA_Count, *MA_Count;
     cudaMallocManaged(&cuda_MA_Count, tot_Segs * sizeof(int));
@@ -1977,48 +1907,25 @@ void prometheus::process_Tajima()
 
     for (int rounds = 0; rounds < start_stop.size(); rounds++)
     {
+        string Seg_sites = concat_Segs[rounds];
+        // cout << Seg_sites << endl;
+        int *site_Index = all_site_Index[rounds];
+
         int start = start_stop[rounds].first;
         int stop = start_stop[rounds].second;
 
         int total_Segs = stop - start;
 
-        // string Seg_sites = concat_Segs[rounds];
-        // // cout << Seg_sites << endl;
-        // int *site_Index = all_site_Index[rounds];
+        char *full_Char;
+        full_Char = (char *)malloc((Seg_sites.size() + 1) * sizeof(char));
+        strcpy(full_Char, Seg_sites.c_str());
 
-        // char *full_Char;
-        // full_Char = (char *)malloc((Seg_sites.size() + 1) * sizeof(char));
-        // strcpy(full_Char, Seg_sites.c_str());
-
-        // char *cuda_full_Char;
-        // cudaMallocManaged(&cuda_full_Char, (Seg_sites.size() + 1) * sizeof(char));
-        // int *cuda_site_Index;
-        // cudaMallocManaged(&cuda_site_Index, (total_Segs + 1) * sizeof(int));
-        // cudaMemcpy(cuda_full_Char, full_Char, (Seg_sites.size() + 1) * sizeof(char), cudaMemcpyHostToDevice);
-        // cudaMemcpy(cuda_site_Index, site_Index, (total_Segs + 1) * sizeof(int), cudaMemcpyHostToDevice);
-
-        char **cuda_seg_Matrix;
-        cudaMallocManaged(&cuda_seg_Matrix, total_Segs * max_Track[rounds] * sizeof(char));
-        char **tmp_2 = (char **)malloc(total_Segs * sizeof(tmp_2[0]));
-        for (size_t i = 0; i < total_Segs; i++)
-        {
-            cudaMalloc((void **)&tmp_2[i], max_Track[rounds] * sizeof(tmp_2[0][0]));
-        }
-        cudaMemcpy(cuda_seg_Matrix, tmp_2, total_Segs * sizeof(char *), cudaMemcpyHostToDevice);
-
-        char **segs_Matrix = all_segs_Matrix[rounds];
-
-        for (size_t i = 0; i < total_Segs; i++)
-        {
-            cudaMemcpy(tmp_2[i], segs_Matrix[i], max_Track[rounds] * sizeof(cuda_seg_Matrix[0][0]), cudaMemcpyHostToDevice);
-        }
-
-        free(tmp_2);
-
-        int *end_Index = all_end_Index[rounds];
-        int *cuda_end_Index;
-        cudaMallocManaged(&cuda_end_Index, total_Segs * sizeof(int));
-        cudaMemcpy(cuda_end_Index, end_Index, total_Segs * sizeof(int), cudaMemcpyHostToDevice);
+        char *cuda_full_Char;
+        cudaMallocManaged(&cuda_full_Char, (Seg_sites.size() + 1) * sizeof(char));
+        int *cuda_site_Index;
+        cudaMallocManaged(&cuda_site_Index, (total_Segs + 1) * sizeof(int));
+        cudaMemcpy(cuda_full_Char, full_Char, (Seg_sites.size() + 1) * sizeof(char), cudaMemcpyHostToDevice);
+        cudaMemcpy(cuda_site_Index, site_Index, (total_Segs + 1) * sizeof(int), cudaMemcpyHostToDevice);
 
         int *cuda_VALID_or_NOT, *VALID_or_NOT;
         cudaMallocManaged(&cuda_VALID_or_NOT, total_Segs * sizeof(int));
@@ -2030,7 +1937,7 @@ void prometheus::process_Tajima()
         pos_start_Index = (int *)malloc(total_Segs * sizeof(int));
         pos_end_Index = (int *)malloc(total_Segs * sizeof(int));
 
-        cuda_tajima_Prometheus<<<tot_Blocks, tot_ThreadsperBlock>>>(cuda_seg_Matrix, cuda_end_Index, total_Segs, cuda_VALID_or_NOT, cuda_MA_Count, cuda_pos_start_Index, cuda_pos_end_Index, start);
+        cuda_tajima_Prometheus<<<tot_Blocks, tot_ThreadsperBlock>>>(cuda_full_Char, cuda_site_Index, total_Segs, cuda_VALID_or_NOT, cuda_MA_Count, cuda_pos_start_Index, cuda_pos_end_Index, start);
 
         cudaError_t err = cudaGetLastError();
 
@@ -2046,10 +1953,8 @@ void prometheus::process_Tajima()
         cudaMemcpy(pos_start_Index, cuda_pos_start_Index, total_Segs * sizeof(int), cudaMemcpyDeviceToHost);
         cudaMemcpy(pos_end_Index, cuda_pos_end_Index, total_Segs * sizeof(int), cudaMemcpyDeviceToHost);
 
-        cudaFree(cuda_end_Index);
-        cudaFree(cuda_seg_Matrix);
-        // cudaFree(cuda_site_Index);
-        // cudaFree(cuda_full_Char);
+        cudaFree(cuda_site_Index);
+        cudaFree(cuda_full_Char);
         cudaFree(cuda_VALID_or_NOT);
         cudaFree(cuda_pos_start_Index);
         cudaFree(cuda_pos_end_Index);
@@ -2066,7 +1971,7 @@ void prometheus::process_Tajima()
             // cout << start_Seg << endl;
             int stop_Seg = start_Seg + segs_per_Thread;
 
-            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, segs_Matrix, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
+            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, full_Char, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
         }
 
         if (remainder != 0)
@@ -2075,7 +1980,7 @@ void prometheus::process_Tajima()
             // cout << start_Seg << endl;
             int stop_Seg = total_Segs;
 
-            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, segs_Matrix, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
+            threads_vec.push_back(thread{&prometheus::seg_Indexer, this, start_Seg, stop_Seg, full_Char, VALID_or_NOT, pos_start_Index, pos_end_Index, start});
         }
 
         for (thread &t : threads_vec)
@@ -2097,10 +2002,8 @@ void prometheus::process_Tajima()
         //     }
         // }
 
-        free(end_Index);
-        free(segs_Matrix);
-        // free(full_Char);
-        // free(site_Index);
+        free(full_Char);
+        free(site_Index);
         free(VALID_or_NOT);
         free(pos_start_Index);
         free(pos_end_Index);
@@ -2372,7 +2275,7 @@ void prometheus::calc_Tajima_Segs(int gene_ID, int *MA_Count)
     //     write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
 }
 
-void prometheus::seg_Indexer(int start_Seg, int stop_Seg, char **full_Char, int *VALID_or_NOT, int *pos_start_Index, int *pos_end_Index, int start)
+void prometheus::seg_Indexer(int start_Seg, int stop_Seg, char *full_Char, int *VALID_or_NOT, int *pos_start_Index, int *pos_end_Index, int start)
 {
 
     // int start = core_ID * segs_per_Thread;
@@ -2388,7 +2291,7 @@ void prometheus::seg_Indexer(int start_Seg, int stop_Seg, char **full_Char, int 
 
             for (int i = pos_start_Index[seg_No]; i < pos_end_Index[seg_No]; i++)
             {
-                POS_string = POS_string + full_Char[seg_No][i];
+                POS_string = POS_string + full_Char[i];
             }
 
             int POS = stoi(POS_string);
