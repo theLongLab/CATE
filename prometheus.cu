@@ -2161,7 +2161,7 @@ void prometheus::process_Tajima()
     {
         if (catch_Point[gene_ID] != -1)
         {
-            if (seg_catch_index_ALL[gene_ID] != -1)
+            if (seg_catch_points_ALL[gene_ID] != -1)
             {
                 threads_vec.push_back(thread{&prometheus::seg_Search_forward, this, gene_ID});
                 threads_vec.push_back(thread{&prometheus::seg_Search_backward, this, gene_ID});
@@ -2189,7 +2189,7 @@ void prometheus::process_Tajima()
 
     for (size_t gene_ID = 0; gene_ID < gene_Size; gene_ID++)
     {
-        if ((catch_Point[gene_ID] != -1) && (seg_catch_index_ALL[gene_ID] != -1))
+        if ((catch_Point[gene_ID] != -1) && (seg_catch_points_ALL[gene_ID] != -1))
         {
             threads_vec.push_back(thread{&prometheus::calc_Tajima_Segs, this, gene_ID, MA_Count});
         }
@@ -2368,51 +2368,84 @@ void prometheus::seg_Search_forward(int gene_ID)
 
 void prometheus::seg_Search_catch_point(int gene_ID)
 {
-    int start = 0;
-    int end = position_index_Segs.size() - 1;
+    // binary search
 
-    int low_Value = position_index_Segs[0].first;
-    int high_Value = position_index_Segs[end].first;
+    int top = 0;
+    int bottom = position_index_Segs.size() - 1;
+    int middle = top + ((bottom - top) / 2);
+
+    int seg_catch_point = -1;
 
     int start_Co = all_start_Co[gene_ID];
     int end_Co = all_end_Co[gene_ID];
 
-    int seg_catch_point = -1;
-
-    while (start <= end && start_Co >= low_Value && start_Co <= high_Value)
+    while (top <= bottom)
     {
-        // vector<string> line_Data_get;
-
-        int pos = start + ((double)(end - start) / ((high_Value - low_Value)) * (start_Co - low_Value));
-
-        int value_at_POS = position_index_Segs[pos].first;
-
-        if ((value_at_POS >= start_Co) && (value_at_POS <= end_Co))
+        if ((position_index_Segs[middle].first >= start_Co) && (position_index_Segs[middle].first <= end_Co))
         {
-
-            // catch point
-            seg_catch_point = pos;
-            // catch_file = folder_Index[pos].second;
-            // file_List.push_back(folder_Index[pos].second);
-
+            seg_catch_point = middle;
+            // found = 'Y';
             break;
         }
-        else if (start_Co > value_at_POS)
+        else if (position_index_Segs[middle].first < start_Co)
         {
-            start = pos + 1;
+            top = middle + 1;
         }
         else
         {
-            end = pos - 1;
+            bottom = middle - 1;
         }
-
-        low_Value = position_index_Segs[start].first;
-        high_Value = position_index_Segs[end].first;
+        middle = top + ((bottom - top) / 2);
     }
+
+    // int start = 0;
+    // int end = position_index_Segs.size() - 1;
+
+    // int low_Value = position_index_Segs[0].first;
+    // int high_Value = position_index_Segs[end].first;
+
+    // int start_Co = all_start_Co[gene_ID];
+    // int end_Co = all_end_Co[gene_ID];
+
+    // int seg_catch_point = -1;
+
+    // while (start <= end && start_Co >= low_Value && start_Co <= high_Value)
+    // {
+    //     // vector<string> line_Data_get;
+
+    //     int pos = start + ((double)(end - start) / ((high_Value - low_Value)) * (start_Co - low_Value));
+
+    //     int value_at_POS = position_index_Segs[pos].first;
+
+    //     if ((value_at_POS >= start_Co) && (value_at_POS <= end_Co))
+    //     {
+
+    //         // catch point
+    //         seg_catch_point = pos;
+    //         // catch_file = folder_Index[pos].second;
+    //         // file_List.push_back(folder_Index[pos].second);
+
+    //         break;
+    //     }
+    //     else if (start_Co > value_at_POS)
+    //     {
+    //         start = pos + 1;
+    //     }
+    //     else
+    //     {
+    //         end = pos - 1;
+    //     }
+
+    //     low_Value = position_index_Segs[start].first;
+    //     high_Value = position_index_Segs[end].first;
+    // }
 
     unique_lock<shared_mutex> ul(g_mutex);
     seg_catch_points_ALL[gene_ID] = seg_catch_point;
-    seg_catch_index_ALL[gene_ID] = position_index_Segs[seg_catch_point].second;
+    if (seg_catch_point != -1)
+    {
+        seg_catch_index_ALL[gene_ID] = position_index_Segs[seg_catch_point].second;
+    }
 }
 
 void prometheus::get_Gene_info_and_catch(string gene_Combo, int gene_ID)
