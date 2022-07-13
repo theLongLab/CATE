@@ -31,7 +31,7 @@ The CATE software is a CUDA based solution to enable rapid processing of large-s
 
 #### How to INSTALL
 
-To install CATE you may have to comile the code using an nvcc compiler. If so execute the following on the terminal:
+To install CATE you may have to compile the code using an nvcc compiler. If so execute the following on the terminal:
 
 Download the repository:
 ````
