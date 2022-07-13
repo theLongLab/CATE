@@ -35,10 +35,10 @@ To install CATE you may have to comile the code using an nvcc compiler. If so ex
 
 Download the repository:
 ````
-$ git clone "https://github.com/theLongLab/CATE/"
+git clone "https://github.com/theLongLab/CATE/"
 ````
 ````
-$ cd CATE/
+cd CATE/
 ````
 *gcc 10.2.0 or higher*
 ````
