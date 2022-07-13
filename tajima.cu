@@ -91,7 +91,7 @@ void tajima::ingress()
         cout << "Processing country\t: " << country.substr(country.find_last_of("/") + 1, country.length()) << endl
              << endl;
         // first: start_stop second: filename
-        vector<pair<string, string>> folder_Index = index_Folder(country);
+        vector<pair<string, string>> folder_Index = function.index_Folder(country);
 
         // for (auto file : folder_Index)
         // {
@@ -102,7 +102,7 @@ void tajima::ingress()
         string check_AF_country = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF";
         cout << endl;
 
-        int samples = getN_Split(folder_Index[0].second);
+        int samples = function.getN_Split(folder_Index[0].second);
         cout << "Number of samples in " << country.substr(country.find_last_of("/") + 1, country.length()) << " population\t: " << samples << endl;
         int N = samples * ploidy;
         cout << "Number of sequences in " << country.substr(country.find_last_of("/") + 1, country.length()) << " population [ " << samples << " x " << ploidy << " ] (N)\t: " << N << endl;
@@ -178,7 +178,7 @@ void tajima::ingress()
                 // }
                 // cout << endl;
 
-                prometheus pro_Tajima = prometheus(folder_Index, Multi_read, this->tot_Blocks, this->tot_ThreadsperBlock, combinations, a1, e1, e2, N, CPU_cores, SNPs_per_Run,number_of_genes);
+                prometheus pro_Tajima = prometheus(folder_Index, Multi_read, this->tot_Blocks, this->tot_ThreadsperBlock, combinations, a1, e1, e2, N, CPU_cores, SNPs_per_Run, number_of_genes);
 
                 vector<string> gene_Collect;
 
@@ -246,11 +246,11 @@ void tajima::ingress()
 
                     // cout << gene_Combo << endl;
                     vector<string> split_Data;
-                    split(split_Data, gene_Combo, "\t");
+                    function.split(split_Data, gene_Combo, '\t');
                     string gene_Name = split_Data[0];
                     cout << "Gene name\t: " << gene_Name << endl;
                     vector<string> coordinates;
-                    split(coordinates, split_Data[1], ":");
+                    function.split(coordinates, split_Data[1], ':');
                     int start_Co = stoi(coordinates[1]);
                     int end_Co = stoi(coordinates[2]);
                     cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
@@ -286,7 +286,7 @@ void tajima::ingress()
                             while (getline(file, line))
                             {
                                 vector<string> positions;
-                                function.split_getPos_ONLY(positions, line, "\t");
+                                function.split_getPos_ONLY(positions, line, '\t');
                                 int pos = stoi(positions[1]);
 
                                 if (pos >= start_Co && pos <= end_Co)

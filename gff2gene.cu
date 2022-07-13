@@ -40,7 +40,7 @@ void gff2gene::ingress()
             // cout << line << endl;
 
             vector<string> split_Data;
-            function.split(split_Data, line, "\t");
+            function.split(split_Data, line, '\t');
 
             if (split_Data.size() == 9)
             {
@@ -52,7 +52,7 @@ void gff2gene::ingress()
                 {
                     string attribute = split_Data[8];
                     vector<string> split_attributes;
-                    function.split(split_attributes, attribute, ";");
+                    function.split(split_attributes, attribute, ';');
 
                     string gene_Name = "NA";
 
@@ -60,7 +60,7 @@ void gff2gene::ingress()
                     {
                         // string ID_check;
                         vector<string> ID_check_split;
-                        function.split(ID_check_split, split_attribute, "=");
+                        function.split(ID_check_split, split_attribute, '=');
 
                         transform(ID_check_split[0].begin(), ID_check_split[0].end(), ID_check_split[0].begin(), ::toupper);
                         if (ID_check_split[0] == "ID")

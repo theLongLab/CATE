@@ -124,11 +124,11 @@ void fst::ingress()
         while (getline(gene_File, gene_Combo))
         {
             vector<string> split_Data;
-            function.split(split_Data, gene_Combo, "\t");
+            function.split(split_Data, gene_Combo, '\t');
             string gene_Name = split_Data[0];
             cout << "Gene name\t: " << gene_Name << endl;
             vector<string> coordinates;
-            function.split(coordinates, split_Data[1], ":");
+            function.split(coordinates, split_Data[1], ':');
             int start_Co = stoi(coordinates[1]);
             int end_Co = stoi(coordinates[2]);
             cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl
@@ -1022,7 +1022,7 @@ void fst::population_Processing(vector<string> &test_Pops, vector<vector<string>
     functions function = functions();
 
     // vector<string> test_Pops;
-    function.split(test_Pops, this->pop_List, ",");
+    function.split(test_Pops, this->pop_List, ',');
     // vector<string> super_Pops_per_ID[test_Pops.size()];
     vector<string> super_Pops_per_ID[test_Pops.size()];
 
@@ -1053,7 +1053,7 @@ void fst::population_Processing(vector<string> &test_Pops, vector<vector<string>
         while (getline(pop_Index, line))
         {
             vector<string> index_Split;
-            function.split(index_Split, line, "\t");
+            function.split(index_Split, line, '\t');
 
             for (int i = 0; i < test_Pops.size(); i++)
             {

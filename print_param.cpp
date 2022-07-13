@@ -81,10 +81,19 @@ void print_param::ingress()
                      << "    \"FASTA files folder\":\"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_Split/3\",\n"
                      << "    \"Merge FASTA path\":\"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_Split/Three.fasta\",\n\n";
 
-              output << "    # Extract genes parameters\n";
-              output << "    # Extract gene FASTA seqeunces from REFERENCE FASTA file and outputs them as seperate FASTA files\n";
-              output << "    \"Reference genome ex\":\"reference/Human_1.fasta\",\n";
-              output << "    \"Extract gene list\":\"universal\",\n\n";
+              output << "    # Extract genes parameters\n"
+                     << "    # Extract gene FASTA seqeunces from REFERENCE FASTA file and outputs them as seperate FASTA files\n"
+                     << "    \"Reference genome ex\":\"reference/Human_1.fasta\",\n"
+                     << "    \"Extract gene list\":\"universal\",\n\n";
+
+              output << "    # GFF to Genes parameters\n"
+                     << "    # REQUIRES SEPERATE INPUT, SINCE IT IS A SINGULAR INPUT\n"
+                     << "    \"GFF file\":\"01.gff\",\n\n";
+
+              output << "    # Haplotype INFO extract\n"
+                     << "    # Extract haplotype information fron VCFs\n"
+                     << "    \"Reference genome hap\":\"reference/Human_1.fasta\",\n"
+                     << "    \"Hap extract gene list\":\"universal\",\n\n";
 
               output << "    # All Neutrality tests\n"
                         "    # Calculates all three neutrality tests (Tajima's D, Fay and Wu's and Fu and Li's) at once\n"

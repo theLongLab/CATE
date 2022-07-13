@@ -215,11 +215,11 @@ void fu_li::ingress()
                 while (getline(gene_File, gene_Combo))
                 {
                     vector<string> split_Data;
-                    function.split(split_Data, gene_Combo, "\t");
+                    function.split(split_Data, gene_Combo, '\t');
                     string gene_Name = split_Data[0];
                     cout << "Gene name\t: " << gene_Name << endl;
                     vector<string> coordinates;
-                    function.split(coordinates, split_Data[1], ":");
+                    function.split(coordinates, split_Data[1], ':');
                     int start_Co = stoi(coordinates[1]);
                     int end_Co = stoi(coordinates[2]);
                     cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
@@ -256,7 +256,7 @@ void fu_li::ingress()
                             while (getline(file, line))
                             {
                                 vector<string> positions;
-                                function.split_getPos_ONLY(positions, line, "\t");
+                                function.split_getPos_ONLY(positions, line, '\t');
                                 int pos = stoi(positions[1]);
 
                                 if (pos >= start_Co && pos <= end_Co)
@@ -423,7 +423,7 @@ int fu_li::outgroup_Singleton(vector<string> &info, vector<string> &positions)
     for (string info_Data : info)
     {
         vector<string> AA_check;
-        function.split(AA_check, info_Data, "=");
+        function.split(AA_check, info_Data, '=');
         if (AA_check[0] == "AA")
         {
             // cout << "AA: " << AA_check[1].at(0) << endl;
@@ -448,8 +448,8 @@ int fu_li::outgroup_Singleton(vector<string> &info, vector<string> &positions)
     vector<string> sample_1;
     vector<string> sample_2;
 
-    function.split(sample_1, positions[9], "|");
-    function.split(sample_2, positions[10], "|");
+    function.split(sample_1, positions[9], '|');
+    function.split(sample_2, positions[10], '|');
 
     for (string check : sample_1)
     {

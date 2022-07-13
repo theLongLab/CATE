@@ -197,7 +197,7 @@ void fst_test_pop::seg_Retrival_with_Found(int start_Co, int end_Co, vector<stri
                     while (getline(file, line))
                     {
                         vector<string> positions;
-                        function.split_getPos_ONLY(positions, line, "\t");
+                        function.split_getPos_ONLY(positions, line, '\t');
                         int pos = stoi(positions[1]);
 
                         if (pos >= start_Co && pos <= end_Co)
@@ -241,7 +241,7 @@ void fst_test_pop::seg_Retrival(int start_Co, int end_Co)
                 while (getline(file, line))
                 {
                     vector<string> positions;
-                    function.split_getPos_ONLY(positions, line, "\t");
+                    function.split_getPos_ONLY(positions, line, '\t');
                     int pos = stoi(positions[1]);
 
                     if (pos >= start_Co && pos <= end_Co)
@@ -333,7 +333,7 @@ void fst_test_pop::index_Samples()
     //  test.close();
 
     vector<string> split_Header;
-    function.split(split_Header, complete_Line, "\t");
+    function.split(split_Header, complete_Line, '\t');
 
     for (size_t i = 9; i < split_Header.size(); i++)
     {

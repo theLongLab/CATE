@@ -403,7 +403,7 @@ vector<pair<string, string>> functions::index_Folder(string &country)
 
     for (const auto &entry : filesystem::directory_iterator(country))
     {
-        
+
         string coordinates = entry.path().string();
         int trim_start = coordinates.find(country_Only + "_") + country_Only.length() + 1;
         int trim_end = coordinates.find_last_of(".") - trim_start;
@@ -418,7 +418,7 @@ vector<pair<string, string>> functions::index_Folder(string &country)
     for (string file : index_pass_1)
     {
         vector<string> file_start_end;
-        split(file_start_end, file, "_");
+        split(file_start_end, file, '_');
         starts.push_back(stoi(file_start_end[0]));
         start_stop.push_back(make_pair(stoi(file_start_end[0]), stoi(file_start_end[1])));
     }
@@ -450,8 +450,23 @@ vector<pair<string, string>> functions::index_Folder(string &country)
     return sorted_Index;
 }
 
-void functions::split(vector<string> &line_Data, string line, string delim)
+void functions::split(vector<string> &line_Data, string line, char delim)
 {
+    line_Data.clear();
+
+    // string coordinates_String = line.substr(gene_Combo.find(delim) + 1);
+    while (line.find(delim) != string::npos)
+    {
+        line_Data.push_back(line.substr(0, line.find(delim)));
+        line = line.substr(line.find(delim) + 1);
+    }
+
+    line_Data.push_back(line);
+}
+
+void functions::split_space(vector<string> &line_Data, string line, string delim)
+{
+
     vector<string>().swap(line_Data);
     char *convert;
     string capture(line);
@@ -482,7 +497,7 @@ int functions::getN_Split(string file)
     file_nCount.close();
 
     vector<string> header_Columns;
-    split(header_Columns, header, "\t");
+    split(header_Columns, header, '\t');
 
     int N = header_Columns.size() - 9;
     // cout << N << endl;
@@ -581,7 +596,7 @@ void functions::backward_Search(int pos, vector<pair<string, string>> folder_Ind
     vector<string> line_Data_get;
     while (pos >= 0)
     {
-        split(line_Data_get, folder_Index[pos].first, "_");
+        split(line_Data_get, folder_Index[pos].first, '_');
         int low_Value_atpos = stoi(line_Data_get[0]);
         int high_Value_atpos = stoi(line_Data_get[1]);
 
@@ -608,7 +623,7 @@ void functions::forward_Search(int pos, vector<pair<string, string>> folder_Inde
     vector<string> line_Data_get;
     while (pos < folder_Index.size())
     {
-        split(line_Data_get, folder_Index[pos].first, "_");
+        split(line_Data_get, folder_Index[pos].first, '_');
         int low_Value_atpos = stoi(line_Data_get[0]);
         int high_Value_atpos = stoi(line_Data_get[1]);
 
@@ -633,9 +648,9 @@ vector<string> functions::compound_interpolationSearch(vector<pair<string, strin
     vector<string> file_List;
 
     vector<string> line_Data;
-    split(line_Data, folder_Index[0].first, "_");
+    split(line_Data, folder_Index[0].first, '_');
     int low_Value = stoi(line_Data[0]);
-    split(line_Data, folder_Index[folder_Index.size() - 1].first, "_");
+    split(line_Data, folder_Index[folder_Index.size() - 1].first, '_');
     int high_Value = stoi(line_Data[1]);
 
     int start = 0;
@@ -647,7 +662,7 @@ vector<string> functions::compound_interpolationSearch(vector<pair<string, strin
 
         int pos = start + ((double)(end - start) / ((high_Value - low_Value)) * (start_Co - low_Value));
 
-        split(line_Data_get, folder_Index[pos].first, "_");
+        split(line_Data_get, folder_Index[pos].first, '_');
         int low_Value_atpos = stoi(line_Data_get[0]);
         int high_Value_atpos = stoi(line_Data_get[1]);
 
@@ -698,70 +713,87 @@ vector<string> functions::compound_interpolationSearch(vector<pair<string, strin
             end = pos - 1;
         }
 
-        split(line_Data_get, folder_Index[start].first, "_");
+        split(line_Data_get, folder_Index[start].first, '_');
         low_Value = stoi(line_Data_get[0]);
 
-        split(line_Data_get, folder_Index[end].first, "_");
+        split(line_Data_get, folder_Index[end].first, '_');
         high_Value = stoi(line_Data_get[1]);
     }
 
     return file_List;
 }
 
-void functions::split_getPos(vector<string> &line_Data, string line, string delim)
+// void functions::split_getPos(vector<string> &line_Data, string line, string delim)
+// {
+//     vector<string>().swap(line_Data);
+//     char *convert;
+//     string capture(line);
+//     convert = &capture[0];
+
+//     char deliminator[delim.length() + 1];
+//     strcpy(deliminator, delim.c_str());
+
+//     char *split_data;
+//     split_data = strtok(convert, deliminator);
+//     int count = 0;
+
+//     while (split_data != NULL)
+//     {
+//         string char2string;
+//         char2string.append(split_data);
+//         line_Data.push_back(char2string);
+//         if (count == 7)
+//         {
+//             break;
+//         }
+//         split_data = strtok(NULL, deliminator);
+//         count++;
+//     }
+// }
+
+void functions::split_getPos_ONLY(vector<string> &line_Data, string line, char delim)
 {
-    vector<string>().swap(line_Data);
-    char *convert;
-    string capture(line);
-    convert = &capture[0];
-
-    char deliminator[delim.length() + 1];
-    strcpy(deliminator, delim.c_str());
-
-    char *split_data;
-    split_data = strtok(convert, deliminator);
+    line_Data.clear();
     int count = 0;
 
-    while (split_data != NULL)
+    // string coordinates_String = line.substr(gene_Combo.find(delim) + 1);
+    while (line.find(delim) != string::npos)
     {
-        string char2string;
-        char2string.append(split_data);
-        line_Data.push_back(char2string);
-        if (count == 7)
-        {
-            break;
-        }
-        split_data = strtok(NULL, deliminator);
-        count++;
-    }
-}
+        line_Data.push_back(line.substr(0, line.find(delim)));
 
-void functions::split_getPos_ONLY(vector<string> &line_Data, string line, string delim)
-{
-    vector<string>().swap(line_Data);
-    char *convert;
-    string capture(line);
-    convert = &capture[0];
-
-    char deliminator[delim.length() + 1];
-    strcpy(deliminator, delim.c_str());
-
-    char *split_data;
-    split_data = strtok(convert, deliminator);
-    int count = 0;
-
-    while (split_data != NULL)
-    {
-        string char2string;
-        char2string.append(split_data);
-        line_Data.push_back(char2string);
         if (count == 1)
         {
             break;
         }
-        split_data = strtok(NULL, deliminator);
+
+        line = line.substr(line.find(delim) + 1);
         count++;
     }
+
+    // vector<string>().swap(line_Data);
+    // char *convert;
+    // string capture(line);
+    // convert = &capture[0];
+
+    // char deliminator[delim.length() + 1];
+    // strcpy(deliminator, delim.c_str());
+
+    // char *split_data;
+    // split_data = strtok(convert, deliminator);
+    // int count = 0;
+
+    // while (split_data != NULL)
+    // {
+    //     string char2string;
+    //     char2string.append(split_data);
+    //     line_Data.push_back(char2string);
+    //     if (count == 1)
+    //     {
+    //         break;
+    //     }
+    //     split_data = strtok(NULL, deliminator);
+    //     count++;
+    // }
 }
 
 __global__ void pairwise_Cuda_(int N, int *SNP, int *differences)
@@ -859,33 +891,49 @@ void functions::split_Convert(int *line_temp, string line, string delim)
     }
 }
 
-void functions::split_to_MA(vector<string> &line_Data, string line, string delim)
+void functions::split_to_MA(vector<string> &line_Data, string line, char delim)
 {
-    vector<string>().swap(line_Data);
-    char *convert;
-    string capture(line);
-    convert = &capture[0];
-    // cout<<convert;
-
-    char deliminator[delim.length() + 1];
-    strcpy(deliminator, delim.c_str());
-
-    char *split_data;
-    split_data = strtok(convert, deliminator);
+    line_Data.clear();
     int count = 0;
 
-    while (split_data != NULL)
+    // string coordinates_String = line.substr(gene_Combo.find(delim) + 1);
+    while (line.find(delim) != string::npos)
     {
-        // cout<<split_data<<endl;
-        string char2string;
-        char2string.append(split_data);
-        // cout << char2string << endl;
-        line_Data.push_back(char2string);
+        line_Data.push_back(line.substr(0, line.find(delim)));
+
         if (count == 10)
         {
             break;
         }
-        split_data = strtok(NULL, deliminator);
+
+        line = line.substr(line.find(delim) + 1);
         count++;
     }
+    // vector<string>().swap(line_Data);
+    // char *convert;
+    // string capture(line);
+    // convert = &capture[0];
+    // // cout<<convert;
+
+    // char deliminator[delim.length() + 1];
+    // strcpy(deliminator, delim.c_str());
+
+    // char *split_data;
+    // split_data = strtok(convert, deliminator);
+    // int count = 0;
+
+    // while (split_data != NULL)
+    // {
+    //     // cout<<split_data<<endl;
+    //     string char2string;
+    //     char2string.append(split_data);
+    //     // cout << char2string << endl;
+    //     line_Data.push_back(char2string);
+    //     if (count == 10)
+    //     {
+    //         break;
+    //     }
+    //     split_data = strtok(NULL, deliminator);
+    //     count++;
+    // }
 }

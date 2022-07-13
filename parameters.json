@@ -5,7 +5,7 @@
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPERATE PARAMTER FILES WITH SEPERATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
     "Input path":"results_2",
-    "Output path":"pro_test",
+    "Output path":"extract",
     "Intermediate path":"intermediate",
 
     # Prometheus settings
@@ -60,6 +60,11 @@
     # GFF to Genes parameters
     # REQUIRES SEPERATE INPUT, SINCE IT IS A SINGULAR INPUT
     "GFF file":"01.gff",
+
+    # Haplotype INFO extract
+    # Extract haplotype information fron VCFs
+    "Reference genome hap":"reference/Human_1.fasta",
+    "Hap extract gene list":"universal",
 
     # All Neutrality tests
     # Calculates all three neutrality tests (Tajima's D, Fay and Wu's and Fu and Li's) at once

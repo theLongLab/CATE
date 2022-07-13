@@ -235,11 +235,11 @@ void fay_wu::ingress()
                     while (getline(gene_File, gene_Combo))
                     {
                          vector<string> split_Data;
-                         function.split(split_Data, gene_Combo, "\t");
+                         function.split(split_Data, gene_Combo, '\t');
                          string gene_Name = split_Data[0];
                          cout << "Gene name\t: " << gene_Name << endl;
                          vector<string> coordinates;
-                         function.split(coordinates, split_Data[1], ":");
+                         function.split(coordinates, split_Data[1], ':');
                          int start_Co = stoi(coordinates[1]);
                          int end_Co = stoi(coordinates[2]);
                          cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
@@ -273,7 +273,7 @@ void fay_wu::ingress()
                                    while (getline(file, line))
                                    {
                                         vector<string> positions;
-                                        function.split_getPos_ONLY(positions, line, "\t");
+                                        function.split_getPos_ONLY(positions, line, '\t');
                                         int pos = stoi(positions[1]);
 
                                         if (pos >= start_Co && pos <= end_Co)

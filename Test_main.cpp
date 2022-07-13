@@ -16,6 +16,7 @@
 #include "mk_test.cuh"
 #include "fst.cuh"
 #include "fasta_splitter.h"
+#include "hap_extract.cuh"
 #include "parameter.h"
 #include "fasta_merge.h"
 #include <bits/stdc++.h>
@@ -154,7 +155,20 @@ int main(int argc, char *argv[])
                               cout << endl
                                    << "Completed GFF to Gene list" << endl;
                          }
+                         else if (function == "--hapfromvcf" || function == "-hapext")
+                         {
+                              string gene_List = properties.where("Hap extract gene list");
+                              if (gene_List == "universal")
+                              {
+                                   gene_List = properties.where("Universal gene list");
+                              }
 
+                              hap_extract haplotype_Extractor = hap_extract(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Reference genome hap"));
+                              haplotype_Extractor.ingress();
+
+                              cout << endl
+                                   << "Completed CUDA powered Haplotype extractor" << endl;
+                         }
                          else if (function == "--tajima" || function == "-t")
                          {
                               string gene_List = properties.where("Tajima gene list");
@@ -411,6 +425,13 @@ void print_HELP()
           << endl
           << "--gff2gene or -g2g      : Creates the gene list file in a *.txt format from the input GFF3 file." << endl
           << "                          Note that only regions annotated as genes will be extracted." << endl
+          << endl
+          << "--hapfromvcf or -hapext : Extracts haplotypes and their sequences for a predefined gene list from a (split) VCF (indexed) folder provided the reference sequence." << endl
+          << "                          The reference genome must be provided in a FASTA file." << endl
+          << "                          The system will automatically identify each haplotype present." << endl
+          << "                          In addition to the summary output each haplotype present for each gene will be generate in a seperate FASTA file." << endl
+          << "                          Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
+          << "                          File format is *.hsum (a tab deliminated text file)." << endl
           << endl
           << "-pparam or --printparam : Prints a sample layout of the parameter file to the specified location." << endl
           << "                          State the path with the name of the parameter file after the \"-pparam\" function." << endl

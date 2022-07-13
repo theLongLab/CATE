@@ -142,12 +142,12 @@ void ehh::ingress()
             while (getline(gene_File, gene_Combo))
             {
                 vector<string> split_Data;
-                function.split(split_Data, gene_Combo, "\t");
+                function.split(split_Data, gene_Combo, '\t');
                 string gene_Name = split_Data[0];
                 cout << "Gene name\t: " << gene_Name << endl;
 
                 vector<string> Core_coordinates;
-                function.split(Core_coordinates, split_Data[1], ":");
+                function.split(Core_coordinates, split_Data[1], ':');
                 int core_start_Co = stoi(Core_coordinates[1]);
                 int core_end_Co = stoi(Core_coordinates[2]);
 
@@ -171,7 +171,7 @@ void ehh::ingress()
                     else
                     {
                         vector<string> Ext_coordinates;
-                        function.split(Ext_coordinates, split_Data[2], ":");
+                        function.split(Ext_coordinates, split_Data[2], ':');
                         ext_start_Co = stoi(Ext_coordinates[0]);
                         ext_end_Co = stoi(Ext_coordinates[1]);
                     }
@@ -245,7 +245,7 @@ void ehh::ingress()
                             while (getline(file, line))
                             {
                                 vector<string> positions;
-                                function.split_getPos_ONLY(positions, line, "\t");
+                                function.split_getPos_ONLY(positions, line, '\t');
                                 int pos = stoi(positions[1]);
 
                                 if (pos >= ext_start_Co && pos <= ext_end_Co)
@@ -718,6 +718,8 @@ void ehh::process_EHH(vector<string> &total_Segregrating_sites, vector<int> &cor
                         {
                             ext_Haplotypes_count.push_back(make_pair(ext_Haplotypes_All[subject], 1));
                         }
+
+                        sort(found.begin(), found.end());
                     }
                 }
             }

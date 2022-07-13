@@ -73,9 +73,9 @@ void mk_test::ingress()
     vector<string> Code_split;
     print_Code(Code_split);
     cout << "Start codon(s): " << this->start_Codons << endl;
-    function.split(this->start_Codons_list, this->start_Codons, ",");
+    function.split(this->start_Codons_list, this->start_Codons, ',');
 
-    function.split(this->stop_Codons_list, this->stop_Codons, ",");
+    function.split(this->stop_Codons_list, this->stop_Codons, ',');
     string stop_Codon_All = "";
     for (string stop_Codon : this->stop_Codons_list)
     {
@@ -107,14 +107,14 @@ void mk_test::process_Genetic_code()
     string string_Gen_code = "";
 
     vector<string> split_Aminos;
-    function.split(split_Aminos, this->genetic_Code, ";");
+    function.split(split_Aminos, this->genetic_Code, ';');
 
     for (string amino : split_Aminos)
     {
         vector<string> split_Amino_codon;
         vector<string> codons;
-        function.split(split_Amino_codon, amino, "|");
-        function.split(codons, split_Amino_codon[1], ",");
+        function.split(split_Amino_codon, amino, '|');
+        function.split(codons, split_Amino_codon[1], ',');
         for (string codon : codons)
         {
             string_Gen_code.append(codon);
@@ -231,11 +231,11 @@ void mk_test::process_MK()
                 while (getline(gene_File, gene_Combo))
                 {
                     vector<string> split_Data;
-                    function.split(split_Data, gene_Combo, "\t");
+                    function.split(split_Data, gene_Combo, '\t');
                     string gene_Name = split_Data[0];
                     cout << "Gene name\t: " << gene_Name << endl;
                     vector<string> coordinates;
-                    function.split(coordinates, split_Data[1], ":");
+                    function.split(coordinates, split_Data[1], ':');
                     int start_Co = stoi(coordinates[1]);
                     int end_Co = stoi(coordinates[2]);
                     cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
@@ -271,7 +271,7 @@ void mk_test::process_MK()
                         string codon_Line_one;
                         getline(get_Codon_coordinates, codon_Line_one);
                         get_Codon_coordinates.close();
-                        function.split(codon_Coordinates, codon_Line_one, "\t");
+                        function.split(codon_Coordinates, codon_Line_one, '\t');
                         int codon_Start = stoi(codon_Coordinates[1]);
                         int codon_Stop = stoi(codon_Coordinates[2]);
 
@@ -307,7 +307,7 @@ void mk_test::process_MK()
                                 while (getline(file, line))
                                 {
                                     vector<string> positions;
-                                    function.split_to_MA(positions, line, "\t");
+                                    function.split_getPos_ONLY(positions, line, '\t');
                                     int pos = stoi(positions[1]);
 
                                     if (pos >= codon_Start && pos <= codon_Stop)
@@ -1207,7 +1207,7 @@ void mk_test::process_ORF(vector<pair<int, string>> &collect_Segregrating_site_P
     while (getline(codon_File, line))
     {
         vector<string> split_Line;
-        function.split(split_Line, line, "\t");
+        function.split(split_Line, line, '\t');
         positions.push_back(stoi(split_Line[0]));
         REF_alleles.push_back(split_Line[1].at(0));
         OUTGROUP_alleles.push_back(split_Line[2].at(0));
@@ -1268,7 +1268,7 @@ void mk_test::process_ORF(vector<pair<int, string>> &collect_Segregrating_site_P
     Ps = (int *)malloc(num_of_Codons * sizeof(int));
 
     // Fix seg sites only catch cause Allele freq does not matter.
-    // GPU load here 
+    // GPU load here
     // cuda_process_Codons(int codon_Number, int *positions, char *REF, char *Outgroup, char *seg_REF, char *seg_ALT, int SEG_size, int *SEG_positions, int *seg_REF_count, int *seg_ALT_count, int codon_Start, int size_of_alignment_File, int genetic_Code_size, char *index_Genetic_code, int *VALID_or_NOT, int *Ds, int *Dn, int *Ps, int *Pn)
 
     cout << "             Launching GPU" << endl;
@@ -1472,7 +1472,7 @@ void mk_test::reference_Prep()
         while (getline(gene_File, gene_Combo))
         {
             vector<string> split_Data;
-            function.split(split_Data, gene_Combo, "\t");
+            function.split(split_Data, gene_Combo, '\t');
 
             string alignment_File = split_Data[2];
             string combination = split_Data[1];
@@ -1481,7 +1481,7 @@ void mk_test::reference_Prep()
             string temp_index_Folder = this->primary_Intermediate_Path + "/alignments/" + gene_Name;
             cout << "Alignment File\t: " << alignment_File << endl;
             vector<string> coordinates;
-            function.split(coordinates, split_Data[1], ":");
+            function.split(coordinates, split_Data[1], ':');
             // POS - 1 Since in FASTA 1st position is 1, but in C++ its 0
             int start_Co = stoi(coordinates[1]) - 1;
             int end_Co = stoi(coordinates[2]);
@@ -1621,11 +1621,11 @@ vector<pair<int, int>> mk_test::alignment_Prep(string Gene_alignment_Path, strin
                 // cout << endl;
 
                 vector<string> split_Query;
-                function.split(split_Query, query, "  ");
+                function.split_space(split_Query, query, "  ");
                 transform(split_Query[2].begin(), split_Query[2].end(), split_Query[2].begin(), ::toupper);
 
                 vector<string> split_Subject;
-                function.split(split_Subject, subject, "  ");
+                function.split_space(split_Subject, subject, "  ");
                 transform(split_Subject[2].begin(), split_Subject[2].end(), split_Subject[2].begin(), ::toupper);
 
                 // cout << split_Query[1] << "\t" << split_Query[2] << endl
@@ -1688,7 +1688,7 @@ vector<pair<int, int>> mk_test::index_alignment_Folder()
         file_Name = file_Name.substr(index_of_slash + 1, index_of_dot - index_of_slash - 1);
         // cout << file_Name << endl;
         vector<string> split_Data;
-        function.split(split_Data, file_Name, "_");
+        function.split(split_Data, file_Name, '_');
         TEMP_file_index.push_back(make_pair(stoi(split_Data[0]), stoi(split_Data[1])));
     }
 
@@ -1762,7 +1762,7 @@ vector<pair<int, int>> mk_test::alignment_Prep()
                 if (line.at(0) == 's')
                 {
                     vector<string> split_Line;
-                    function.split(split_Line, line, " ");
+                    function.split_space(split_Line, line, " ");
                     transform(split_Line[6].begin(), split_Line[6].end(), split_Line[6].begin(), ::toupper);
 
                     if (ref_Check == 0)
@@ -1815,7 +1815,7 @@ vector<pair<int, int>> mk_test::alignment_Prep()
     {
         // start ref_seq query_seq
         vector<string> split_Line;
-        function.split(split_Line, sort_Alinged_Full[i].second, "\t");
+        function.split(split_Line, sort_Alinged_Full[i].second, '\t');
 
         // maf start pos is a zero based number. Therefore it must be incremented by 1
         int ref_start_Pos = stoi(split_Line[0]) + 1;
@@ -1925,13 +1925,13 @@ void mk_test::reference_Prep(vector<pair<int, int>> TEMP_file_index)
         while (getline(gene_File, gene_Combo))
         {
             vector<string> split_Data;
-            function.split(split_Data, gene_Combo, "\t");
+            function.split(split_Data, gene_Combo, '\t');
 
             string combination = split_Data[1];
             string gene_Name = split_Data[0];
             cout << "Gene name\t: " << gene_Name << endl;
             vector<string> coordinates;
-            function.split(coordinates, split_Data[1], ":");
+            function.split(coordinates, split_Data[1], ':');
             // POS - 1 Since in FASTA 1st position is 1, but in C++ its 0
             int start_Co = stoi(coordinates[1]) - 1;
             int end_Co = stoi(coordinates[2]);
@@ -2234,7 +2234,7 @@ void mk_test::codon_Alignment_print(vector<string> file_List, int start_Codon, i
             while (getline(align_Index, alignment))
             {
                 vector<string> line_Split;
-                function.split(line_Split, alignment, "\t");
+                function.split(line_Split, alignment, '\t');
                 int location = stoi(line_Split[0]);
                 if (location >= start_Codon && location <= end_Codon)
                 {
@@ -2409,7 +2409,7 @@ void mk_test::print_Code(vector<string> &Code_split)
     functions function = functions();
 
     cout << "User specified Genetic code:" << endl;
-    function.split(Code_split, this->genetic_Code, ";");
+    function.split(Code_split, this->genetic_Code, ';');
 
     int long_Length = 0;
     for (string longest : Code_split)

@@ -2369,6 +2369,7 @@ void prometheus::seg_Search_forward(int gene_ID)
 void prometheus::seg_Search_catch_point(int gene_ID)
 {
     // binary search
+    // SAVES time from interpolation since we cannot guarantee even distribution
 
     int top = 0;
     int bottom = position_index_Segs.size() - 1;
