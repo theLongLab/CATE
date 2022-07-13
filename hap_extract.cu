@@ -229,24 +229,29 @@ void hap_extract::ingress()
                     }
                 }
                 // GET Haps
-                vector<string> write_Lines, write_Sequences;
-                hap_extraction(write_Lines, write_Sequences, collect_Segregrating_sites, pos_INDEX, gene_Name, coordinates[0], start_Co, end_Co);
 
-                string FASTA_File = FASTA_folder + "/" + gene_Name + ".fasta";
-                fstream FASTA_out;
-                FASTA_out.open(FASTA_File, ios::out);
-
-                for (int hap = 0; hap < write_Lines.size(); hap++)
+                if (collect_Segregrating_sites.size() != 0)
                 {
-                    output << write_Lines[hap] + "\n";
-                    FASTA_out << write_Sequences[hap] + "\n";
-                }
 
-                intermediate << gene_Combo << "\n";
-                intermediate.flush();
-                cout << endl;
-                // REMOVE break
-                // break;
+                    vector<string> write_Lines, write_Sequences;
+                    hap_extraction(write_Lines, write_Sequences, collect_Segregrating_sites, pos_INDEX, gene_Name, coordinates[0], start_Co, end_Co);
+
+                    string FASTA_File = FASTA_folder + "/" + gene_Name + ".fasta";
+                    fstream FASTA_out;
+                    FASTA_out.open(FASTA_File, ios::out);
+
+                    for (int hap = 0; hap < write_Lines.size(); hap++)
+                    {
+                        output << write_Lines[hap] + "\n";
+                        FASTA_out << write_Sequences[hap] + "\n";
+                    }
+
+                    intermediate << gene_Combo << "\n";
+                    intermediate.flush();
+                    cout << endl;
+                    // REMOVE break
+                    // break;
+                }
             }
             output.close();
             intermediate.close();
