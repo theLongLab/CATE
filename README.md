@@ -33,17 +33,19 @@ The CATE software is a CUDA based solution to enable rapid processing of large-s
 
 To install CATE you may have to comile the code using an nvcc compiler. If so execute the following on the terminal:
 
->git clone "https://github.com/theLongLab/CATE/"
->
->cd CATE/
-
+````
+$ git clone "https://github.com/theLongLab/CATE/"
+````
+````
+$ cd CATE/
+````
 *gcc 10.2.0 or higher*
->module load gcc/10.2.0
+>$ module load gcc/10.2.0
 
 *cuda 11.3.0 or higher*
->module load cuda/11.3.0
+>$ module load cuda/11.3.0
 
->nvcc -std=c++17 *.cu *.cpp -o "CATE_beta"
+>$ nvcc -std=c++17 *.cu *.cpp -o "CATE_beta"
 
 ---
 
