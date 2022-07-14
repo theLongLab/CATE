@@ -595,7 +595,7 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
 
             string mutation_positions = "NA";
 
-            for (int stride = 0; stride < query_Hap.length(); stride++)
+            for (int stride = 0; stride < num_segregrating_Sites; stride++)
             {
                 if (query_Hap.at(stride) == '1')
                 {
@@ -622,11 +622,11 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
             cudaMallocManaged(&cuda_sequence, (sequence_Size + 1) * sizeof(char));
 
             char *haplotye, *cuda_haplotype;
-            haplotye = (char *)malloc((query_Hap.size() + 1) * sizeof(char));
-            cudaMallocManaged(&cuda_haplotype, (query_Hap.size() + 1) * sizeof(char));
+            haplotye = (char *)malloc((num_segregrating_Sites + 1) * sizeof(char));
+            cudaMallocManaged(&cuda_haplotype, (num_segregrating_Sites + 1) * sizeof(char));
 
             strcpy(haplotye, query_Hap.c_str());
-            cudaMemcpy(cuda_haplotype, haplotye, (query_Hap.size() + 1) * sizeof(char), cudaMemcpyHostToDevice);
+            cudaMemcpy(cuda_haplotype, haplotye, (num_segregrating_Sites + 1) * sizeof(char), cudaMemcpyHostToDevice);
 
             // cuda_sequence_Generation(int sequence_Size, int num_of_Segs, int start, char *ref, char *haplotype, int *pos_Allele, char *index_Allele, char *REF, char *ALT, char *sequence_Full)
             cuda_sequence_Generation<<<tot_Blocks, tot_ThreadsperBlock>>>(sequence_Size, num_segregrating_Sites, start_Pos, cuda_reference, cuda_haplotype, cuda_pos_Allele, cuda_index_Allele, cuda_REF_char, cuda_ALT_char, cuda_sequence);
