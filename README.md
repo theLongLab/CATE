@@ -50,7 +50,7 @@ module load gcc/10.2.0
 module load cuda/11.3.0
 ````
 
-Finally compile the project:
+Finally, compile the project:
 ````
 nvcc -std=c++17 *.cu *.cpp -o "CATE_beta"
 ````
