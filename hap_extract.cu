@@ -641,7 +641,10 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
 
             cudaMemcpy(sequence, cuda_sequence, (sequence_Size + 1) * sizeof(char), cudaMemcpyDeviceToHost);
 
-            string sequence_Full = sequence_ID + sequence;
+            string sequence_string = sequence;
+            sequence_string = sequence_string.substr(0, sequence_Size);
+
+            string sequence_Full = sequence_ID + sequence_string;
             write_Sequences.push_back(sequence_Full);
 
             cudaFree(cuda_haplotype);
