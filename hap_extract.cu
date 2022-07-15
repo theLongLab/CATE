@@ -102,7 +102,7 @@ void hap_extract::ingress()
         int samples = function.getN_Split(folder_Index[0].second);
         cout << "Number of samples in " << country.substr(country.find_last_of("/") + 1, country.length()) << " population\t: " << samples << endl;
 
-        N = samples * ploidy;
+        this->N = samples * ploidy;
         cout << "Number of sequences in " << country.substr(country.find_last_of("/") + 1, country.length()) << " population [ " << samples << " x " << ploidy << " ] (N)\t: " << N << endl;
 
         cout << endl;
@@ -467,7 +467,7 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
 
     char **cuda_snp_N_grid;
 
-    cudaMallocManaged(&cuda_snp_N_grid, N * num_segregrating_Sites * sizeof(char));
+    cudaMallocManaged(&cuda_snp_N_grid, (N * num_segregrating_Sites) * sizeof(char));
     char **tmp = (char **)malloc(num_segregrating_Sites * sizeof(tmp[0]));
     for (int i = 0; i < num_segregrating_Sites; i++)
     {
@@ -534,10 +534,10 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
 
     cudaMemcpy(Hap_array, cuda_Hap_array, ((N * num_segregrating_Sites) + 1) * sizeof(char), cudaMemcpyDeviceToHost);
 
-    string haplotypes = Hap_array;
+    string haplotypes(Hap_array);
     vector<string> Haplotypes_All;
 
-    for (size_t i = 0; i < (num_segregrating_Sites * N); i = i + num_segregrating_Sites)
+    for (int i = 0; i < (num_segregrating_Sites * N); i = i + num_segregrating_Sites)
     {
         // cout << ext_Haplotypes.substr(i, num_segregrating_Sites) << endl;
         Haplotypes_All.push_back(haplotypes.substr(i, num_segregrating_Sites));

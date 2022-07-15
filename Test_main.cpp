@@ -194,7 +194,6 @@ int main(int argc, char *argv[])
                               cout << endl
                                    << "CUDA powered Tajima's D calculator has been completed." << endl;
                          }
-
                          else if (function == "--fuli" || function == "-f")
                          {
                               string gene_List = properties.where("Fu and Li gene list");

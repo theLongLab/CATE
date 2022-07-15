@@ -4,7 +4,7 @@
 
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPERATE PARAMTER FILES WITH SEPERATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
-    "Input path":"results_2",
+    "Input path":"split_VCF",
     "Output path":"extract",
     "Intermediate path":"intermediate",
 
@@ -29,7 +29,7 @@
     "Genetic code":"A|GCT,GCC,GCA,GCG;R|CGT,CGC,CGA,CGG,AGA,AGG;N|AAT,AAC;D|GAT,GAC;B|AAT,AAC,GAT,GAC;C|TGT,TGC;Q|CAA,CAG;E|GAA,GAG;Z|CAA,CAG,GAA,GAG;G|GGT,GGC,GGA,GGG;H|CAT,CAC;M|ATG;I|ATT,ATC,ATA;L|CTT,CTC,CTA,CTG,TTA,TTG;K|AAA,AAG;F|TTT,TTC;P|CCT,CCC,CCA,CCG;S|TCT,TCC,TCA,TCG,AGT,AGC;T|ACT,ACC,ACA,ACG;W|TGG;Y|TAT,TAC;V|GTT,GTC,GTA,GTG;X|TAA,TGA,TAG",
 
     # Any tab-deliminated text based formats such as but not limited to (*.txt, *.csv)
-    "Universal gene list":"genelist.txt",
+    "Universal gene list":"test_san.txt",
 
     # VCF split parameters
     # Column numbers are non zero digits, i.e. Column numbers start with one
@@ -54,8 +54,8 @@
 
     # Extract genes parameters
     # Extract gene FASTA seqeunces from REFERENCE FASTA file and outputs them as seperate FASTA files
-    "Reference genome ex":"reference/Human_1.fasta",
-    "Extract gene list":"01.txt",
+    "Reference genome ex":"reference/19.fasta",
+    "Extract gene list":"universal",
 
     # GFF to Genes parameters
     # REQUIRES SEPERATE INPUT, SINCE IT IS A SINGULAR INPUT
@@ -63,7 +63,7 @@
 
     # Haplotype INFO extract
     # Extract haplotype information fron VCFs
-    "Reference genome hap":"reference/Human_1.fasta",
+    "Reference genome hap":"reference/19.fasta",
     "Hap extract gene list":"universal",
 
     # All Neutrality tests
