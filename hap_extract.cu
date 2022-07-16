@@ -62,7 +62,7 @@ void hap_extract::ingress()
     }
 
     transform(full_Reference.begin(), full_Reference.end(), full_Reference.begin(), ::toupper);
-    this->reference_size = full_Reference.size();
+    // this->reference_size = full_Reference.size();
 
     char *reference_full;
     reference_full = (char *)malloc((full_Reference.size() + 1) * sizeof(char));
@@ -228,8 +228,8 @@ void hap_extract::ingress()
                         file.close();
                     }
                 }
-                // GET Haps
 
+                // GET Haps
                 if (collect_Segregrating_sites.size() != 0)
                 {
 
@@ -245,13 +245,14 @@ void hap_extract::ingress()
                         output << write_Lines[hap] + "\n";
                         FASTA_out << write_Sequences[hap] + "\n";
                     }
-
-                    intermediate << gene_Combo << "\n";
-                    intermediate.flush();
-                    cout << endl;
+                    output.flush();
+                    FASTA_out.close();
                     // REMOVE break
                     // break;
                 }
+                cout << endl;
+                intermediate << gene_Combo << "\n";
+                intermediate.flush();
             }
             output.close();
             intermediate.close();
@@ -263,7 +264,7 @@ void hap_extract::ingress()
     }
 }
 
-__global__ void cuda_SNP_grid_with_alleles(int total_Segs, char *sites, int *index, char **grid, char *REF_all, char *ALT_all)
+__global__ void cuda_hap_Forge_with_alleles(int total_Segs, char *sites, int *index, char *Hap_array, char *REF_all, char *ALT_all)
 {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     while (tid < total_Segs)
@@ -324,15 +325,21 @@ __global__ void cuda_SNP_grid_with_alleles(int total_Segs, char *sites, int *ind
             i++;
         }
 
-        int grid_Row = tid;
-        int grid_Column = 0;
+        // int grid_Row = tid;
+        // int grid_Column = 0;
+
+        int start_Hap = tid;
+        int stride = 0;
 
         while (i < site_End)
         {
             if (sites[i] == '0' || sites[i] == '1')
             {
-                grid[grid_Row][grid_Column] = sites[i];
-                grid_Column++;
+                char value = sites[i];
+                Hap_array[start_Hap + stride] = value;
+                stride = stride + total_Segs;
+                // grid[grid_Row][grid_Column] = sites[i];
+                // grid_Column++;
             }
             i++;
         }
@@ -341,23 +348,23 @@ __global__ void cuda_SNP_grid_with_alleles(int total_Segs, char *sites, int *ind
     }
 }
 
-__global__ void cuda_haplotype_Forge(int N, int total_Segs, char **grid, char *Hap_array)
-{
-    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+// __global__ void cuda_haplotype_Forge(int N, int total_Segs, char **grid, char *Hap_array)
+// {
+//     int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
-    while (tid < N)
-    {
-        int start = tid * total_Segs;
+//     while (tid < N)
+//     {
+//         int start = tid * total_Segs;
 
-        for (size_t stride = 0; stride < total_Segs; stride++)
-        {
-            char value = grid[stride][tid];
-            Hap_array[start + stride] = value;
-        }
+//         for (size_t stride = 0; stride < total_Segs; stride++)
+//         {
+//             char value = grid[stride][tid];
+//             Hap_array[start + stride] = value;
+//         }
 
-        tid += blockDim.x * gridDim.x;
-    }
-}
+//         tid += blockDim.x * gridDim.x;
+//     }
+// }
 
 __global__ void cuda_sequence_Generation(int sequence_Size, int num_of_Segs, int start, char *ref, char *haplotype, int *pos_Allele, int *index_Allele, char *REF, char *ALT, char *sequence_Full)
 {
@@ -432,7 +439,8 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
     int num_segregrating_Sites = total_Segregrating_sites.size();
 
     string Seg_sites = "";
-    int site_Index[num_segregrating_Sites + 1];
+    int *site_Index;
+    site_Index = (int *)malloc((num_segregrating_Sites + 1) * sizeof(int));
     site_Index[0] = 0;
 
     int *pos;
@@ -465,16 +473,15 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
     pos_INDEX.clear();
     pos_INDEX_temp.clear();
 
-    char **cuda_snp_N_grid;
+    // char **cuda_snp_N_grid;
 
-    cudaMallocManaged(&cuda_snp_N_grid, (N * num_segregrating_Sites) * sizeof(char));
-    char **tmp = (char **)malloc(num_segregrating_Sites * sizeof(tmp[0]));
-    for (int i = 0; i < num_segregrating_Sites; i++)
-    {
-        cudaMalloc((void **)&tmp[i], N * sizeof(tmp[0][0]));
-    }
-    cudaMemcpy(cuda_snp_N_grid, tmp, num_segregrating_Sites * sizeof(char *), cudaMemcpyHostToDevice);
-    free(tmp);
+    // cudaMallocManaged(&cuda_snp_N_grid, this->N * num_segregrating_Sites * sizeof(char));
+    // char **tmp = (char **)malloc(num_segregrating_Sites * sizeof(tmp[0]));
+    // for (int i = 0; i < num_segregrating_Sites; i++)
+    // {
+    //     cudaMalloc((void **)&tmp[i], this->N * sizeof(tmp[0][0]));
+    // }
+    // cudaMemcpy(cuda_snp_N_grid, tmp, num_segregrating_Sites * sizeof(char *), cudaMemcpyHostToDevice);
 
     char *cuda_full_Char;
     cudaMallocManaged(&cuda_full_Char, (Seg_sites.size() + 1) * sizeof(char));
@@ -489,9 +496,12 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
     cudaMallocManaged(&cuda_REF_char, (num_segregrating_Sites + 1) * sizeof(char));
     cudaMallocManaged(&cuda_ALT_char, (num_segregrating_Sites + 1) * sizeof(char));
 
+    char *Hap_array, *cuda_Hap_array;
+    cudaMallocManaged(&cuda_Hap_array, ((this->N * num_segregrating_Sites) + 1) * sizeof(char));
+
     // ORGANIZE into array and collect Alleles
-    cout << "STEP 1 OF 3: Sorting segegrating sites into an array" << endl;
-    cuda_SNP_grid_with_alleles<<<tot_Blocks, tot_ThreadsperBlock>>>(num_segregrating_Sites, cuda_full_Char, cuda_site_Index, cuda_snp_N_grid, cuda_REF_char, cuda_ALT_char);
+    cout << "STEP 1 OF 2: Haplotype forging from segregrating sites" << endl;
+    cuda_hap_Forge_with_alleles<<<tot_Blocks, tot_ThreadsperBlock>>>(num_segregrating_Sites, cuda_full_Char, cuda_site_Index, cuda_Hap_array, cuda_REF_char, cuda_ALT_char);
 
     cudaError_t err = cudaGetLastError();
 
@@ -502,6 +512,9 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
         // Possibly: exit(-1) if program cannot continue....
     }
     cudaDeviceSynchronize();
+    // cout << "STEP 1 OF 2: Haplotype forging from segregrating sites" << endl;
+    Hap_array = (char *)malloc(((this->N * num_segregrating_Sites) + 1) * sizeof(char));
+    cudaMemcpy(Hap_array, cuda_Hap_array, ((this->N * num_segregrating_Sites) + 1) * sizeof(char), cudaMemcpyDeviceToHost);
 
     // REF_char = (char *)malloc((num_segregrating_Sites + 1) * sizeof(char));
     // ALT_char = (char *)malloc((num_segregrating_Sites + 1) * sizeof(char));
@@ -513,31 +526,27 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
     cudaFree(cuda_site_Index);
 
     free(full_Char);
+    free(site_Index);
 
     // CONCAT
-    char *Hap_array, *cuda_Hap_array;
-    Hap_array = (char *)malloc(((N * num_segregrating_Sites) + 1) * sizeof(char));
-    cudaMallocManaged(&cuda_Hap_array, ((N * num_segregrating_Sites) + 1) * sizeof(char));
 
-    cout << "STEP 2 OF 3: Forging haplotypes" << endl;
-    cuda_haplotype_Forge<<<tot_Blocks, tot_ThreadsperBlock>>>(N, num_segregrating_Sites, cuda_snp_N_grid, cuda_Hap_array);
+    // cout << "STEP 2 OF 3: Forging haplotypes" << endl;
+    // cuda_haplotype_Forge<<<tot_Blocks, tot_ThreadsperBlock>>>(this->N, num_segregrating_Sites, cuda_snp_N_grid, cuda_Hap_array);
 
-    // cudaError_t err = cudaGetLastError();
+    // // cudaError_t err = cudaGetLastError();
 
-    if (err != cudaSuccess)
-    {
-        printf("CUDA Error: %s\n", cudaGetErrorString(err));
+    // if (err != cudaSuccess)
+    // {
+    //     printf("CUDA Error: %s\n", cudaGetErrorString(err));
 
-        // Possibly: exit(-1) if program cannot continue....
-    }
-    cudaDeviceSynchronize();
-
-    cudaMemcpy(Hap_array, cuda_Hap_array, ((N * num_segregrating_Sites) + 1) * sizeof(char), cudaMemcpyDeviceToHost);
+    //     // Possibly: exit(-1) if program cannot continue....
+    // }
+    // cudaDeviceSynchronize();
 
     string haplotypes(Hap_array);
     vector<string> Haplotypes_All;
 
-    for (int i = 0; i < (num_segregrating_Sites * N); i = i + num_segregrating_Sites)
+    for (int i = 0; i < (num_segregrating_Sites * this->N); i = i + num_segregrating_Sites)
     {
         // cout << ext_Haplotypes.substr(i, num_segregrating_Sites) << endl;
         Haplotypes_All.push_back(haplotypes.substr(i, num_segregrating_Sites));
@@ -558,7 +567,7 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
     int sequence_Size = end_Pos - start_Pos + 1;
     int HAP_ID = 0;
 
-    cout << "STEP 3 OF 3: Detecting unique haplotypes and synthesizing their sequences" << endl;
+    cout << "STEP 2 OF 2: Detecting unique haplotypes and synthesizing their sequences" << endl;
     for (size_t query = 0; query < Haplotypes_All.size(); query++)
     {
         if (binary_search(found.begin(), found.end(), query) == false)
@@ -667,10 +676,12 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
     cudaFree(cuda_pos_Allele);
     cudaFree(cuda_REF_char);
     cudaFree(cuda_ALT_char);
-    cudaFree(cuda_snp_N_grid);
+    // cudaFree(cuda_snp_N_grid);
     cudaFree(cuda_Hap_array);
 
     free(index_Allele);
     free(pos_Allele);
     free(Hap_array);
+    free(pos);
+    // free(tmp);
 }

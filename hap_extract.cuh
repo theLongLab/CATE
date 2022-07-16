@@ -33,7 +33,7 @@ private:
     int tot_ThreadsperBlock;
 
     char *cuda_reference;
-    int reference_size;
+    // int reference_size;
 
 public:
     hap_extract(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy, string reference_File);
