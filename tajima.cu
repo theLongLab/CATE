@@ -78,8 +78,8 @@ tajima::tajima(string gene_List, string input_Folder, string ouput_Path, int cud
 
 tajima::tajima(string calc_Mode, int window_Size, int step_Size, string input_Folder, string ouput_Path, int cuda_ID, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run)
 {
-    //PROMETHEUS WINDOW MODE CONSTRUCTOR
-    
+    // PROMETHEUS WINDOW MODE CONSTRUCTOR
+
     cout << "Initiating CUDA powered Tajima's D calculator on PROMETHEUS" << endl
          << endl;
     this->calc_Mode = "WINDOW";
@@ -189,7 +189,6 @@ void tajima::ingress()
         }
         else
         {
-
             string output_File = ouput_Path + "/" +
                                  country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
                                  filesystem::path(gene_List).stem().string() +

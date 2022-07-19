@@ -218,7 +218,7 @@ void prometheus::process_Window(string test)
     int start_Co = 0;
     int end_Co = start_Co + window_Size;
 
-    while (((start_Value >= start_Co) && (start_Value <= end_Co)) == 0)
+    while (start_Value > end_Co)
     {
         start_Co = start_Co + step_Size;
         end_Co = start_Co + window_Size;
