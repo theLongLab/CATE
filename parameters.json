@@ -17,7 +17,7 @@
     "CPU cores":10,
     "SNPs per time":1000,
     "Number of genes":2,
-    "Multi read":"No",
+    "Multi read":"Yes",
 
     # VCF sample details
     "Ploidy":2,
@@ -27,6 +27,12 @@
     "Start codon(s)":"ATG",
     "Stop codon(s)":"TAA,TAG,TGA",
     "Genetic code":"A|GCT,GCC,GCA,GCG;R|CGT,CGC,CGA,CGG,AGA,AGG;N|AAT,AAC;D|GAT,GAC;B|AAT,AAC,GAT,GAC;C|TGT,TGC;Q|CAA,CAG;E|GAA,GAG;Z|CAA,CAG,GAA,GAG;G|GGT,GGC,GGA,GGG;H|CAT,CAC;M|ATG;I|ATT,ATC,ATA;L|CTT,CTC,CTA,CTG,TTA,TTG;K|AAA,AAG;F|TTT,TTC;P|CCT,CCC,CCA,CCG;S|TCT,TCC,TCA,TCG,AGT,AGC;T|ACT,ACC,ACA,ACG;W|TGG;Y|TAT,TAC;V|GTT,GTC,GTA,GTG;X|TAA,TGA,TAG",
+
+    # Neutrality and FST calculation mode
+    # Calculation mode can be FILE (to calculate the tests for predefined regions) or WINDOW
+    "Calculation mode":"WINDOW",
+    "Window size":1000,
+    "Step size":1000,
 
     # Any tab-deliminated text based formats such as but not limited to (*.txt, *.csv)
     "Universal gene list":"test_san.txt",

@@ -50,6 +50,26 @@ fay_wu::fay_wu(string gene_List, string input_Folder, string ouput_Path, int cud
      this->number_of_genes = number_of_genes;
 }
 
+fay_wu::fay_wu(string calc_Mode, int window_Size, int step_Size, string input_Folder, string ouput_Path, int cuda_ID, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run)
+{
+     // PROMETHEUS WINDOW MODE
+     cout << "Initiating CUDA powered Fay and Wu's normalized H and E calculator on PROMETHEUS" << endl
+          << endl;
+
+     this->calc_Mode = "WINDOW";
+     set_Values("", input_Folder, ouput_Path, cuda_ID, "", ploidy);
+
+     this->window_Size = window_Size;
+     this->step_Size = step_Size;
+
+     this->prometheus_Activate = "YES";
+     this->CPU_cores = CPU_cores;
+     this->SNPs_per_Run = SNPs_per_Run;
+     transform(Multi_read.begin(), Multi_read.end(), Multi_read.begin(), ::toupper);
+     this->Multi_read = Multi_read;
+     this->number_of_genes = number_of_genes;
+}
+
 void fay_wu::set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
      this->gene_List = gene_List;
@@ -119,271 +139,283 @@ void fay_wu::ingress()
           cout << endl;
 
           float an, bn, bn_plus1;
-
           calc_Pre(an, bn, bn_plus1, N);
-
-          fstream gene_File;
-          gene_File.open(gene_List, ios::in);
-          cout << "Processing gene list:" << endl;
-          string output_File = ouput_Path + "/" +
-                               country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
-                               filesystem::path(gene_List).stem().string() +
-                               ".fw";
-          string intermediate_File = intermediate_Path + "/" +
-                                     country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
-                                     filesystem::path(gene_List).stem().string() +
-                                     ".log_fw";
-          cout << endl;
-          cout << "Writing to file\t: " << output_File << endl;
-          cout << endl;
-
-          if (gene_File.is_open())
+          
+          if (this->calc_Mode != "FILE")
           {
-               string gene_Combo;
+               string output_File = ouput_Path + "/" +
+                                    country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
+                                    to_string(window_Size) + "_" + to_string(step_Size) +
+                                    ".fw";
 
-               if (filesystem::exists(output_File) == 0)
+               prometheus pro_Fay_Wu_Window = prometheus(output_File, window_Size, step_Size, folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, bn, bn_plus1);
+               pro_Fay_Wu_Window.process_Window("FA");
+          }
+          else
+          {
+               fstream gene_File;
+               gene_File.open(gene_List, ios::in);
+               cout << "Processing gene list:" << endl;
+               string output_File = ouput_Path + "/" +
+                                    country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
+                                    filesystem::path(gene_List).stem().string() +
+                                    ".fw";
+               string intermediate_File = intermediate_Path + "/" +
+                                          country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
+                                          filesystem::path(gene_List).stem().string() +
+                                          ".log_fw";
+               cout << endl;
+               cout << "Writing to file\t: " << output_File << endl;
+               cout << endl;
+
+               if (gene_File.is_open())
                {
-                    function.createFile(output_File, "Gene_name\tCoordinates\tPi\tS\tTotal_iEi\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E");
-                    function.createFile(intermediate_File);
-               }
-               else
-               {
-                    fstream intermediate;
-                    intermediate.open(intermediate_File, ios::in);
-                    string get_finished;
-                    while (getline(intermediate, get_finished))
+                    string gene_Combo;
+
+                    if (filesystem::exists(output_File) == 0)
                     {
-                         getline(gene_File, gene_Combo);
-                         if (gene_Combo != get_finished)
-                         {
-                              break;
-                         }
+                         function.createFile(output_File, "Gene_name\tCoordinates\tPi\tS\tTotal_iEi\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E");
+                         function.createFile(intermediate_File);
                     }
-                    intermediate.close();
-               }
-               fstream output;
-               fstream intermediate;
-               output.open(output_File, ios::app);
-               intermediate.open(intermediate_File, ios::app);
-
-               // PROMETHEUS HERE
-               if (prometheus_Activate == "YES")
-               {
-                    string test = "FA";
-                    cout << "Initializing Prometheus:" << endl
-                         << endl;
-
-                    prometheus pro_Fay_Wu = prometheus(folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, bn, bn_plus1);
-                    vector<string> gene_Collect;
-
-                    while (getline(gene_File, gene_Combo))
+                    else
                     {
-                         gene_Collect.push_back(gene_Combo);
-                         if (gene_Collect.size() == number_of_genes)
+                         fstream intermediate;
+                         intermediate.open(intermediate_File, ios::in);
+                         string get_finished;
+                         while (getline(intermediate, get_finished))
                          {
+                              getline(gene_File, gene_Combo);
+                              if (gene_Combo != get_finished)
+                              {
+                                   break;
+                              }
+                         }
+                         intermediate.close();
+                    }
+                    fstream output;
+                    fstream intermediate;
+                    output.open(output_File, ios::app);
+                    intermediate.open(intermediate_File, ios::app);
+
+                    // PROMETHEUS HERE
+                    if (prometheus_Activate == "YES")
+                    {
+                         string test = "FA";
+                         cout << "Initializing Prometheus:" << endl
+                              << endl;
+
+                         prometheus pro_Fay_Wu = prometheus(folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, bn, bn_plus1);
+                         vector<string> gene_Collect;
+
+                         while (getline(gene_File, gene_Combo))
+                         {
+                              gene_Collect.push_back(gene_Combo);
+                              if (gene_Collect.size() == number_of_genes)
+                              {
+                                   cout << "Prometheus batch intialized" << endl;
+                                   cout << "From: " << gene_Collect[0] << endl;
+                                   cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
+                                        << endl;
+                                   // launch prometheus
+                                   vector<string> write_Lines = pro_Fay_Wu.collection_Engine(gene_Collect, test);
+                                   // print
+                                   cout << "System is writing Fay and Wu results" << endl;
+                                   for (size_t i = 0; i < write_Lines.size(); i++)
+                                   {
+                                        output << write_Lines[i] << "\n";
+                                        intermediate << gene_Combo << "\n";
+                                   }
+                                   // clear prometheus
+                                   output.flush();
+                                   intermediate.flush();
+                                   pro_Fay_Wu.erase();
+                                   gene_Collect.clear();
+                                   cout << endl;
+                              }
+                         }
+                         if (gene_Collect.size() != 0)
+                         {
+                              // RUN PROMETHEUS for remaining
+                              // launch prometheus
                               cout << "Prometheus batch intialized" << endl;
                               cout << "From: " << gene_Collect[0] << endl;
                               cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
                                    << endl;
-                              // launch prometheus
+
                               vector<string> write_Lines = pro_Fay_Wu.collection_Engine(gene_Collect, test);
                               // print
                               cout << "System is writing Fay and Wu results" << endl;
                               for (size_t i = 0; i < write_Lines.size(); i++)
                               {
-                                   output << write_Lines[i] << "\n";
-                                   intermediate << gene_Combo << "\n";
-                              }
-                              // clear prometheus
-                              output.flush();
-                              intermediate.flush();
-                              pro_Fay_Wu.erase();
-                              gene_Collect.clear();
-                              cout << endl;
-                         }
-                    }
-                    if (gene_Collect.size() != 0)
-                    {
-                         // RUN PROMETHEUS for remaining
-                         // launch prometheus
-                         cout << "Prometheus batch intialized" << endl;
-                         cout << "From: " << gene_Collect[0] << endl;
-                         cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
-                              << endl;
-
-                         vector<string> write_Lines = pro_Fay_Wu.collection_Engine(gene_Collect, test);
-                         // print
-                         cout << "System is writing Fay and Wu results" << endl;
-                         for (size_t i = 0; i < write_Lines.size(); i++)
-                         {
-                              if (write_Lines[i] != "")
-                              {
-                                   output << write_Lines[i] << "\n";
-                                   intermediate << gene_Combo << "\n";
-                              }
-                         }
-                         cout << endl;
-                    }
-
-                    output.flush();
-                    intermediate.flush();
-                    pro_Fay_Wu.erase();
-                    gene_Collect.clear();
-               }
-               else
-               {
-                    while (getline(gene_File, gene_Combo))
-                    {
-                         vector<string> split_Data;
-                         function.split(split_Data, gene_Combo, '\t');
-                         string gene_Name = split_Data[0];
-                         cout << "Gene name\t: " << gene_Name << endl;
-                         vector<string> coordinates;
-                         function.split(coordinates, split_Data[1], ':');
-                         int start_Co = stoi(coordinates[1]);
-                         int end_Co = stoi(coordinates[2]);
-                         cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
-
-                         float tot_pairwise_Differences = 0;
-                         vector<string> collect_Segregrating_sites;
-
-                         vector<string> file_List;
-                         cout << endl;
-                         cout << "System is retrieving file(s)" << endl;
-                         if (folder_Index.size() > 1)
-                         {
-                              file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
-                         }
-                         else
-                         {
-                              file_List.push_back(folder_Index[0].second);
-                         }
-                         cout << "System has retrieved all file(s)" << endl;
-                         cout << endl;
-
-                         cout << "System is collecting segregrating site(s)" << endl;
-                         for (string files : file_List)
-                         {
-                              fstream file;
-                              file.open(files, ios::in);
-                              if (file.is_open())
-                              {
-                                   string line;
-                                   getline(file, line); // skip first header line
-                                   while (getline(file, line))
+                                   if (write_Lines[i] != "")
                                    {
-                                        vector<string> positions;
-                                        function.split_getPos_ONLY(positions, line, '\t');
-                                        int pos = stoi(positions[1]);
-
-                                        if (pos >= start_Co && pos <= end_Co)
-                                        {
-                                             collect_Segregrating_sites.push_back(line);
-
-                                             // string check_0 = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF=0";
-                                             // string seg_Check = "GO";
-                                             // vector<string> info;
-                                             // function.split(info, positions[7], ";");
-                                             // for (string AF_check : info)
-                                             // {
-                                             //      if (AF_check == check_0)
-                                             //      {
-                                             //           seg_Check = "NO";
-                                             //           break;
-                                             //      }
-                                             // }
-                                             // if (seg_Check == "GO")
-                                             // {
-                                             //      string check_AF_country = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF";
-                                             //      float MAF_float = 0.0000;
-                                             //      // collect_Segregrating_sites.push_back(line);
-                                             //      for (string AF_check : info)
-                                             //      {
-                                             //           vector<string> split_info;
-                                             //           function.split(split_info, AF_check, "=");
-                                             //           if (split_info[0] == check_AF_country)
-                                             //           {
-                                             //                MAF_float = stof(split_info[1]);
-                                             //                if (MAF_float > 0.5)
-                                             //                {
-                                             //                     MAF_float = 1 - MAF_float;
-                                             //                }
-                                             //                break;
-                                             //           }
-                                             //      }
-                                             //      tot_pairwise_Differences = tot_pairwise_Differences + (MAF_float * (1 - MAF_float) * pow(N_float, 2));
-                                             // }
-                                        }
-                                        else if (pos > end_Co)
-                                        {
-                                             break;
-                                        }
+                                        output << write_Lines[i] << "\n";
+                                        intermediate << gene_Combo << "\n";
                                    }
-                                   file.close();
                               }
-                         }
-
-                         int num_segregrating_Sites;
-                         string Fay_Wu_H, Fay_Wu_E;
-                         float pi = 0.0;
-                         int Total_iEi = 0;
-
-                         float theta_L = calc_theta_L(collect_Segregrating_sites, N_float, num_segregrating_Sites, Total_iEi, tot_pairwise_Differences);
-
-                         cout << "Total segregating sites (S)\t: " << num_segregrating_Sites << endl;
-                         cout << endl;
-                         if (num_segregrating_Sites != 0)
-                         {
-                              float S = (float)num_segregrating_Sites;
-                              float theta_squared = (float)(S * (S - 1)) / (pow(an, 2) + bn);
-                              cout << "Theta_squared\t: " << theta_squared << endl;
-                              cout << "Theta_L\t: " << theta_L << endl;
-                              float theta_W = (float)S / an;
-                              cout << "Theta_W\t: " << theta_W << endl;
-                              pi = (float)tot_pairwise_Differences / combinations;
-                              cout << "Average pairwise polymorphisms (pi)\t: " << pi << endl;
                               cout << endl;
-
-                              float VAR_pi_MINUS_theta_L = (float)(((N_float - 2.0) / (6.0 * (N_float - 1.0))) * theta_W) + ((((18.0 * pow(N_float, 2) * ((3.0 * N_float) + 2.0) * bn_plus1) - ((88.0 * pow(N_float, 3)) + (9.0 * pow(N_float, 2)) - (13.0 * N_float) + 6.0)) / (9.0 * N_float * pow(N_float - 1, 2))) * theta_squared);
-                              // cout << "VAR_pi_MINUS_theta_L: " << VAR_pi_MINUS_theta_L << endl;
-                              float VAR_theta_L_MINUS_theta_W = (float)(((N_float / (2.0 * (N_float - 1.0))) - (1.0 / an)) * theta_W) + (((bn / (pow(an, 2))) + (2.0 * pow((N_float / (N_float - 1.0)), 2) * bn) - ((2.0 * ((N_float * bn) - N_float + 1.0)) / ((N_float - 1.0) * an)) - (((3.0 * N_float) + 1) / (N_float - 1.0))) * theta_squared);
-                              // cout << "VAR_theta_L_MINUS_theta_W: " << VAR_theta_L_MINUS_theta_W << endl;
-
-                              float H = (float)(pi - theta_L) / (sqrt(VAR_pi_MINUS_theta_L));
-                              Fay_Wu_H = to_string(H);
-                              cout << "Fay and Wu's normalized H\t: " << Fay_Wu_H << endl;
-                              float E = (float)(theta_L - theta_W) / (sqrt(VAR_theta_L_MINUS_theta_W));
-                              Fay_Wu_E = to_string(E);
-                              cout << "Fay and Wu's normalized E\t: " << Fay_Wu_E << endl;
-                         }
-                         else
-                         {
-                              cout << "Fay and Wu's H and E\t: "
-                                   << "Not Available" << endl;
-                              Fay_Wu_H = "NA";
-                              Fay_Wu_E = "NA";
                          }
 
-                         cout << endl;
-
-                         // Gene_name\tCoordinates\tPi\tS\tTotal_iEi\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E
-                         output << gene_Name << "\t"
-                                << coordinates[0] << ":" << to_string(start_Co) << ":" << to_string(end_Co)
-                                << "\t" << to_string(pi)
-                                << "\t" << to_string(num_segregrating_Sites)
-                                << "\t" << to_string(Total_iEi)
-
-                                << "\t" << Fay_Wu_H
-                                << "\t" << Fay_Wu_E << "\n";
-
-                         intermediate << gene_Combo << "\n";
                          output.flush();
                          intermediate.flush();
+                         pro_Fay_Wu.erase();
+                         gene_Collect.clear();
                     }
+                    else
+                    {
+                         while (getline(gene_File, gene_Combo))
+                         {
+                              vector<string> split_Data;
+                              function.split(split_Data, gene_Combo, '\t');
+                              string gene_Name = split_Data[0];
+                              cout << "Gene name\t: " << gene_Name << endl;
+                              vector<string> coordinates;
+                              function.split(coordinates, split_Data[1], ':');
+                              int start_Co = stoi(coordinates[1]);
+                              int end_Co = stoi(coordinates[2]);
+                              cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
+
+                              float tot_pairwise_Differences = 0;
+                              vector<string> collect_Segregrating_sites;
+
+                              vector<string> file_List;
+                              cout << endl;
+                              cout << "System is retrieving file(s)" << endl;
+                              if (folder_Index.size() > 1)
+                              {
+                                   file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
+                              }
+                              else
+                              {
+                                   file_List.push_back(folder_Index[0].second);
+                              }
+                              cout << "System has retrieved all file(s)" << endl;
+                              cout << endl;
+
+                              cout << "System is collecting segregrating site(s)" << endl;
+                              for (string files : file_List)
+                              {
+                                   fstream file;
+                                   file.open(files, ios::in);
+                                   if (file.is_open())
+                                   {
+                                        string line;
+                                        getline(file, line); // skip first header line
+                                        while (getline(file, line))
+                                        {
+                                             vector<string> positions;
+                                             function.split_getPos_ONLY(positions, line, '\t');
+                                             int pos = stoi(positions[1]);
+
+                                             if (pos >= start_Co && pos <= end_Co)
+                                             {
+                                                  collect_Segregrating_sites.push_back(line);
+
+                                                  // string check_0 = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF=0";
+                                                  // string seg_Check = "GO";
+                                                  // vector<string> info;
+                                                  // function.split(info, positions[7], ";");
+                                                  // for (string AF_check : info)
+                                                  // {
+                                                  //      if (AF_check == check_0)
+                                                  //      {
+                                                  //           seg_Check = "NO";
+                                                  //           break;
+                                                  //      }
+                                                  // }
+                                                  // if (seg_Check == "GO")
+                                                  // {
+                                                  //      string check_AF_country = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF";
+                                                  //      float MAF_float = 0.0000;
+                                                  //      // collect_Segregrating_sites.push_back(line);
+                                                  //      for (string AF_check : info)
+                                                  //      {
+                                                  //           vector<string> split_info;
+                                                  //           function.split(split_info, AF_check, "=");
+                                                  //           if (split_info[0] == check_AF_country)
+                                                  //           {
+                                                  //                MAF_float = stof(split_info[1]);
+                                                  //                if (MAF_float > 0.5)
+                                                  //                {
+                                                  //                     MAF_float = 1 - MAF_float;
+                                                  //                }
+                                                  //                break;
+                                                  //           }
+                                                  //      }
+                                                  //      tot_pairwise_Differences = tot_pairwise_Differences + (MAF_float * (1 - MAF_float) * pow(N_float, 2));
+                                                  // }
+                                             }
+                                             else if (pos > end_Co)
+                                             {
+                                                  break;
+                                             }
+                                        }
+                                        file.close();
+                                   }
+                              }
+
+                              int num_segregrating_Sites;
+                              string Fay_Wu_H, Fay_Wu_E;
+                              float pi = 0.0;
+                              int Total_iEi = 0;
+
+                              float theta_L = calc_theta_L(collect_Segregrating_sites, N_float, num_segregrating_Sites, Total_iEi, tot_pairwise_Differences);
+
+                              cout << "Total segregating sites (S)\t: " << num_segregrating_Sites << endl;
+                              cout << endl;
+                              if (num_segregrating_Sites != 0)
+                              {
+                                   float S = (float)num_segregrating_Sites;
+                                   float theta_squared = (float)(S * (S - 1)) / (pow(an, 2) + bn);
+                                   cout << "Theta_squared\t: " << theta_squared << endl;
+                                   cout << "Theta_L\t: " << theta_L << endl;
+                                   float theta_W = (float)S / an;
+                                   cout << "Theta_W\t: " << theta_W << endl;
+                                   pi = (float)tot_pairwise_Differences / combinations;
+                                   cout << "Average pairwise polymorphisms (pi)\t: " << pi << endl;
+                                   cout << endl;
+
+                                   float VAR_pi_MINUS_theta_L = (float)(((N_float - 2.0) / (6.0 * (N_float - 1.0))) * theta_W) + ((((18.0 * pow(N_float, 2) * ((3.0 * N_float) + 2.0) * bn_plus1) - ((88.0 * pow(N_float, 3)) + (9.0 * pow(N_float, 2)) - (13.0 * N_float) + 6.0)) / (9.0 * N_float * pow(N_float - 1, 2))) * theta_squared);
+                                   // cout << "VAR_pi_MINUS_theta_L: " << VAR_pi_MINUS_theta_L << endl;
+                                   float VAR_theta_L_MINUS_theta_W = (float)(((N_float / (2.0 * (N_float - 1.0))) - (1.0 / an)) * theta_W) + (((bn / (pow(an, 2))) + (2.0 * pow((N_float / (N_float - 1.0)), 2) * bn) - ((2.0 * ((N_float * bn) - N_float + 1.0)) / ((N_float - 1.0) * an)) - (((3.0 * N_float) + 1) / (N_float - 1.0))) * theta_squared);
+                                   // cout << "VAR_theta_L_MINUS_theta_W: " << VAR_theta_L_MINUS_theta_W << endl;
+
+                                   float H = (float)(pi - theta_L) / (sqrt(VAR_pi_MINUS_theta_L));
+                                   Fay_Wu_H = to_string(H);
+                                   cout << "Fay and Wu's normalized H\t: " << Fay_Wu_H << endl;
+                                   float E = (float)(theta_L - theta_W) / (sqrt(VAR_theta_L_MINUS_theta_W));
+                                   Fay_Wu_E = to_string(E);
+                                   cout << "Fay and Wu's normalized E\t: " << Fay_Wu_E << endl;
+                              }
+                              else
+                              {
+                                   cout << "Fay and Wu's H and E\t: "
+                                        << "Not Available" << endl;
+                                   Fay_Wu_H = "NA";
+                                   Fay_Wu_E = "NA";
+                              }
+
+                              cout << endl;
+
+                              // Gene_name\tCoordinates\tPi\tS\tTotal_iEi\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E
+                              output << gene_Name << "\t"
+                                     << coordinates[0] << ":" << to_string(start_Co) << ":" << to_string(end_Co)
+                                     << "\t" << to_string(pi)
+                                     << "\t" << to_string(num_segregrating_Sites)
+                                     << "\t" << to_string(Total_iEi)
+
+                                     << "\t" << Fay_Wu_H
+                                     << "\t" << Fay_Wu_E << "\n";
+
+                              intermediate << gene_Combo << "\n";
+                              output.flush();
+                              intermediate.flush();
+                         }
+                    }
+                    output.close();
+                    intermediate.close();
+                    gene_File.close();
                }
-               output.close();
-               intermediate.close();
-               gene_File.close();
           }
      }
 }

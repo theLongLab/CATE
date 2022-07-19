@@ -27,7 +27,21 @@ private:
     int tot_ThreadsperBlock;
     int CPU_cores;
     int SNPs_per_Run;
-    // int number_of_genes;
+
+    int number_of_genes_Window = 0;
+
+    // string intermediate_File;
+    string output_File;
+
+    // file check
+    vector<string> prev_file_List;
+    int *pre_MA, *pre_Theta_partials, *pre_ne, *pre_ns;
+    string same_Files = "NO";
+
+    // WINDOW parameters
+    string calc_Mode = "FILE";
+    int window_Size;
+    int step_Size;
 
     long int combinations;
     int N;
@@ -77,17 +91,29 @@ private:
     // vector<int> max_Track;
 
 public:
-    // TAJIMA
+    // TAJIMA GENE FILE
     prometheus(vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, long int combinations, float an, float e1, float e2, int N, int CPU_cores, int SNPs_per_Run, int number_of_genes);
+    // TAJIMA WINDOW
+    prometheus(string output_File, int window_Size, int step_Size, vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, long int combinations, float an, float e1, float e2, int N, int CPU_cores, int SNPs_per_Run, int number_of_genes);
+
     // FU_LI
     prometheus(vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, int CPU_cores, int SNPs_per_Run, int number_of_genes, int N, long int combinations, float an, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star);
+    // FU LI WINDOW
+    prometheus(string output_File, int window_Size, int step_Size, vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, int CPU_cores, int SNPs_per_Run, int number_of_genes, int N, long int combinations, float an, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star);
+
     // FAY_WU
     prometheus(vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, int CPU_cores, int SNPs_per_Run, int number_of_genes, int N, long int combinations, float an, float bn, float bn_plus1);
+    // FAY_WU WINDOW
+    prometheus(string output_File, int window_Size, int step_Size, vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, int CPU_cores, int SNPs_per_Run, int number_of_genes, int N, long int combinations, float an, float bn, float bn_plus1);
+
     // NEUTRALITY ALL
     prometheus(vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, int CPU_cores, int SNPs_per_Run, int number_of_genes, int N, long int combinations, float an, float e1, float e2, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float bn, float bn_plus1);
+    // NEUTRALITY WINDOW
+    prometheus(string output_File, int window_Size, int step_Size, vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, int CPU_cores, int SNPs_per_Run, int number_of_genes, int N, long int combinations, float an, float e1, float e2, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float bn, float bn_plus1);
 
     // vector<string> collection_Engine(vector<string> &gene_Collect);
     vector<string> collection_Engine(vector<string> &gene_Collect, string test_Type);
+    void process_Window(string test);
 
     void get_Gene_info_and_catch(string gene_Combo, int gene_ID);
     void forward_Search(int pos, int start_Co, int end_Co, int gene_ID);
@@ -120,5 +146,7 @@ public:
     void calc_Neutrality_Segs(int gene_ID, int *MA_Count, int *ne, int *ns, int *Theta_partials);
 
     void erase();
+    void intialize(vector<pair<int, int>> &coordinates);
     void set_Values(vector<pair<string, string>> folder_Index, int tot_Blocks, int tot_ThreadsperBlock, string Multi_read, int CPU_cores, int SNPs_per_Run, int number_of_genes);
+    void set_Values_Window(string output_File, int window_Size, int step_Size, int number_of_genes_Window);
 };

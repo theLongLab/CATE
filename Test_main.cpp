@@ -171,24 +171,47 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--tajima" || function == "-t")
                          {
-                              string gene_List = properties.where("Tajima gene list");
-                              if (gene_List == "universal")
-                              {
-                                   gene_List = properties.where("Universal gene list");
-                              }
-
                               string prometheus_Activate = properties.where("Prometheus activate");
                               transform(prometheus_Activate.begin(), prometheus_Activate.end(), prometheus_Activate.begin(), ::toupper);
 
+                              string calc_Mode = properties.where("Calculation mode");
+                              transform(calc_Mode.begin(), calc_Mode.end(), calc_Mode.begin(), ::toupper);
+
+                              string gene_List;
+                              if (calc_Mode == "FILE")
+                              {
+                                   gene_List = properties.where("Tajima gene list");
+                                   if (gene_List == "universal")
+                                   {
+                                        gene_List = properties.where("Universal gene list");
+                                   }
+                              }
+
                               if (prometheus_Activate != "YES")
                               {
-                                   tajima tajimasD = tajima(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
-                                   tajimasD.ingress();
+                                   if (calc_Mode == "FILE")
+                                   {
+                                        tajima tajimasD = tajima(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                                        tajimasD.ingress();
+                                   }
+                                   else
+                                   {
+                                        cout << "ERROR: FOR WINDOW MODE PROMETHEUS NEEDS TO BE ACTIVATED" << endl;
+                                   }
                               }
                               else
                               {
-                                   tajima tajimasD_Prometheus = tajima(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
-                                   tajimasD_Prometheus.ingress();
+                                   if (calc_Mode == "FILE")
+                                   {
+                                        tajima tajimasD_Prometheus = tajima(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
+                                        tajimasD_Prometheus.ingress();
+                                   }
+                                   else
+                                   {
+                                        // WINDOW MODE
+                                        tajima tajimasD_Prometheus_Window = tajima(calc_Mode, properties.where_Int("Window size"), properties.where_Int("Step size"), properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
+                                        tajimasD_Prometheus_Window.ingress();
+                                   }
                               }
 
                               cout << endl
@@ -196,24 +219,47 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--fuli" || function == "-f")
                          {
-                              string gene_List = properties.where("Fu and Li gene list");
-                              if (gene_List == "universal")
-                              {
-                                   gene_List = properties.where("Universal gene list");
-                              }
-
                               string prometheus_Activate = properties.where("Prometheus activate");
                               transform(prometheus_Activate.begin(), prometheus_Activate.end(), prometheus_Activate.begin(), ::toupper);
 
+                              string calc_Mode = properties.where("Calculation mode");
+                              transform(calc_Mode.begin(), calc_Mode.end(), calc_Mode.begin(), ::toupper);
+
+                              string gene_List;
+                              if (calc_Mode == "FILE")
+                              {
+                                   gene_List = properties.where("Fu and Li gene list");
+                                   if (gene_List == "universal")
+                                   {
+                                        gene_List = properties.where("Universal gene list");
+                                   }
+                              }
+
                               if (prometheus_Activate != "YES")
                               {
-                                   fu_li fuli = fu_li(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
-                                   fuli.ingress();
+                                   if (calc_Mode == "FILE")
+                                   {
+                                        fu_li fuli = fu_li(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                                        fuli.ingress();
+                                   }
+                                   else
+                                   {
+                                        cout << "ERROR: FOR WINDOW MODE PROMETHEUS NEEDS TO BE ACTIVATED" << endl;
+                                   }
                               }
                               else
                               {
-                                   fu_li fuli_Prometheus = fu_li(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
-                                   fuli_Prometheus.ingress();
+                                   if (calc_Mode == "FILE")
+                                   {
+                                        fu_li fuli_Prometheus = fu_li(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
+                                        fuli_Prometheus.ingress();
+                                   }
+                                   else
+                                   {
+                                        // WINDOW MODE
+                                        fu_li fuli_Prometheus_Window = fu_li(calc_Mode, properties.where_Int("Window size"), properties.where_Int("Step size"), properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
+                                        fuli_Prometheus_Window.ingress();
+                                   }
                               }
 
                               cout << "CUDA powered Fu and Li's D, D*, F and F* calculator has been completed." << endl;
@@ -221,48 +267,94 @@ int main(int argc, char *argv[])
 
                          else if (function == "--faywu" || function == "-w")
                          {
-                              string gene_List = properties.where("Fay and Wu gene list");
-                              if (gene_List == "universal")
-                              {
-                                   gene_List = properties.where("Universal gene list");
-                              }
-
                               string prometheus_Activate = properties.where("Prometheus activate");
                               transform(prometheus_Activate.begin(), prometheus_Activate.end(), prometheus_Activate.begin(), ::toupper);
 
+                              string calc_Mode = properties.where("Calculation mode");
+                              transform(calc_Mode.begin(), calc_Mode.end(), calc_Mode.begin(), ::toupper);
+
+                              string gene_List;
+                              if (calc_Mode == "FILE")
+                              {
+                                   gene_List = properties.where("Fay and Wu gene list");
+                                   if (gene_List == "universal")
+                                   {
+                                        gene_List = properties.where("Universal gene list");
+                                   }
+                              }
+
                               if (prometheus_Activate != "YES")
                               {
-                                   fay_wu faywu = fay_wu(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
-                                   faywu.ingress();
+                                   if (calc_Mode == "FILE")
+                                   {
+                                        fay_wu faywu = fay_wu(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                                        faywu.ingress();
+                                   }
+                                   else
+                                   {
+                                        cout << "ERROR: FOR WINDOW MODE PROMETHEUS NEEDS TO BE ACTIVATED" << endl;
+                                   }
                               }
                               else
                               {
-                                   fay_wu faywu_Prometheus = fay_wu(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
-                                   faywu_Prometheus.ingress();
+                                   if (calc_Mode == "FILE")
+                                   {
+                                        fay_wu faywu_Prometheus = fay_wu(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
+                                        faywu_Prometheus.ingress();
+                                   }
+                                   else
+                                   {
+                                        // WINDOW MODE
+                                        fay_wu faywu_Prometheus_Window = fay_wu(calc_Mode, properties.where_Int("Window size"), properties.where_Int("Step size"), properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
+                                        faywu_Prometheus_Window.ingress();
+                                   }
                               }
 
                               cout << "CUDA powered Fay and Wu's normalized H and E calculator has been completed." << endl;
                          }
                          else if (function == "--neutrality" || function == "-n")
                          {
-                              string gene_List = properties.where("Neutrality gene list");
-                              if (gene_List == "universal")
-                              {
-                                   gene_List = properties.where("Universal gene list");
-                              }
-
                               string prometheus_Activate = properties.where("Prometheus activate");
                               transform(prometheus_Activate.begin(), prometheus_Activate.end(), prometheus_Activate.begin(), ::toupper);
 
+                              string calc_Mode = properties.where("Calculation mode");
+                              transform(calc_Mode.begin(), calc_Mode.end(), calc_Mode.begin(), ::toupper);
+
+                              string gene_List;
+                              if (calc_Mode == "FILE")
+                              {
+                                   gene_List = properties.where("Neutrality gene list");
+                                   if (gene_List == "universal")
+                                   {
+                                        gene_List = properties.where("Universal gene list");
+                                   }
+                              }
+
                               if (prometheus_Activate != "YES")
                               {
-                                   neutral neutrality = neutral(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
-                                   neutrality.ingress();
+                                   if (calc_Mode == "FILE")
+                                   {
+                                        neutral neutrality = neutral(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                                        neutrality.ingress();
+                                   }
+                                   else
+                                   {
+                                        cout << "ERROR: FOR WINDOW MODE PROMETHEUS NEEDS TO BE ACTIVATED" << endl;
+                                   }
                               }
                               else
                               {
-                                   neutral neutrality_Prometheus = neutral(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
-                                   neutrality_Prometheus.ingress();
+                                   if (calc_Mode == "FILE")
+                                   {
+                                        neutral neutrality_Prometheus = neutral(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
+                                        neutrality_Prometheus.ingress();
+                                   }
+                                   else
+                                   {
+                                        // WINDOW MODE
+                                        neutral neutrality_Prometheus = neutral(calc_Mode, properties.where_Int("Window size"), properties.where_Int("Step size"), properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
+                                        neutrality_Prometheus.ingress();
+                                   }
                               }
 
                               cout << "CUDA powered complete neutrality test calculator has completed" << endl;

@@ -16,6 +16,10 @@ using namespace std;
 class tajima
 {
 private:
+    string calc_Mode = "FILE";
+    int window_Size = 0;
+    int step_Size = 0;
+
     string gene_List;
     string input_Folder;
     string ouput_Path;
@@ -34,8 +38,14 @@ private:
 
 public:
     tajima();
+    // Normal GENE mode
     tajima(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy);
+    // PROMETHEUS GENE mode
     tajima(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run);
+    // WINDOW mode PROMETHEUS
+    tajima(string calc_Mode, int window_Size, int step_Size, string input_Folder, string ouput_Path, int cuda_ID, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run);
+
+    void set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy);
     void ingress();
 
     vector<string> get_Countries();

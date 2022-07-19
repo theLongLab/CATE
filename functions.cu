@@ -656,7 +656,7 @@ vector<string> functions::compound_interpolationSearch(vector<pair<string, strin
     int start = 0;
     int end = folder_Index.size() - 1;
 
-    while (start <= end && start_Co >= low_Value && start_Co <= high_Value)
+    while (start <= end && start_Co <= high_Value)
     {
         vector<string> line_Data_get;
 

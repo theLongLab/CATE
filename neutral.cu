@@ -33,6 +33,29 @@ neutral::neutral(string gene_List, string input_Folder, string output_Path, int 
      this->number_of_genes = number_of_genes;
 }
 
+neutral::neutral(string calc_Mode, int window_Size, int step_Size, string input_Folder, string output_Path, int cuda_ID, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run)
+{
+     cout << "Initiating CUDA powered complete neutrality test calculator on PROMETHEUS" << endl
+          << "The following 3 tests will be calculated: " << endl
+          << "1. Tajima's D" << endl
+          << "2. Fu and Li's D, D*, F and F*" << endl
+          << "3. Fay and Wu's normalized H and E" << endl
+          << endl;
+
+     this->calc_Mode = "WINDOW";
+     set_Values("", input_Folder, output_Path, cuda_ID, "", ploidy);
+
+     this->window_Size = window_Size;
+     this->step_Size = step_Size;
+
+     this->prometheus_Activate = "YES";
+     this->CPU_cores = CPU_cores;
+     this->SNPs_per_Run = SNPs_per_Run;
+     transform(Multi_read.begin(), Multi_read.end(), Multi_read.begin(), ::toupper);
+     this->Multi_read = Multi_read;
+     this->number_of_genes = number_of_genes;
+}
+
 void neutral::set_Values(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
      this->gene_List = gene_List;
@@ -101,307 +124,321 @@ void neutral::ingress()
           float an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1 = 0;
           get_Prerequisites(N, an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1);
 
-          cout << "Prerequisites:" << endl
-               << endl;
-
-          cout << "Common prerequisites:" << endl;
-          cout << "an: " << an << "\t"
-               << "bn: " << bn << endl
-               << endl;
-
-          cout << "Tajima's D prerequisites:" << endl;
-          cout << "e1\t: " << e1 << "\t"
-               << "e2: " << e2 << endl
-               << endl;
-
-          cout << "Fu and Li's prerequisites:" << endl;
-          cout << "ud\t: " << ud << "\t"
-               << "vd\t: " << vd << endl;
-
-          cout << "ud*\t: " << ud_star << "\t"
-               << "vd*\t: " << vd_star << endl;
-
-          cout << endl;
-
-          cout << "uf\t: " << uf << "\t"
-               << "vf\t: " << vf << endl;
-
-          cout << "uf*\t: " << uf_star << "\t"
-               << "vf*\t: " << vf_star << endl
-               << endl;
-
-          cout << "Fay and Wu Prerequisites:" << endl;
-          cout << "bn_plus_1: " << bn_plus1 << endl
-               << endl;
-
-          fstream gene_File;
-          gene_File.open(gene_List, ios::in);
-          cout << "Processing gene list:" << endl;
-          string output_File = output_Path + "/" +
-                               country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
-                               filesystem::path(gene_List).stem().string() +
-                               ".nt";
-          string intermediate_File = intermediate_Path + "/" +
-                                     country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
-                                     filesystem::path(gene_List).stem().string() +
-                                     ".log_nt";
-          cout << endl;
-          cout << "Writing to file\t: " << output_File << endl;
-          cout << endl;
-
-          if (gene_File.is_open())
+          if (this->calc_Mode != "FILE")
           {
-               string gene_Combo;
+               string output_File = output_Path + "/" +
+                                    country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
+                                    to_string(window_Size) + "_" + to_string(step_Size) +
+                                    ".nt";
 
-               if (filesystem::exists(output_File) == 0)
+               prometheus pro_Neutrality_Window = prometheus(output_File, window_Size, step_Size, folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1);
+               pro_Neutrality_Window.process_Window("N");
+          }
+          else
+          {
+
+               cout << "Prerequisites:" << endl
+                    << endl;
+
+               cout << "Common prerequisites:" << endl;
+               cout << "an: " << an << "\t"
+                    << "bn: " << bn << endl
+                    << endl;
+
+               cout << "Tajima's D prerequisites:" << endl;
+               cout << "e1\t: " << e1 << "\t"
+                    << "e2: " << e2 << endl
+                    << endl;
+
+               cout << "Fu and Li's prerequisites:" << endl;
+               cout << "ud\t: " << ud << "\t"
+                    << "vd\t: " << vd << endl;
+
+               cout << "ud*\t: " << ud_star << "\t"
+                    << "vd*\t: " << vd_star << endl;
+
+               cout << endl;
+
+               cout << "uf\t: " << uf << "\t"
+                    << "vf\t: " << vf << endl;
+
+               cout << "uf*\t: " << uf_star << "\t"
+                    << "vf*\t: " << vf_star << endl
+                    << endl;
+
+               cout << "Fay and Wu Prerequisites:" << endl;
+               cout << "bn_plus_1: " << bn_plus1 << endl
+                    << endl;
+
+               fstream gene_File;
+               gene_File.open(gene_List, ios::in);
+               cout << "Processing gene list:" << endl;
+               string output_File = output_Path + "/" +
+                                    country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
+                                    filesystem::path(gene_List).stem().string() +
+                                    ".nt";
+               string intermediate_File = intermediate_Path + "/" +
+                                          country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
+                                          filesystem::path(gene_List).stem().string() +
+                                          ".log_nt";
+               cout << endl;
+               cout << "Writing to file\t: " << output_File << endl;
+               cout << endl;
+
+               if (gene_File.is_open())
                {
-                    function.createFile(output_File, "Gene_name\tCoordinates\tPi\tS\tne\tns\tTotal_iEi\tTajimas_D\tD\tD_star\tF\tF_star\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E");
-                    function.createFile(intermediate_File);
-               }
-               else
-               {
-                    fstream intermediate;
-                    intermediate.open(intermediate_File, ios::in);
-                    string get_finished;
-                    while (getline(intermediate, get_finished))
+                    string gene_Combo;
+
+                    if (filesystem::exists(output_File) == 0)
                     {
-                         getline(gene_File, gene_Combo);
-                         if (gene_Combo != get_finished)
-                         {
-                              break;
-                         }
+                         function.createFile(output_File, "Gene_name\tCoordinates\tPi\tS\tne\tns\tTotal_iEi\tTajimas_D\tD\tD_star\tF\tF_star\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E");
+                         function.createFile(intermediate_File);
                     }
-                    intermediate.close();
-               }
-
-               fstream output;
-               fstream intermediate;
-               output.open(output_File, ios::app);
-               intermediate.open(intermediate_File, ios::app);
-
-               // PROMETHEUS HERE
-               if (prometheus_Activate == "YES")
-               {
-                    string test = "N";
-                    cout << "Initializing Prometheus:" << endl
-                         << endl;
-
-                    prometheus pro_Neutrality = prometheus(folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1);
-                    vector<string> gene_Collect;
-
-                    while (getline(gene_File, gene_Combo))
+                    else
                     {
-                         gene_Collect.push_back(gene_Combo);
-                         if (gene_Collect.size() == number_of_genes)
+                         fstream intermediate;
+                         intermediate.open(intermediate_File, ios::in);
+                         string get_finished;
+                         while (getline(intermediate, get_finished))
                          {
+                              getline(gene_File, gene_Combo);
+                              if (gene_Combo != get_finished)
+                              {
+                                   break;
+                              }
+                         }
+                         intermediate.close();
+                    }
+
+                    fstream output;
+                    fstream intermediate;
+                    output.open(output_File, ios::app);
+                    intermediate.open(intermediate_File, ios::app);
+
+                    // PROMETHEUS HERE
+                    if (prometheus_Activate == "YES")
+                    {
+                         string test = "N";
+                         cout << "Initializing Prometheus:" << endl
+                              << endl;
+
+                         prometheus pro_Neutrality = prometheus(folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1);
+                         vector<string> gene_Collect;
+
+                         while (getline(gene_File, gene_Combo))
+                         {
+                              gene_Collect.push_back(gene_Combo);
+                              if (gene_Collect.size() == number_of_genes)
+                              {
+                                   cout << "Prometheus batch intialized" << endl;
+                                   cout << "From: " << gene_Collect[0] << endl;
+                                   cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
+                                        << endl;
+                                   // launch prometheus
+                                   vector<string> write_Lines = pro_Neutrality.collection_Engine(gene_Collect, test);
+                                   // print
+                                   cout << "System is writing Neutrality tests results" << endl;
+                                   for (size_t i = 0; i < write_Lines.size(); i++)
+                                   {
+                                        output << write_Lines[i] << "\n";
+                                        intermediate << gene_Combo << "\n";
+                                   }
+                                   // clear prometheus
+                                   output.flush();
+                                   intermediate.flush();
+                                   pro_Neutrality.erase();
+                                   gene_Collect.clear();
+                                   cout << endl;
+                              }
+                         }
+                         if (gene_Collect.size() != 0)
+                         {
+                              // RUN PROMETHEUS for remaining
+                              // launch prometheus
                               cout << "Prometheus batch intialized" << endl;
                               cout << "From: " << gene_Collect[0] << endl;
                               cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
                                    << endl;
-                              // launch prometheus
+
                               vector<string> write_Lines = pro_Neutrality.collection_Engine(gene_Collect, test);
                               // print
                               cout << "System is writing Neutrality tests results" << endl;
                               for (size_t i = 0; i < write_Lines.size(); i++)
                               {
-                                   output << write_Lines[i] << "\n";
-                                   intermediate << gene_Combo << "\n";
+                                   if (write_Lines[i] != "")
+                                   {
+                                        output << write_Lines[i] << "\n";
+                                        intermediate << gene_Combo << "\n";
+                                   }
                               }
-                              // clear prometheus
-                              output.flush();
-                              intermediate.flush();
-                              pro_Neutrality.erase();
-                              gene_Collect.clear();
                               cout << endl;
                          }
-                    }
-                    if (gene_Collect.size() != 0)
-                    {
-                         // RUN PROMETHEUS for remaining
-                         // launch prometheus
-                         cout << "Prometheus batch intialized" << endl;
-                         cout << "From: " << gene_Collect[0] << endl;
-                         cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
-                              << endl;
 
-                         vector<string> write_Lines = pro_Neutrality.collection_Engine(gene_Collect, test);
-                         // print
-                         cout << "System is writing Neutrality tests results" << endl;
-                         for (size_t i = 0; i < write_Lines.size(); i++)
-                         {
-                              if (write_Lines[i] != "")
-                              {
-                                   output << write_Lines[i] << "\n";
-                                   intermediate << gene_Combo << "\n";
-                              }
-                         }
-                         cout << endl;
-                    }
-
-                    output.flush();
-                    intermediate.flush();
-                    pro_Neutrality.erase();
-                    gene_Collect.clear();
-               }
-               else
-               {
-                    while (getline(gene_File, gene_Combo))
-                    {
-                         vector<string> split_Data;
-                         function.split(split_Data, gene_Combo, '\t');
-                         string gene_Name = split_Data[0];
-                         cout << "Gene name\t: " << gene_Name << endl;
-                         vector<string> coordinates;
-                         function.split(coordinates, split_Data[1], ':');
-                         int start_Co = stoi(coordinates[1]);
-                         int end_Co = stoi(coordinates[2]);
-                         cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
-
-                         float tot_pairwise_Differences = 0;
-                         float theta_L = 0.00;
-                         int segregating_Sites = 0;
-                         int singletons_ns = 0;
-                         int singletons_ne = 0;
-                         int Total_iEi = 0;
-
-                         vector<string> file_List;
-                         cout << endl;
-                         cout << "System is retrieving file(s)" << endl;
-                         if (folder_Index.size() > 1)
-                         {
-                              file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
-                         }
-                         else
-                         {
-                              file_List.push_back(folder_Index[0].second);
-                         }
-                         cout << "System has retrieved all file(s)" << endl;
-                         cout << "System is collecting segregrating site(s)" << endl;
-                         vector<string> collect_Segregrating_sites;
-
-                         for (string files : file_List)
-                         {
-                              fstream file;
-                              file.open(files, ios::in);
-                              if (file.is_open())
-                              {
-                                   string line;
-                                   getline(file, line);
-                                   while (getline(file, line))
-                                   {
-                                        vector<string> positions;
-                                        function.split_getPos_ONLY(positions, line, '\t');
-                                        int pos = stoi(positions[1]);
-
-                                        if (pos >= start_Co && pos <= end_Co)
-                                        {
-                                             collect_Segregrating_sites.push_back(line);
-                                        }
-                                        else if (pos > end_Co)
-                                        {
-                                             break;
-                                        }
-                                   }
-                                   file.close();
-                              }
-                         }
-
-                         // CUDA combined function
-                         process_Segs(collect_Segregrating_sites, N_float, segregating_Sites, tot_pairwise_Differences, singletons_ne, singletons_ns, Total_iEi, theta_L, tot_Blocks, tot_ThreadsperBlock);
-
-                         cout << endl;
-                         cout << "Total segregating sites (S)\t: " << segregating_Sites << endl;
-                         cout << endl;
-
-                         float pi = 0;
-
-                         string Tajima_D, Fu_Li_D, Fu_Li_D_star, Fu_Li_F, Fu_Li_F_star, Fay_Wu_H, Fay_Wu_E;
-
-                         if (segregating_Sites != 0)
-                         {
-                              pi = (float)tot_pairwise_Differences / combinations;
-                              cout << "Average pairwise polymorphisms (pi)\t: " << pi << endl
-                                   << endl;
-
-                              // float theta_squared, = 0;
-                              calculate_Neutrality(N_float, pi, segregating_Sites,
-                                                   an, bn, e1, e2,
-                                                   singletons_ne, singletons_ns, vd, ud, vd_star, ud_star, vf, uf, vf_star, uf_star,
-                                                   theta_L, bn_plus1,
-                                                   Tajima_D, Fu_Li_D, Fu_Li_D_star, Fu_Li_F, Fu_Li_F_star, Fay_Wu_H, Fay_Wu_E);
-
-                              cout << "Tajima's D\t: " << Tajima_D << endl
-                                   << endl;
-
-                              // cout << "Total ns singletons\t: " << singletons_ns << endl;
-                              // cout << "Total ne singletons\t: " << singletons_ne << endl
-                              //      << endl;
-
-                              cout << "Fu and Li's D\t: " << Fu_Li_D << endl;
-                              cout << "Fu and Li's D*\t: " << Fu_Li_D_star << endl;
-                              cout << "Fu and Li's F\t: " << Fu_Li_F << endl;
-                              cout << "Fu and Li's F*\t: " << Fu_Li_F_star << endl
-                                   << endl;
-
-                              // cout << "Theta_squared\t: " << theta_squared << endl;
-                              // cout << "Theta_L\t: " << theta_L << endl
-                              //      << endl;
-
-                              cout << "Fay and Wu's normalized H\t: " << Fay_Wu_H << endl;
-                              cout << "Fay and Wu's normalized E\t: " << Fay_Wu_E << endl;
-                         }
-                         else
-                         {
-                              // cout << endl;
-                              cout << "Neutrality tests: Not Available" << endl;
-                              Tajima_D = "NA";
-                              Fu_Li_D = "NA";
-                              Fu_Li_D_star = "NA";
-                              Fu_Li_F = "NA";
-                              Fu_Li_F_star = "NA";
-                              Fay_Wu_H = "NA";
-                              Fay_Wu_E = "NA";
-                         }
-
-                         cout << endl;
-
-                         //"Gene_name\tCoordinates\tPi\tS\tne\tns\tTotal_iEi\tTajimas_D\tD\tD_star\tF\tF_star\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E"
-                         output << gene_Name << "\t"
-                                << coordinates[0] << ":" << to_string(start_Co) << ":" << to_string(end_Co)
-
-                                << "\t" << to_string(pi)
-                                << "\t" << to_string(segregating_Sites)
-
-                                << "\t" << to_string(singletons_ne)
-                                << "\t" << to_string(singletons_ns)
-
-                                << "\t" << to_string(Total_iEi)
-
-                                << "\t" << Tajima_D
-
-                                << "\t" << Fu_Li_D
-                                << "\t" << Fu_Li_D_star
-                                << "\t" << Fu_Li_F
-                                << "\t" << Fu_Li_F_star
-
-                                << "\t" << Fay_Wu_H
-                                << "\t" << Fay_Wu_E
-                                << "\n";
-
-                         intermediate << gene_Combo << "\n";
                          output.flush();
                          intermediate.flush();
-
-                         // REMOVE AFTER TEST
-                         // break;
+                         pro_Neutrality.erase();
+                         gene_Collect.clear();
                     }
+                    else
+                    {
+                         while (getline(gene_File, gene_Combo))
+                         {
+                              vector<string> split_Data;
+                              function.split(split_Data, gene_Combo, '\t');
+                              string gene_Name = split_Data[0];
+                              cout << "Gene name\t: " << gene_Name << endl;
+                              vector<string> coordinates;
+                              function.split(coordinates, split_Data[1], ':');
+                              int start_Co = stoi(coordinates[1]);
+                              int end_Co = stoi(coordinates[2]);
+                              cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
+
+                              float tot_pairwise_Differences = 0;
+                              float theta_L = 0.00;
+                              int segregating_Sites = 0;
+                              int singletons_ns = 0;
+                              int singletons_ne = 0;
+                              int Total_iEi = 0;
+
+                              vector<string> file_List;
+                              cout << endl;
+                              cout << "System is retrieving file(s)" << endl;
+                              if (folder_Index.size() > 1)
+                              {
+                                   file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
+                              }
+                              else
+                              {
+                                   file_List.push_back(folder_Index[0].second);
+                              }
+                              cout << "System has retrieved all file(s)" << endl;
+                              cout << "System is collecting segregrating site(s)" << endl;
+                              vector<string> collect_Segregrating_sites;
+
+                              for (string files : file_List)
+                              {
+                                   fstream file;
+                                   file.open(files, ios::in);
+                                   if (file.is_open())
+                                   {
+                                        string line;
+                                        getline(file, line);
+                                        while (getline(file, line))
+                                        {
+                                             vector<string> positions;
+                                             function.split_getPos_ONLY(positions, line, '\t');
+                                             int pos = stoi(positions[1]);
+
+                                             if (pos >= start_Co && pos <= end_Co)
+                                             {
+                                                  collect_Segregrating_sites.push_back(line);
+                                             }
+                                             else if (pos > end_Co)
+                                             {
+                                                  break;
+                                             }
+                                        }
+                                        file.close();
+                                   }
+                              }
+
+                              // CUDA combined function
+                              process_Segs(collect_Segregrating_sites, N_float, segregating_Sites, tot_pairwise_Differences, singletons_ne, singletons_ns, Total_iEi, theta_L, tot_Blocks, tot_ThreadsperBlock);
+
+                              cout << endl;
+                              cout << "Total segregating sites (S)\t: " << segregating_Sites << endl;
+                              cout << endl;
+
+                              float pi = 0;
+
+                              string Tajima_D, Fu_Li_D, Fu_Li_D_star, Fu_Li_F, Fu_Li_F_star, Fay_Wu_H, Fay_Wu_E;
+
+                              if (segregating_Sites != 0)
+                              {
+                                   pi = (float)tot_pairwise_Differences / combinations;
+                                   cout << "Average pairwise polymorphisms (pi)\t: " << pi << endl
+                                        << endl;
+
+                                   // float theta_squared, = 0;
+                                   calculate_Neutrality(N_float, pi, segregating_Sites,
+                                                        an, bn, e1, e2,
+                                                        singletons_ne, singletons_ns, vd, ud, vd_star, ud_star, vf, uf, vf_star, uf_star,
+                                                        theta_L, bn_plus1,
+                                                        Tajima_D, Fu_Li_D, Fu_Li_D_star, Fu_Li_F, Fu_Li_F_star, Fay_Wu_H, Fay_Wu_E);
+
+                                   cout << "Tajima's D\t: " << Tajima_D << endl
+                                        << endl;
+
+                                   // cout << "Total ns singletons\t: " << singletons_ns << endl;
+                                   // cout << "Total ne singletons\t: " << singletons_ne << endl
+                                   //      << endl;
+
+                                   cout << "Fu and Li's D\t: " << Fu_Li_D << endl;
+                                   cout << "Fu and Li's D*\t: " << Fu_Li_D_star << endl;
+                                   cout << "Fu and Li's F\t: " << Fu_Li_F << endl;
+                                   cout << "Fu and Li's F*\t: " << Fu_Li_F_star << endl
+                                        << endl;
+
+                                   // cout << "Theta_squared\t: " << theta_squared << endl;
+                                   // cout << "Theta_L\t: " << theta_L << endl
+                                   //      << endl;
+
+                                   cout << "Fay and Wu's normalized H\t: " << Fay_Wu_H << endl;
+                                   cout << "Fay and Wu's normalized E\t: " << Fay_Wu_E << endl;
+                              }
+                              else
+                              {
+                                   // cout << endl;
+                                   cout << "Neutrality tests: Not Available" << endl;
+                                   Tajima_D = "NA";
+                                   Fu_Li_D = "NA";
+                                   Fu_Li_D_star = "NA";
+                                   Fu_Li_F = "NA";
+                                   Fu_Li_F_star = "NA";
+                                   Fay_Wu_H = "NA";
+                                   Fay_Wu_E = "NA";
+                              }
+
+                              cout << endl;
+
+                              //"Gene_name\tCoordinates\tPi\tS\tne\tns\tTotal_iEi\tTajimas_D\tD\tD_star\tF\tF_star\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E"
+                              output << gene_Name << "\t"
+                                     << coordinates[0] << ":" << to_string(start_Co) << ":" << to_string(end_Co)
+
+                                     << "\t" << to_string(pi)
+                                     << "\t" << to_string(segregating_Sites)
+
+                                     << "\t" << to_string(singletons_ne)
+                                     << "\t" << to_string(singletons_ns)
+
+                                     << "\t" << to_string(Total_iEi)
+
+                                     << "\t" << Tajima_D
+
+                                     << "\t" << Fu_Li_D
+                                     << "\t" << Fu_Li_D_star
+                                     << "\t" << Fu_Li_F
+                                     << "\t" << Fu_Li_F_star
+
+                                     << "\t" << Fay_Wu_H
+                                     << "\t" << Fay_Wu_E
+                                     << "\n";
+
+                              intermediate << gene_Combo << "\n";
+                              output.flush();
+                              intermediate.flush();
+
+                              // REMOVE AFTER TEST
+                              // break;
+                         }
+                    }
+                    output.close();
+                    intermediate.close();
+                    gene_File.close();
                }
-               output.close();
-               intermediate.close();
-               gene_File.close();
+               // REMOVE AFTER TEST
+               // break;
           }
-          // REMOVE AFTER TEST
-          // break;
      }
 }
 
