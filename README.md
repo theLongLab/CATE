@@ -40,11 +40,6 @@ git clone "https://github.com/theLongLab/CATE/"
 ````
 cd CATE/
 ````
-*gcc 10.2.0 or higher*
-````
-module load gcc/10.2.0
-````
-
 *cuda 11.3.0 or higher*
 ````
 module load cuda/11.3.0
