@@ -69,6 +69,19 @@ fay_wu::fay_wu(string calc_Mode, int window_Size, int step_Size, string input_Fo
      this->Multi_read = Multi_read;
      this->number_of_genes = number_of_genes;
 }
+fay_wu::fay_wu(string calc_Mode, int window_Size, int step_Size, string input_Folder, string ouput_Path, int cuda_ID, int ploidy)
+{
+     // NORMAL WINDOW CONSTRUCTOR
+
+     cout << "Initiating CUDA powered Fay and Wu's normalized H and E calculator" << endl
+          << endl;
+
+     this->calc_Mode = "WINDOW";
+     set_Values("", input_Folder, ouput_Path, cuda_ID, "", ploidy);
+
+     this->window_Size = window_Size;
+     this->step_Size = step_Size;
+}
 
 void fay_wu::set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
@@ -140,16 +153,22 @@ void fay_wu::ingress()
 
           float an, bn, bn_plus1;
           calc_Pre(an, bn, bn_plus1, N);
-          
+
           if (this->calc_Mode != "FILE")
           {
                string output_File = ouput_Path + "/" +
                                     country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
                                     to_string(window_Size) + "_" + to_string(step_Size) +
                                     ".fw";
-
-               prometheus pro_Fay_Wu_Window = prometheus(output_File, window_Size, step_Size, folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, bn, bn_plus1);
-               pro_Fay_Wu_Window.process_Window("FA");
+               if (prometheus_Activate == "YES")
+               {
+                    prometheus pro_Fay_Wu_Window = prometheus(output_File, window_Size, step_Size, folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, bn, bn_plus1);
+                    pro_Fay_Wu_Window.process_Window("FA");
+               }
+               else
+               {
+                    window(output_File, an, bn, bn_plus1, N_float, combinations, folder_Index);
+               }
           }
           else
           {
@@ -418,6 +437,184 @@ void fay_wu::ingress()
                }
           }
      }
+}
+
+void fay_wu::window(string output_File, float an, float bn, float bn_plus1, float N_float, long int combinations, vector<pair<string, string>> &folder_Index)
+{
+     functions function = functions();
+
+     int start_Value = stoi(folder_Index[0].first.substr(0, folder_Index[0].first.find('_')));
+     int end_Value = stoi(folder_Index[folder_Index.size() - 1].first.substr(folder_Index[folder_Index.size() - 1].first.find('_') + 1));
+
+     cout << start_Value << endl;
+     cout << end_Value << endl;
+
+     int start_Co = 0;
+     int end_Co = start_Co + window_Size;
+
+     while (start_Value > end_Co)
+     {
+          start_Co = start_Co + step_Size;
+          end_Co = start_Co + window_Size;
+     }
+
+     cout << "Writing to file\t: " << output_File << endl;
+     cout << endl;
+
+     if (filesystem::exists(output_File) == 0)
+     {
+          function.createFile(output_File, "Coordinates\tPi\tS\tTotal_iEi\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E");
+     }
+     else
+     {
+          // RESUME FUNCTION
+          int caught = 0;
+
+          // skipper
+          fstream output;
+          output.open(output_File, ios::in);
+
+          string output_Line;
+
+          while (start_Co <= end_Value)
+          {
+
+               // skip header
+               getline(output, output_Line);
+
+               while (getline(output, output_Line))
+               {
+                    string trim = output_Line.substr(0, output_Line.find('\t'));
+                    string check = to_string(start_Co) + ":" + to_string(end_Co);
+                    if (trim != check)
+                    {
+                         caught = 1;
+                         break;
+                    }
+               }
+
+               if (caught == 1)
+               {
+                    break;
+               }
+
+               start_Co = start_Co + step_Size;
+               end_Co = start_Co + window_Size;
+          }
+          output.close();
+     }
+
+     fstream output;
+     output.open(output_File, ios::app);
+
+     while (start_Co <= end_Value)
+     {
+          cout << "Coordinates\t: Start: " << start_Co << " End: " << end_Co << endl;
+
+          float tot_pairwise_Differences = 0;
+          vector<string> collect_Segregrating_sites;
+
+          vector<string> file_List;
+          cout << endl;
+          cout << "System is retrieving file(s)" << endl;
+          if (folder_Index.size() > 1)
+          {
+               file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
+          }
+          else
+          {
+               file_List.push_back(folder_Index[0].second);
+          }
+          cout << "System has retrieved all file(s)" << endl;
+          cout << endl;
+
+          cout << "System is collecting segregrating site(s)" << endl;
+
+          for (string files : file_List)
+          {
+               fstream file;
+               file.open(files, ios::in);
+               if (file.is_open())
+               {
+                    string line;
+                    getline(file, line); // skip first header line
+                    while (getline(file, line))
+                    {
+                         vector<string> positions;
+                         function.split_getPos_ONLY(positions, line, '\t');
+                         int pos = stoi(positions[1]);
+
+                         if (pos >= start_Co && pos <= end_Co)
+                         {
+                              collect_Segregrating_sites.push_back(line);
+                         }
+                         else if (pos > end_Co)
+                         {
+                              break;
+                         }
+                    }
+                    file.close();
+               }
+          }
+
+          int num_segregrating_Sites;
+          string Fay_Wu_H, Fay_Wu_E;
+          float pi = 0.0;
+          int Total_iEi = 0;
+
+          float theta_L = calc_theta_L(collect_Segregrating_sites, N_float, num_segregrating_Sites, Total_iEi, tot_pairwise_Differences);
+
+          cout << "Total segregating sites (S)\t: " << num_segregrating_Sites << endl;
+          cout << endl;
+
+          if (num_segregrating_Sites != 0)
+          {
+               float S = (float)num_segregrating_Sites;
+               float theta_squared = (float)(S * (S - 1)) / (pow(an, 2) + bn);
+               cout << "Theta_squared\t: " << theta_squared << endl;
+               cout << "Theta_L\t: " << theta_L << endl;
+               float theta_W = (float)S / an;
+               cout << "Theta_W\t: " << theta_W << endl;
+               pi = (float)tot_pairwise_Differences / combinations;
+               cout << "Average pairwise polymorphisms (pi)\t: " << pi << endl;
+               cout << endl;
+
+               float VAR_pi_MINUS_theta_L = (float)(((N_float - 2.0) / (6.0 * (N_float - 1.0))) * theta_W) + ((((18.0 * pow(N_float, 2) * ((3.0 * N_float) + 2.0) * bn_plus1) - ((88.0 * pow(N_float, 3)) + (9.0 * pow(N_float, 2)) - (13.0 * N_float) + 6.0)) / (9.0 * N_float * pow(N_float - 1, 2))) * theta_squared);
+               // cout << "VAR_pi_MINUS_theta_L: " << VAR_pi_MINUS_theta_L << endl;
+               float VAR_theta_L_MINUS_theta_W = (float)(((N_float / (2.0 * (N_float - 1.0))) - (1.0 / an)) * theta_W) + (((bn / (pow(an, 2))) + (2.0 * pow((N_float / (N_float - 1.0)), 2) * bn) - ((2.0 * ((N_float * bn) - N_float + 1.0)) / ((N_float - 1.0) * an)) - (((3.0 * N_float) + 1) / (N_float - 1.0))) * theta_squared);
+               // cout << "VAR_theta_L_MINUS_theta_W: " << VAR_theta_L_MINUS_theta_W << endl;
+
+               float H = (float)(pi - theta_L) / (sqrt(VAR_pi_MINUS_theta_L));
+               Fay_Wu_H = to_string(H);
+               cout << "Fay and Wu's normalized H\t: " << Fay_Wu_H << endl;
+               float E = (float)(theta_L - theta_W) / (sqrt(VAR_theta_L_MINUS_theta_W));
+               Fay_Wu_E = to_string(E);
+               cout << "Fay and Wu's normalized E\t: " << Fay_Wu_E << endl;
+          }
+          else
+          {
+               cout << "Fay and Wu's H and E\t: "
+                    << "Not Available" << endl;
+               Fay_Wu_H = "NA";
+               Fay_Wu_E = "NA";
+          }
+
+          cout << endl;
+
+          output << to_string(start_Co) << ":" << to_string(end_Co)
+                 << "\t" << to_string(pi)
+                 << "\t" << to_string(num_segregrating_Sites)
+                 << "\t" << to_string(Total_iEi)
+
+                 << "\t" << Fay_Wu_H
+                 << "\t" << Fay_Wu_E << "\n";
+
+          output.flush();
+
+          start_Co = start_Co + step_Size;
+          end_Co = start_Co + window_Size;
+     }
+     output.close();
 }
 
 __global__ void cuda_theta_L(char *sites, int *index, int num_Segregrating_sites, int *theta_Partials, int *VALID_or_NOT, int *MA_count)

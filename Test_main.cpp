@@ -196,7 +196,8 @@ int main(int argc, char *argv[])
                                    }
                                    else
                                    {
-                                        cout << "ERROR: FOR WINDOW MODE PROMETHEUS NEEDS TO BE ACTIVATED" << endl;
+                                        tajima tajimasD_Window = tajima(calc_Mode, properties.where_Int("Window size"), properties.where_Int("Step size"), properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), properties.where_Int("Ploidy"));
+                                        tajimasD_Window.ingress();
                                    }
                               }
                               else
@@ -244,7 +245,8 @@ int main(int argc, char *argv[])
                                    }
                                    else
                                    {
-                                        cout << "ERROR: FOR WINDOW MODE PROMETHEUS NEEDS TO BE ACTIVATED" << endl;
+                                        fu_li fuli_Window = fu_li(calc_Mode, properties.where_Int("Window size"), properties.where_Int("Step size"), properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), properties.where_Int("Ploidy"));
+                                        fuli_Window.ingress();
                                    }
                               }
                               else
@@ -292,7 +294,9 @@ int main(int argc, char *argv[])
                                    }
                                    else
                                    {
-                                        cout << "ERROR: FOR WINDOW MODE PROMETHEUS NEEDS TO BE ACTIVATED" << endl;
+                                        // WINDOW MODE
+                                        fay_wu faywu_Window = fay_wu(calc_Mode, properties.where_Int("Window size"), properties.where_Int("Step size"), properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), properties.where_Int("Ploidy"));
+                                        faywu_Window.ingress();
                                    }
                               }
                               else
@@ -339,7 +343,9 @@ int main(int argc, char *argv[])
                                    }
                                    else
                                    {
-                                        cout << "ERROR: FOR WINDOW MODE PROMETHEUS NEEDS TO BE ACTIVATED" << endl;
+                                        // WINDOW MODE
+                                        neutral neutrality_Window = neutral(calc_Mode, properties.where_Int("Window size"), properties.where_Int("Step size"), properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), properties.where_Int("Ploidy"));
+                                        neutrality_Window.ingress();
                                    }
                               }
                               else
@@ -373,14 +379,26 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--fst" || function == "-x")
                          {
-                              string gene_List = properties.where("Fst gene list");
-                              if (gene_List == "universal")
-                              {
-                                   gene_List = properties.where("Universal gene list");
-                              }
+                              string calc_Mode = properties.where("Calculation mode");
+                              transform(calc_Mode.begin(), calc_Mode.end(), calc_Mode.begin(), ::toupper);
 
-                              fst fs = fst(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Population index file path"), properties.where("Population ID"));
-                              fs.ingress();
+                              if (calc_Mode == "FILE")
+                              {
+                                   string gene_List = properties.where("Fst gene list");
+                                   if (gene_List == "universal")
+                                   {
+                                        gene_List = properties.where("Universal gene list");
+                                   }
+
+                                   fst fs = fst(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Population index file path"), properties.where("Population ID"));
+                                   fs.ingress();
+                              }
+                              else
+                              {
+                                   // fst(string calc_Mode, int window_Size, int step_Size, string gene_List, string input_Folder, string output_Path, int cuda_ID, int ploidy, string pop_Index_path, string pop_List);
+                                   fst fst_Window = fst(calc_Mode, properties.where_Int("Window size"), properties.where_Int("Step size"), properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), properties.where_Int("Ploidy"), properties.where("Population index file path"), properties.where("Population ID"));
+                                   fst_Window.ingress();
+                              }
 
                               cout << "CUDA powered Fst (Fixation Index) calculator has been completed." << endl;
                          }

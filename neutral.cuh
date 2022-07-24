@@ -39,6 +39,8 @@ private:
 public:
     // Normal GENE mode
     neutral(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy);
+    // NORMAL WINDOW mode
+    neutral(string calc_Mode, int window_Size, int step_Size, string input_Folder, string output_Path, int cuda_ID, int ploidy);
     // PROMETHEUS GENE mode
     neutral(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run);
     // WINDOW mode PROMETHEUS
@@ -47,6 +49,8 @@ public:
     void set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy);
 
     void ingress();
+
+    void window(string output_File, float an, float e1, float e2, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float bn, float bn_plus1, float N_float, long int combinations, vector<pair<string, string>> &folder_Index);
 
     void get_Prerequisites(int N_tot, float &an, float &e1, float &e2, float &vd, float &ud, float &vd_star, float &ud_star, float &uf, float &vf, float &uf_star, float &vf_star, float &bn, float &bn_plus1);
     void pre_Tajima(float N_tot, float an, float bn, promise<float> &e1_set, promise<float> &e2_set);

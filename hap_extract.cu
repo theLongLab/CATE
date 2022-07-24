@@ -524,6 +524,7 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
 
     cudaFree(cuda_full_Char);
     cudaFree(cuda_site_Index);
+    cudaFree(cuda_Hap_array);
 
     free(full_Char);
     free(site_Index);
@@ -677,7 +678,6 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
     cudaFree(cuda_REF_char);
     cudaFree(cuda_ALT_char);
     // cudaFree(cuda_snp_N_grid);
-    cudaFree(cuda_Hap_array);
 
     free(index_Allele);
     free(pos_Allele);

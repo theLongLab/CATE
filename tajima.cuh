@@ -40,13 +40,18 @@ public:
     tajima();
     // Normal GENE mode
     tajima(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy);
+    // Normal WINDOW mode
+    tajima(string calc_Mode, int window_Size, int step_Size, string input_Folder, string ouput_Path, int cuda_ID, int ploidy);
     // PROMETHEUS GENE mode
     tajima(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run);
     // WINDOW mode PROMETHEUS
     tajima(string calc_Mode, int window_Size, int step_Size, string input_Folder, string ouput_Path, int cuda_ID, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run);
 
     void set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy);
+
     void ingress();
+
+    void window(string output_File, float a1, float e1, float e2, int N, long int combinations, vector<pair<string, string>> &folder_Index);
 
     vector<string> get_Countries();
     vector<pair<string, string>> index_Folder(string &country);

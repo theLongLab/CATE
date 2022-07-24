@@ -38,6 +38,8 @@ private:
 public:
     // Normal GENE mode
     fay_wu(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy);
+    // NORMAL WINDOW mode
+    fay_wu(string calc_Mode, int window_Size, int step_Size, string input_Folder, string ouput_Path, int cuda_ID, int ploidy);
     // PROMETHEUS GENE mode
     fay_wu(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run);
     // WINDOW mode PROMETHEUS
@@ -46,6 +48,8 @@ public:
     void set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy);
 
     void ingress();
+
+    void window(string output_File, float an, float bn, float bn_plus1, float N_float, long int combinations, vector<pair<string, string>> &folder_Index);
 
     void calc_Pre(float &an, float &bn, float &bn_plus1, int N_tot);
     float calc_theta_L(vector<string> &total_Segregrating_sites, float N_tot, int &num_segregrating_Sites, int &Total_iEi, float &tot_pairwise_Differences);

@@ -6,15 +6,74 @@ fst::fst(string gene_List, string input_Folder, string output_Path, int cuda_ID,
 {
     cout << "Initiating CUDA powered Fst (Fixation Index) calculator" << endl
          << endl;
-    this->gene_List = gene_List;
-    cout << "Gene list file path\t: " << gene_List << endl
+
+    this->pop_Index_path = pop_Index_path;
+    this->pop_List = pop_List;
+
+    set_Values(gene_List, input_Folder, output_Path, cuda_ID, intermediate_Path, ploidy);
+
+    // this->gene_List = gene_List;
+    // cout << "Gene list file path\t: " << gene_List << endl
+    //      << endl;
+    // this->input_Folder = input_Folder;
+    // this->output_Path = output_Path;
+    // this->intermediate_Path = intermediate_Path;
+    // this->ploidy = ploidy;
+
+    // cudaSetDevice(cuda_ID);
+    // cout << "Properties of selected CUDA GPU:" << endl;
+    // cudaDeviceProp prop;
+    // cudaGetDeviceProperties(&prop, cuda_ID);
+    // cout << "GPU number\t: " << cuda_ID << endl;
+    // cout << "GPU name\t: " << prop.name << endl;
+    // size_t l_free = 0;
+    // size_t l_Total = 0;
+    // cudaError_t error_id = cudaMemGetInfo(&l_free, &l_Total);
+    // cout << "GPU memory (GB)\t: " << l_Total / (1000 * 1000 * 1000) << endl;
+    // cout << "GPU number of multiprocessor(s)\t: " << prop.multiProcessorCount << endl;
+    // cout << "GPU block(s) per multiprocessor\t: " << prop.maxBlocksPerMultiProcessor << endl;
+    // this->tot_Blocks = prop.maxBlocksPerMultiProcessor;
+    // this->tot_ThreadsperBlock = prop.maxThreadsPerBlock;
+    // cout << "GPU thread(s) per block\t: " << tot_ThreadsperBlock << endl
+    //      << endl;
+}
+
+fst::fst(string calc_Mode, int window_Size, int step_Size, string input_Folder, string output_Path, int cuda_ID, int ploidy, string pop_Index_path, string pop_List)
+{
+    // WINDOW MODE
+    cout << "Initiating CUDA powered Fst (Fixation Index) calculator" << endl
          << endl;
+
+    this->pop_Index_path = pop_Index_path;
+    this->pop_List = pop_List;
+
+    this->calc_Mode = "WINDOW";
+
+    set_Values("", input_Folder, output_Path, cuda_ID, "", ploidy);
+
+    this->window_Size = window_Size;
+    this->step_Size = step_Size;
+}
+
+void fst::set_Values(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy)
+{
+    if (this->calc_Mode == "WINDOW")
+    {
+        cout << "Calculation mode: WINDOW" << endl
+             << endl;
+    }
+    else
+    {
+        cout << "Calculation mode: FILE" << endl;
+        this->gene_List = gene_List;
+        cout << "Gene list file path\t: " << gene_List << endl
+             << endl;
+    }
+
     this->input_Folder = input_Folder;
     this->output_Path = output_Path;
     this->intermediate_Path = intermediate_Path;
     this->ploidy = ploidy;
-    this->pop_Index_path = pop_Index_path;
-    this->pop_List = pop_List;
 
     cudaSetDevice(cuda_ID);
     cout << "Properties of selected CUDA GPU:" << endl;
@@ -82,59 +141,109 @@ void fst::ingress()
     string pop_List_mod = this->pop_List;
     replace(pop_List_mod.begin(), pop_List_mod.end(), ',', '_');
 
-    string output_File = output_Path + "/" + filesystem::path(gene_List).stem().string() + "_" + pop_List_mod + ".fst";
-    // cout << output_File << endl;
-    string intermediate_File = intermediate_Path + "/" + filesystem::path(gene_List).stem().string() + "_" + pop_List_mod + ".log_fst";
-    // cout << intermediate_File << endl;
-
-    cout << endl;
-    cout << "Writing to file\t: " << output_File << endl;
-    cout << endl;
-
-    if (gene_File.is_open())
+    // CALC MODE SEPERATION
+    if (calc_Mode != "FILE")
     {
-        string gene_Combo;
+        string output_File = output_Path + "/" + pop_List_mod + "_" + to_string(window_Size) + "_" + to_string(step_Size) + ".fst";
+        // cout << output_File << endl;
+        cout << endl;
+        cout << "Writing to file\t: " << output_File << endl;
+        cout << endl;
+
+        int max, min;
+        for (size_t i = 0; i < super_Pop_Unique_vec.size(); i++)
+        {
+            string folder_Path = this->input_Folder + "/" + super_Pop_Unique_vec[i];
+            vector<pair<string, string>> folder_Index = function.index_Folder(folder_Path);
+            if (i == 0)
+            {
+                max = stoi(folder_Index[folder_Index.size() - 1].first.substr(folder_Index[folder_Index.size() - 1].first.find('_') + 1));
+                min = stoi(folder_Index[0].first.substr(0, folder_Index[0].first.find('_')));
+            }
+            else
+            {
+                int current_Max, current_Min;
+                current_Max = stoi(folder_Index[folder_Index.size() - 1].first.substr(folder_Index[folder_Index.size() - 1].first.find('_') + 1));
+                current_Min = stoi(folder_Index[0].first.substr(0, folder_Index[0].first.find('_')));
+
+                if (current_Max > max)
+                {
+                    max = current_Max;
+                }
+                if (current_Min < min)
+                {
+                    min = current_Min;
+                }
+            }
+        }
+
+        int start_Value = min;
+        int end_Value = max;
+
+        cout << start_Value << endl;
+        cout << end_Value << endl;
+
+        int start_Co = 0;
+        int end_Co = start_Co + window_Size;
+
+        while (start_Value > end_Co)
+        {
+            start_Co = start_Co + step_Size;
+            end_Co = start_Co + window_Size;
+        }
+
+        cout << "Writing to file\t: " << output_File << endl;
+        cout << endl;
 
         if (filesystem::exists(output_File) == 0)
         {
-            // CHANGE TO FST
-            function.createFile(output_File, "Gene_name\tCoordinates\tTotal_Fst\tTotal_seg_sites\tAverage_Fst");
-            function.createFile(intermediate_File);
+            function.createFile(output_File, "Coordinates\tTotal_Fst\tTotal_seg_sites\tAverage_Fst");
         }
         else
         {
-            fstream intermediate;
-            intermediate.open(intermediate_File, ios::in);
-            string get_finished;
-            while (getline(intermediate, get_finished))
+            // RESUME FUNCTION
+            int caught = 0;
+
+            // skipper
+            fstream output;
+            output.open(output_File, ios::in);
+
+            string output_Line;
+
+            while (start_Co <= end_Value)
             {
-                getline(gene_File, gene_Combo);
-                if (gene_Combo != get_finished)
+
+                // skip header
+                getline(output, output_Line);
+
+                while (getline(output, output_Line))
+                {
+                    string trim = output_Line.substr(0, output_Line.find('\t'));
+                    string check = to_string(start_Co) + ":" + to_string(end_Co);
+                    if (trim != check)
+                    {
+                        caught = 1;
+                        break;
+                    }
+                }
+
+                if (caught == 1)
                 {
                     break;
                 }
+
+                start_Co = start_Co + step_Size;
+                end_Co = start_Co + window_Size;
             }
-            intermediate.close();
+            output.close();
         }
+
         fstream output;
-        fstream intermediate;
         output.open(output_File, ios::app);
-        intermediate.open(intermediate_File, ios::app);
 
-        while (getline(gene_File, gene_Combo))
+        while (start_Co <= end_Value)
         {
-            vector<string> split_Data;
-            function.split(split_Data, gene_Combo, '\t');
-            string gene_Name = split_Data[0];
-            cout << "Gene name\t: " << gene_Name << endl;
-            vector<string> coordinates;
-            function.split(coordinates, split_Data[1], ':');
-            int start_Co = stoi(coordinates[1]);
-            int end_Co = stoi(coordinates[2]);
-            cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl
-                 << endl;
-
-            // Process gene combo at a time.
+            cout << "Coordinates\t: Start: " << start_Co << " End: " << end_Co << endl;
 
             for (size_t i = 0; i < test_Pops.size(); i++)
             {
@@ -212,35 +321,192 @@ void fst::ingress()
             // make a list and use in the gpu to validate if we want to process it or not based on pos
             float Fst_Total, Fst_Avg;
             int Seg_count;
-            // process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int Segs_count_All, float Fst_All, float Avg_Fst)
+
             process_FST(pop_ID, test_Pops.size(), Seg_count, Fst_Total, Fst_Avg);
             cout << endl
                  << "Fst has been caluclated" << endl;
 
-            // write to file
-            // Gene_name\tCoordinates\tTotal_Fst\tTotal_seg_sites\tAvg_Fst
             string FST_out = to_string(Fst_Avg);
             if (isnan(Fst_Avg))
             {
                 FST_out = "NaN";
             }
-            output << gene_Name
-                   << "\t" << coordinates[0] << ":" << to_string(start_Co) << ":" << to_string(end_Co)
+
+            output << to_string(start_Co) << ":" << to_string(end_Co)
                    << "\t" << Fst_Total
                    << "\t" << Seg_count
                    << "\t" << FST_out << "\n";
 
             cout << endl;
 
-            intermediate << gene_Combo << "\n";
             output.flush();
-            intermediate.flush();
-            // Remove BREAK BEFORE RUN: ONLY FOR TESTING
-            // break;
+
+            start_Co = start_Co + step_Size;
+            end_Co = start_Co + window_Size;
         }
         output.close();
-        intermediate.close();
-        gene_File.close();
+    }
+    else
+    {
+        string output_File = output_Path + "/" + filesystem::path(gene_List).stem().string() + "_" + pop_List_mod + ".fst";
+        // cout << output_File << endl;
+        cout << endl;
+        cout << "Writing to file\t: " << output_File << endl;
+        cout << endl;
+        string intermediate_File = intermediate_Path + "/" + filesystem::path(gene_List).stem().string() + "_" + pop_List_mod + ".log_fst";
+        // cout << intermediate_File << endl;
+
+        if (gene_File.is_open())
+        {
+            string gene_Combo;
+
+            if (filesystem::exists(output_File) == 0)
+            {
+                // CHANGE TO FST
+                function.createFile(output_File, "Gene_name\tCoordinates\tTotal_Fst\tTotal_seg_sites\tAverage_Fst");
+                function.createFile(intermediate_File);
+            }
+            else
+            {
+                fstream intermediate;
+                intermediate.open(intermediate_File, ios::in);
+                string get_finished;
+                while (getline(intermediate, get_finished))
+                {
+                    getline(gene_File, gene_Combo);
+                    if (gene_Combo != get_finished)
+                    {
+                        break;
+                    }
+                }
+                intermediate.close();
+            }
+            fstream output;
+            fstream intermediate;
+            output.open(output_File, ios::app);
+            intermediate.open(intermediate_File, ios::app);
+
+            while (getline(gene_File, gene_Combo))
+            {
+                vector<string> split_Data;
+                function.split(split_Data, gene_Combo, '\t');
+                string gene_Name = split_Data[0];
+                cout << "Gene name\t: " << gene_Name << endl;
+                vector<string> coordinates;
+                function.split(coordinates, split_Data[1], ':');
+                int start_Co = stoi(coordinates[1]);
+                int end_Co = stoi(coordinates[2]);
+                cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl
+                     << endl;
+
+                // Process gene combo at a time.
+
+                for (size_t i = 0; i < test_Pops.size(); i++)
+                {
+                    pop_ID[i].folder_Search(start_Co, end_Co);
+                    cout << endl;
+                }
+
+                for (size_t i = 0; i < test_Pops.size(); i++)
+                {
+                    cout << "System is collecting segregrating site(s) for " << test_Pops[i] << endl;
+                    if (i == 0)
+                    {
+                        pop_ID[i].seg_Retrival(start_Co, end_Co);
+                        cout << endl;
+                    }
+                    else
+                    {
+                        // prevent searching for the same seg list
+
+                        vector<string> query_Super_pops = super_Pop_per_ID_full[i];
+                        vector<pair<string, int>> super_Pop_pop_ID;
+
+                        for (int check = 0; check < i; check++)
+                        {
+
+                            vector<string> CHECK_Super_pops = super_Pop_per_ID_full[check];
+                            vector<string> found_Pops;
+
+                            for (string query : query_Super_pops)
+                            {
+                                for (string check_pop : CHECK_Super_pops)
+                                {
+                                    if (check_pop == query)
+                                    {
+                                        super_Pop_pop_ID.push_back(make_pair(query, check));
+                                        found_Pops.push_back(query);
+                                    }
+                                }
+                            }
+
+                            for (string remover : found_Pops)
+                            {
+                                query_Super_pops.erase(remove(query_Super_pops.begin(), query_Super_pops.end(), remover), query_Super_pops.end());
+                            }
+                        }
+
+                        vector<string> super_Pops_FOUND;
+                        vector<vector<pair<int, string>>> collect_Segregrating_sites_FOUND;
+
+                        for (int find = 0; find < super_Pop_pop_ID.size(); find++)
+                        {
+                            vector<pair<int, string>> get_Segs_Found;
+                            get_Segs_Found = pop_ID[super_Pop_pop_ID[find].second].return_Seg_site(super_Pop_pop_ID[find].first);
+                            super_Pops_FOUND.push_back(super_Pop_pop_ID[find].first);
+                            collect_Segregrating_sites_FOUND.push_back(get_Segs_Found);
+                        }
+
+                        // collect segs with found
+                        pop_ID[i].seg_Retrival_with_Found(start_Co, end_Co, super_Pops_FOUND, collect_Segregrating_sites_FOUND);
+                        cout << endl;
+                    }
+                }
+
+                // check matching pos in each and combine if present
+                cout << "System is concatanting each population's segregrating sites:" << endl;
+                for (size_t i = 0; i < test_Pops.size(); i++)
+                {
+                    cout << "Processing " << test_Pops[i];
+                    pop_ID[i].combine_Segs();
+                }
+                cout << "System has completed concatanting each population's segregrating sites" << endl;
+                cout << endl;
+
+                // check for matching pos in all
+                // make a list and use in the gpu to validate if we want to process it or not based on pos
+                float Fst_Total, Fst_Avg;
+                int Seg_count;
+                // process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int Segs_count_All, float Fst_All, float Avg_Fst)
+                process_FST(pop_ID, test_Pops.size(), Seg_count, Fst_Total, Fst_Avg);
+                cout << endl
+                     << "Fst has been caluclated" << endl;
+
+                // write to file
+                // Gene_name\tCoordinates\tTotal_Fst\tTotal_seg_sites\tAvg_Fst
+                string FST_out = to_string(Fst_Avg);
+                if (isnan(Fst_Avg))
+                {
+                    FST_out = "NaN";
+                }
+                output << gene_Name
+                       << "\t" << coordinates[0] << ":" << to_string(start_Co) << ":" << to_string(end_Co)
+                       << "\t" << Fst_Total
+                       << "\t" << Seg_count
+                       << "\t" << FST_out << "\n";
+
+                cout << endl;
+
+                intermediate << gene_Combo << "\n";
+                output.flush();
+                intermediate.flush();
+                // Remove BREAK BEFORE RUN: ONLY FOR TESTING
+                // break;
+            }
+            output.close();
+            intermediate.close();
+            gene_File.close();
+        }
     }
 
     free(sample_Location_array);
@@ -1030,9 +1296,9 @@ void fst::population_Processing(vector<string> &test_Pops, vector<vector<string>
          << endl;
 
     vector<string> sample_ID[test_Pops.size()];
-    vector<string> super_Pop_Unique_vec;
-    // vector<string> population_ID[test_Pops.size()];
-    // vector<string> super_Pops[test_Pops.size()];
+    // vector<string> super_Pop_Unique_vec;
+    //  vector<string> population_ID[test_Pops.size()];
+    //  vector<string> super_Pops[test_Pops.size()];
 
     // vector<pair<string, string>> test_Pop_super_Pop;
 

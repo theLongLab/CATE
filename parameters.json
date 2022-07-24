@@ -13,7 +13,7 @@
     # User is capable of determining the number of gene combinations and number of SNPs to be processed by CATE.
     # When setting these parameters be mindful of system hardware availability.
     # WARNING: Multi read CAN CAUSE A BOTTLENECK IF HARDWARE DOES NOT SUPPORT IT. NVMe DRIVES CONNECTED VIA PCIe BUS WILL SUPPORT MULTI READ. TYPICAL HDD DRIVES DO NOT.
-    "Prometheus activate":"Yes",
+    "Prometheus activate":"No",
     "CPU cores":10,
     "SNPs per time":1000,
     "Number of genes":2,
@@ -31,9 +31,12 @@
     # Neutrality and FST calculation mode
     # Calculation mode can be FILE (to calculate the tests for predefined regions) or WINDOW
     "Calculation mode":"WINDOW",
+
+    # WINDOW mode parameters
     "Window size":1000,
     "Step size":1000,
 
+    # FILE mode paramters
     # Any tab-deliminated text based formats such as but not limited to (*.txt, *.csv)
     "Universal gene list":"test_san.txt",
 
@@ -106,7 +109,7 @@
     # Ensure population_ID values are unique to each super population and do not overlap
     "Population index file path":"fst_pop/population.txt",
     "Fst gene list":"universal",
-    "Population ID":"GWD,ACB,PJL",
+    "Population ID":"EAL,AFR,AMS",
 
     # EHH or Extended Haplotype Homozygosity
     # Define the extended haplotype region specification mode by either using a seperate gene list file (FILE mode) or state the standard displacement value (FIXED mode) in bases

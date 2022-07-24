@@ -35,6 +35,7 @@ neutral::neutral(string gene_List, string input_Folder, string output_Path, int 
 
 neutral::neutral(string calc_Mode, int window_Size, int step_Size, string input_Folder, string output_Path, int cuda_ID, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run)
 {
+     // PROMETHEUS WINDOW MODE
      cout << "Initiating CUDA powered complete neutrality test calculator on PROMETHEUS" << endl
           << "The following 3 tests will be calculated: " << endl
           << "1. Tajima's D" << endl
@@ -54,6 +55,22 @@ neutral::neutral(string calc_Mode, int window_Size, int step_Size, string input_
      transform(Multi_read.begin(), Multi_read.end(), Multi_read.begin(), ::toupper);
      this->Multi_read = Multi_read;
      this->number_of_genes = number_of_genes;
+}
+
+neutral::neutral(string calc_Mode, int window_Size, int step_Size, string input_Folder, string output_Path, int cuda_ID, int ploidy)
+{
+     cout << "Initiating CUDA powered complete neutrality test calculator" << endl
+          << "The following 3 tests will be calculated: " << endl
+          << "1. Tajima's D" << endl
+          << "2. Fu and Li's D, D*, F and F*" << endl
+          << "3. Fay and Wu's normalized H and E" << endl
+          << endl;
+
+     this->calc_Mode = "WINDOW";
+     set_Values("", input_Folder, output_Path, cuda_ID, "", ploidy);
+
+     this->window_Size = window_Size;
+     this->step_Size = step_Size;
 }
 
 void neutral::set_Values(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy)
@@ -131,8 +148,16 @@ void neutral::ingress()
                                     to_string(window_Size) + "_" + to_string(step_Size) +
                                     ".nt";
 
-               prometheus pro_Neutrality_Window = prometheus(output_File, window_Size, step_Size, folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1);
-               pro_Neutrality_Window.process_Window("N");
+               if (prometheus_Activate == "YES")
+               {
+                    prometheus pro_Neutrality_Window = prometheus(output_File, window_Size, step_Size, folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1);
+                    pro_Neutrality_Window.process_Window("N");
+               }
+               else
+               {
+                    // PROMETHEUS OFF WINDOW MODE
+                    window(output_File, an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1, N_float, combinations, folder_Index);
+               }
           }
           else
           {
@@ -440,6 +465,217 @@ void neutral::ingress()
                // break;
           }
      }
+}
+
+void neutral::window(string output_File, float an, float e1, float e2, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float bn, float bn_plus1, float N_float, long int combinations, vector<pair<string, string>> &folder_Index)
+{
+     functions function = functions();
+
+     int start_Value = stoi(folder_Index[0].first.substr(0, folder_Index[0].first.find('_')));
+     int end_Value = stoi(folder_Index[folder_Index.size() - 1].first.substr(folder_Index[folder_Index.size() - 1].first.find('_') + 1));
+
+     cout << start_Value << endl;
+     cout << end_Value << endl;
+
+     int start_Co = 0;
+     int end_Co = start_Co + window_Size;
+
+     while (start_Value > end_Co)
+     {
+          start_Co = start_Co + step_Size;
+          end_Co = start_Co + window_Size;
+     }
+
+     cout << "Writing to file\t: " << output_File << endl;
+     cout << endl;
+
+     if (filesystem::exists(output_File) == 0)
+     {
+          function.createFile(output_File, "Coordinates\tPi\tS\tne\tns\tTotal_iEi\tTajimas_D\tD\tD_star\tF\tF_star\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E");
+     }
+     else
+     {
+          // RESUME FUNCTION
+          int caught = 0;
+
+          // skipper
+          fstream output;
+          output.open(output_File, ios::in);
+
+          string output_Line;
+
+          while (start_Co <= end_Value)
+          {
+
+               // skip header
+               getline(output, output_Line);
+
+               while (getline(output, output_Line))
+               {
+                    string trim = output_Line.substr(0, output_Line.find('\t'));
+                    string check = to_string(start_Co) + ":" + to_string(end_Co);
+                    if (trim != check)
+                    {
+                         caught = 1;
+                         break;
+                    }
+               }
+
+               if (caught == 1)
+               {
+                    break;
+               }
+
+               start_Co = start_Co + step_Size;
+               end_Co = start_Co + window_Size;
+          }
+          output.close();
+     }
+
+     fstream output;
+     output.open(output_File, ios::app);
+
+     while (start_Co <= end_Value)
+     {
+          cout << "Coordinates\t: Start: " << start_Co << " End: " << end_Co << endl;
+
+          float tot_pairwise_Differences = 0;
+          float theta_L = 0.00;
+          int segregating_Sites = 0;
+          int singletons_ns = 0;
+          int singletons_ne = 0;
+          int Total_iEi = 0;
+
+          vector<string> file_List;
+          cout << endl;
+          cout << "System is retrieving file(s)" << endl;
+          if (folder_Index.size() > 1)
+          {
+               file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
+          }
+          else
+          {
+               file_List.push_back(folder_Index[0].second);
+          }
+          cout << "System has retrieved all file(s)" << endl;
+          cout << "System is collecting segregrating site(s)" << endl;
+          vector<string> collect_Segregrating_sites;
+
+          for (string files : file_List)
+          {
+               fstream file;
+               file.open(files, ios::in);
+               if (file.is_open())
+               {
+                    string line;
+                    getline(file, line);
+                    while (getline(file, line))
+                    {
+                         vector<string> positions;
+                         function.split_getPos_ONLY(positions, line, '\t');
+                         int pos = stoi(positions[1]);
+
+                         if (pos >= start_Co && pos <= end_Co)
+                         {
+                              collect_Segregrating_sites.push_back(line);
+                         }
+                         else if (pos > end_Co)
+                         {
+                              break;
+                         }
+                    }
+                    file.close();
+               }
+          }
+
+          // CUDA combined function
+          process_Segs(collect_Segregrating_sites, N_float, segregating_Sites, tot_pairwise_Differences, singletons_ne, singletons_ns, Total_iEi, theta_L, tot_Blocks, tot_ThreadsperBlock);
+
+          cout << endl;
+          cout << "Total segregating sites (S)\t: " << segregating_Sites << endl;
+          cout << endl;
+
+          float pi = 0;
+
+          string Tajima_D, Fu_Li_D, Fu_Li_D_star, Fu_Li_F, Fu_Li_F_star, Fay_Wu_H, Fay_Wu_E;
+
+          if (segregating_Sites != 0)
+          {
+               pi = (float)tot_pairwise_Differences / combinations;
+               cout << "Average pairwise polymorphisms (pi)\t: " << pi << endl
+                    << endl;
+
+               // float theta_squared, = 0;
+               calculate_Neutrality(N_float, pi, segregating_Sites,
+                                    an, bn, e1, e2,
+                                    singletons_ne, singletons_ns, vd, ud, vd_star, ud_star, vf, uf, vf_star, uf_star,
+                                    theta_L, bn_plus1,
+                                    Tajima_D, Fu_Li_D, Fu_Li_D_star, Fu_Li_F, Fu_Li_F_star, Fay_Wu_H, Fay_Wu_E);
+
+               cout << "Tajima's D\t: " << Tajima_D << endl
+                    << endl;
+
+               // cout << "Total ns singletons\t: " << singletons_ns << endl;
+               // cout << "Total ne singletons\t: " << singletons_ne << endl
+               //      << endl;
+
+               cout << "Fu and Li's D\t: " << Fu_Li_D << endl;
+               cout << "Fu and Li's D*\t: " << Fu_Li_D_star << endl;
+               cout << "Fu and Li's F\t: " << Fu_Li_F << endl;
+               cout << "Fu and Li's F*\t: " << Fu_Li_F_star << endl
+                    << endl;
+
+               // cout << "Theta_squared\t: " << theta_squared << endl;
+               // cout << "Theta_L\t: " << theta_L << endl
+               //      << endl;
+
+               cout << "Fay and Wu's normalized H\t: " << Fay_Wu_H << endl;
+               cout << "Fay and Wu's normalized E\t: " << Fay_Wu_E << endl;
+          }
+          else
+          {
+               // cout << endl;
+               cout << "Neutrality tests: Not Available" << endl;
+               Tajima_D = "NA";
+               Fu_Li_D = "NA";
+               Fu_Li_D_star = "NA";
+               Fu_Li_F = "NA";
+               Fu_Li_F_star = "NA";
+               Fay_Wu_H = "NA";
+               Fay_Wu_E = "NA";
+          }
+
+          cout << endl;
+
+          //"Gene_name\tCoordinates\tPi\tS\tne\tns\tTotal_iEi\tTajimas_D\tD\tD_star\tF\tF_star\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E"
+          output << to_string(start_Co) << ":" << to_string(end_Co)
+
+                 << "\t" << to_string(pi)
+                 << "\t" << to_string(segregating_Sites)
+
+                 << "\t" << to_string(singletons_ne)
+                 << "\t" << to_string(singletons_ns)
+
+                 << "\t" << to_string(Total_iEi)
+
+                 << "\t" << Tajima_D
+
+                 << "\t" << Fu_Li_D
+                 << "\t" << Fu_Li_D_star
+                 << "\t" << Fu_Li_F
+                 << "\t" << Fu_Li_F_star
+
+                 << "\t" << Fay_Wu_H
+                 << "\t" << Fay_Wu_E
+                 << "\n";
+
+          output.flush();
+
+          start_Co = start_Co + step_Size;
+          end_Co = start_Co + window_Size;
+     }
+
+     output.close();
 }
 
 void neutral::calculate_Neutrality(float N_float, float &pi, int &segregating_Sites, float &an, float &bn, float &e1, float &e2, int &singletons_ne, int &singletons_ns, float &vd, float &ud, float &vd_star, float &ud_star, float &vf, float &uf, float &vf_star, float &uf_star, float &theta_L, float &bn_plus1, string &Tajima_D, string &Fu_Li_D, string &Fu_Li_D_star, string &Fu_Li_F, string &Fu_Li_F_star, string &Fay_Wu_H, string &Fay_Wu_E)

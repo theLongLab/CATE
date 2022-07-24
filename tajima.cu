@@ -96,6 +96,20 @@ tajima::tajima(string calc_Mode, int window_Size, int step_Size, string input_Fo
     this->number_of_genes = number_of_genes;
 }
 
+tajima::tajima(string calc_Mode, int window_Size, int step_Size, string input_Folder, string ouput_Path, int cuda_ID, int ploidy)
+{
+    // NORMAL WINDOW CONSTRUCTOR
+
+    cout << "Initiating CUDA powered Tajima's D calculator" << endl
+         << endl;
+
+    this->calc_Mode = "WINDOW";
+    set_Values("", input_Folder, ouput_Path, cuda_ID, "", ploidy);
+
+    this->window_Size = window_Size;
+    this->step_Size = step_Size;
+}
+
 void tajima::set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
     if (this->calc_Mode == "WINDOW")
@@ -183,9 +197,17 @@ void tajima::ingress()
                                  country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
                                  to_string(window_Size) + "_" + to_string(step_Size) +
                                  ".td";
-
-            prometheus pro_Tajima_Window = prometheus(output_File, window_Size, step_Size, folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, combinations, a1, e1, e2, N, CPU_cores, SNPs_per_Run, number_of_genes);
-            pro_Tajima_Window.process_Window("T");
+                                 
+            if (prometheus_Activate == "YES")
+            {
+                prometheus pro_Tajima_Window = prometheus(output_File, window_Size, step_Size, folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, combinations, a1, e1, e2, N, CPU_cores, SNPs_per_Run, number_of_genes);
+                pro_Tajima_Window.process_Window("T");
+            }
+            else
+            {
+                // Prometheus OFF Window Mode
+                window(output_File, a1, e1, e2, N, combinations, folder_Index);
+            }
         }
         else
         {
@@ -211,8 +233,8 @@ void tajima::ingress()
 
                 if (filesystem::exists(output_File) == 0)
                 {
-                    createFile(output_File, "Gene_name\tCoordinates\tPi\tS\tTajimas_D");
-                    createFile(intermediate_File);
+                    function.createFile(output_File, "Gene_name\tCoordinates\tPi\tS\tTajimas_D");
+                    function.createFile(intermediate_File);
                 }
                 else
                 {
@@ -469,6 +491,169 @@ void tajima::ingress()
             }
         }
     }
+}
+
+void tajima::window(string output_File, float a1, float e1, float e2, int N, long int combinations, vector<pair<string, string>> &folder_Index)
+{
+    functions function = functions();
+
+    int start_Value = stoi(folder_Index[0].first.substr(0, folder_Index[0].first.find('_')));
+    int end_Value = stoi(folder_Index[folder_Index.size() - 1].first.substr(folder_Index[folder_Index.size() - 1].first.find('_') + 1));
+
+    cout << start_Value << endl;
+    cout << end_Value << endl;
+
+    int start_Co = 0;
+    int end_Co = start_Co + window_Size;
+
+    while (start_Value > end_Co)
+    {
+        start_Co = start_Co + step_Size;
+        end_Co = start_Co + window_Size;
+    }
+
+    cout << "Writing to file\t: " << output_File << endl;
+    cout << endl;
+
+    if (filesystem::exists(output_File) == 0)
+    {
+        function.createFile(output_File, "Coordinates\tPi\tS\tTajimas_D");
+    }
+    else
+    {
+        // RESUME FUNCTION
+        int caught = 0;
+
+        // skipper
+        fstream output;
+        output.open(output_File, ios::in);
+
+        string output_Line;
+
+        while (start_Co <= end_Value)
+        {
+
+            // skip header
+            getline(output, output_Line);
+
+            while (getline(output, output_Line))
+            {
+                string trim = output_Line.substr(0, output_Line.find('\t'));
+                string check = to_string(start_Co) + ":" + to_string(end_Co);
+                if (trim != check)
+                {
+                    caught = 1;
+                    break;
+                }
+            }
+
+            if (caught == 1)
+            {
+                break;
+            }
+
+            start_Co = start_Co + step_Size;
+            end_Co = start_Co + window_Size;
+        }
+        output.close();
+    }
+
+    fstream output;
+    output.open(output_File, ios::app);
+
+    while (start_Co <= end_Value)
+    {
+        cout << "Coordinates\t: Start: " << start_Co << " End: " << end_Co << endl;
+
+        float tot_pairwise_Differences = 0;
+        int segregating_Sites = 0;
+
+        vector<string> file_List;
+        cout << endl;
+        cout << "System is retrieving file(s)" << endl;
+        if (folder_Index.size() > 1)
+        {
+            file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
+        }
+        else
+        {
+            file_List.push_back(folder_Index[0].second);
+        }
+        cout << "System has retrieved all file(s)" << endl;
+
+        cout << "System is collecting segregrating site(s)" << endl;
+        vector<string> collect_Segregrating_sites;
+
+        for (string files : file_List)
+        {
+            // cout << files << endl;
+            fstream file;
+            file.open(files, ios::in);
+            if (file.is_open())
+            {
+                string line;
+                getline(file, line); // skip first header line
+                while (getline(file, line))
+                {
+                    vector<string> positions;
+                    function.split_getPos_ONLY(positions, line, '\t');
+                    int pos = stoi(positions[1]);
+
+                    if (pos >= start_Co && pos <= end_Co)
+                    {
+                        collect_Segregrating_sites.push_back(line);
+                    }
+                    else if (pos > end_Co)
+                    {
+                        break;
+                    }
+                }
+                file.close();
+            }
+        }
+
+        function.process_Seg_sites_tajima(collect_Segregrating_sites, N, segregating_Sites, tot_pairwise_Differences, this->tot_Blocks, this->tot_ThreadsperBlock);
+
+        cout << endl;
+
+        float pi = 0;
+        float D = 0;
+
+        string Tajima_D;
+        cout << "Total segregating sites (S)\t: " << segregating_Sites << endl;
+
+        if (segregating_Sites != 0)
+        {
+            pi = (float)tot_pairwise_Differences / combinations;
+            cout << "Average pairwise polymorphisms (pi)\t: " << pi << endl;
+            D = (float)(pi - (segregating_Sites / a1)) / sqrt(((e1 * segregating_Sites) + (e2 * segregating_Sites * (segregating_Sites - 1))));
+            cout << endl;
+            cout << "Tajima's D\t: " << D << endl;
+            Tajima_D = to_string(D);
+        }
+        else
+        {
+            cout << endl;
+            cout << "Tajima's D\t: "
+                 << "Not Available" << endl;
+            Tajima_D = "NA";
+        }
+
+        cout << endl;
+
+        output << to_string(start_Co) << ":" << to_string(end_Co)
+               << "\t" << to_string(pi)
+               << "\t" << to_string(segregating_Sites)
+
+               << "\t" << Tajima_D << "\n";
+
+        output.flush();
+
+        start_Co = start_Co + step_Size;
+        end_Co = start_Co + window_Size;
+    }
+
+    output.close();
 }
 
 void tajima::createFile(string path)
