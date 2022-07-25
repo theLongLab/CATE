@@ -504,13 +504,35 @@ void print_HELP()
           << endl
           << "** Available functions are (not CaSe sensitive) **" << endl
           << endl
-          << "MODES:"
+          << "PROCESS MODES:"
           << endl
           << "A high performance and fully customizable mode called PROMETHEUS is available." << endl
+          << endl
           << "PROMETHEUS is available for the three neutrality tests (Tajima's D, Fay and Wu tests and Fu and Li tests)." << endl
           << "PROMETHEUS is designed for power users on (High Performance Computing) HPC systems." << endl
           << "PROMETHEUS is activated via the parameters file. All other protocols of test execution remains the same." << endl
           << "PROMETHEUS uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
+          << endl
+          << "PROMETHEUS can be configured by the following five parameters:" << endl
+          << "1. Prometheus activate: \"YES\" or \"NO\" paramters used to turn the mode ON or OFF." << endl
+          << "2. CPU cores          : Controls the maximum number of cores that can be used at a time." << endl
+          << "3. SNPs per time      : Controls the max number of SNPs that will be processed on the GPU at a time." << endl
+          << "4. Number of genes    : Controls the number gene combinations that will be processed at a time." << endl
+          << "5. Multi read         : \"YES\" or \"NO\" paramters used to control the ability to read multiple files at once." << endl
+          << endl
+          << "CALCULATION MODES:" << endl
+          << "CATE can perform tests for pre-defined gene regions or the classical sliding window mechanism." << endl
+          << endl
+          << "Parameters for calculation mode is as follows:" << endl
+          << "Calculation mode: Can be either \"WINDOW\" or \"FILE\"." << endl
+          << endl
+          << "If the calculation mode is \"WINDOW\" then the following two parameters need to be configured:" << endl
+          << "1. Window size: Base pair size of the window or range of the combination." << endl
+          << "2. Step size  : The base pair amount by which the next window's start will be incemented." << endl
+          << endl
+          << "If the calculation mode is \"FILE\" then the following two parameters need to be configured:" << endl
+          << "1. Universal gene list: Configure the location for the tab deliminated gene list file for all tests." << endl
+          << "2. * gene list        : Specify the location of the per test file or set it as \"universal\" to access the universal list." << endl
           << endl
           << "TOOLS:"
           << endl
