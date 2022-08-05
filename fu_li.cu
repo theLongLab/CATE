@@ -62,9 +62,17 @@ fu_li::fu_li(string calc_Mode, int window_Size, int step_Size, string input_Fold
 
 void fu_li::set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
-    this->gene_List = gene_List;
-    cout << "Gene list file path\t: " << gene_List << endl
-         << endl;
+    if (this->calc_Mode != "WINDOW")
+    {
+        cout << "Calculation mode: FILE" << endl;
+        this->gene_List = gene_List;
+        cout << "Gene list file path\t: " << gene_List << endl;
+    }
+    else
+    {
+        cout << "Calculation mode: WINDOW" << endl;
+    }
+    cout << endl;
     this->input_Folder = input_Folder;
     this->ouput_Path = ouput_Path;
     this->intermediate_Path = intermediate_Path;
@@ -131,6 +139,7 @@ void fu_li::ingress()
         // calculate prerequisites
         float an, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star;
         calc_Pre(N, an, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star);
+        string test = "FU";
 
         if (this->calc_Mode != "FILE")
         {
@@ -142,12 +151,26 @@ void fu_li::ingress()
             if (prometheus_Activate == "YES")
             {
                 prometheus pro_Fu_Li_Window = prometheus(output_File, window_Size, step_Size, folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star);
-                pro_Fu_Li_Window.process_Window("FU");
+                if (step_Size != 0)
+                {
+                    pro_Fu_Li_Window.process_Window(test);
+                }
+                else
+                {
+                    pro_Fu_Li_Window.process_C_sliding_Window(test);
+                }
             }
             else
             {
                 // Prometheus OFF Window Mode
-                window(output_File, an, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, N_float, combinations, folder_Index);
+                if (step_Size != 0)
+                {
+                    window(output_File, an, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, N_float, combinations, folder_Index);
+                }
+                else
+                {
+                    window_Sliding(output_File, an, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, N_float, combinations, folder_Index);
+                }
             }
         }
         else
@@ -199,7 +222,6 @@ void fu_li::ingress()
 
                 if (prometheus_Activate == "YES")
                 {
-                    string test = "FU";
                     cout << "Initializing Prometheus:" << endl
                          << endl;
 
@@ -464,6 +486,226 @@ void fu_li::ingress()
             }
         }
     }
+}
+
+void fu_li::window_Sliding(string output_File, float an, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float N_float, long int combinations, vector<pair<string, string>> &folder_Index)
+{
+    functions function = functions();
+    cout << "Writing to file\t: " << output_File << endl;
+    cout << endl;
+
+    int file_Count_Start = 0;
+    int line_Num = 0;
+
+    if (filesystem::exists(output_File) == 0)
+    {
+        function.createFile(output_File, "Coordinates\tPi\tS\tne\tns\tD\tD_star\tF\tF_star");
+    }
+    else
+    {
+        int found = 0;
+
+        fstream output_Check;
+        output_Check.open(output_File, ios::in);
+        if (output_Check.is_open())
+        {
+            string line_Check;
+            getline(output_Check, line_Check); // skip first header line
+
+            for (int file_Count = 0; file_Count < folder_Index.size(); file_Count++)
+            {
+                string file_Path = folder_Index[file_Count].second;
+                fstream file;
+                file.open(file_Path, ios::in);
+                int line_Current = 0;
+
+                if (file.is_open())
+                {
+                    string line;
+                    getline(file, line); // skip first header line
+                    while (getline(file, line))
+                    {
+                        line_Current++;
+                        int VALID = function.get_Valid(line);
+                        if (VALID != -1)
+                        {
+                            getline(output_Check, line_Check);
+                            string trim = line_Check.substr(0, line_Check.find('\t'));
+
+                            vector<string> positions;
+                            function.split_getPos_ONLY(positions, line, '\t');
+                            string pos = positions[1] + ":" + to_string((stoi(positions[1]) + window_Size));
+
+                            if (pos != trim)
+                            {
+                                found = 1;
+                                file_Count_Start = file_Count;
+                                line_Num = line_Current;
+                                break;
+                            }
+                        }
+                    }
+                    file.close();
+                }
+                if (found == 1)
+                {
+                    break;
+                }
+            }
+            output_Check.close();
+        }
+    }
+
+    fstream output;
+    output.open(output_File, ios::app);
+
+    int line_Current = 0;
+
+    for (int file_Count = file_Count_Start; file_Count < folder_Index.size(); file_Count++)
+    {
+        string file_Path = folder_Index[file_Count].second;
+        fstream file_Main;
+        file_Main.open(file_Path, ios::in);
+
+        if (file_Main.is_open())
+        {
+            string line_Main;
+            getline(file_Main, line_Main); // skip first header line
+            while (getline(file_Main, line_Main))
+            {
+                if (line_Current < line_Num)
+                {
+                    line_Current++;
+                }
+                else
+                {
+                    // check VALID
+                    int VALID = function.get_Valid(line_Main);
+                    // cout << line_Main << endl;
+                    if (VALID != -1)
+                    {
+                        int start_Co = VALID;
+                        int end_Co = start_Co + window_Size;
+
+                        cout << "Coordinates\t: Start: " << start_Co << " End: " << end_Co << endl;
+
+                        float tot_pairwise_Differences = 0;
+                        int segregating_Sites = 0;
+                        int singletons_ns = 0;
+                        int singletons_ne = 0;
+
+                        vector<string> file_List;
+                        cout << endl;
+                        cout << "System is retrieving file(s)" << endl;
+                        if (folder_Index.size() > 1)
+                        {
+                            file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
+                        }
+                        else
+                        {
+                            file_List.push_back(folder_Index[0].second);
+                        }
+                        cout << "System has retrieved all file(s)" << endl;
+                        cout << "System is collecting segregrating site(s)" << endl;
+                        vector<string> collect_Segregrating_sites;
+
+                        for (string files : file_List)
+                        {
+                            fstream file;
+                            file.open(files, ios::in);
+                            if (file.is_open())
+                            {
+                                string line;
+                                getline(file, line); // skip first header line
+                                while (getline(file, line))
+                                {
+                                    vector<string> positions;
+                                    function.split_getPos_ONLY(positions, line, '\t');
+                                    int pos = stoi(positions[1]);
+
+                                    if (pos >= start_Co && pos <= end_Co)
+                                    {
+                                        collect_Segregrating_sites.push_back(line);
+                                    }
+                                    else if (pos > end_Co)
+                                    {
+                                        break;
+                                    }
+                                }
+                                file.close();
+                            }
+                        }
+
+                        function.process_Seg_sites_fu_li(collect_Segregrating_sites, N_float, segregating_Sites, tot_pairwise_Differences, singletons_ne, singletons_ns, this->tot_Blocks, this->tot_ThreadsperBlock);
+                        cout << endl;
+
+                        cout << "Total segregating sites (S)\t: " << segregating_Sites << endl;
+
+                        string Fu_Li_D;
+                        string Fu_Li_D_star;
+                        string Fu_Li_F;
+                        string Fu_Li_F_star;
+                        float pi = 0;
+
+                        if (segregating_Sites != 0)
+                        {
+                            float D = (float)(segregating_Sites - (an * singletons_ne)) / sqrt(((ud * segregating_Sites) + (vd * (pow(segregating_Sites, 2)))));
+                            float D_star = (float)(((N_float / (N_float - 1)) * segregating_Sites) - (an * singletons_ns)) / sqrt(((ud_star * segregating_Sites) + (vd_star * (pow(segregating_Sites, 2.0)))));
+
+                            pi = (float)tot_pairwise_Differences / combinations;
+
+                            cout << "Average pairwise polymorphisms (pi)\t: " << pi << endl;
+                            cout << "Total ns singletons\t: " << singletons_ns << endl;
+                            cout << "Total ne singletons\t: " << singletons_ne << endl;
+                            cout << endl;
+
+                            float F = (float)(pi - singletons_ne) / sqrt(((uf * segregating_Sites) + (vf * (pow(segregating_Sites, 2)))));
+                            float F_star = (float)(pi - (((N_float - 1) / N_float) * singletons_ns)) / sqrt(((uf_star * segregating_Sites) + (vf_star * (pow(segregating_Sites, 2.0)))));
+
+                            Fu_Li_D = to_string(D);
+                            Fu_Li_D_star = to_string(D_star);
+                            Fu_Li_F = to_string(F);
+                            Fu_Li_F_star = to_string(F_star);
+
+                            cout << "Fu and Li's D\t: " << Fu_Li_D << endl;
+                            cout << "Fu and Li's D*\t: " << Fu_Li_D_star << endl;
+                            cout << "Fu and Li's F\t: " << Fu_Li_F << endl;
+                            cout << "Fu and Li's F*\t: " << Fu_Li_F_star << endl;
+                        }
+                        else
+                        {
+                            cout << endl;
+                            Fu_Li_D = "NA";
+                            Fu_Li_D_star = "NA";
+                            Fu_Li_F = "NA";
+                            Fu_Li_F_star = "NA";
+                            cout << "Fu and Li's D, D*, F and F*\t: "
+                                 << "Not Available" << endl;
+                        }
+
+                        cout << endl;
+
+                        output << to_string(start_Co) << ":" << to_string(end_Co)
+                               << "\t" << to_string(pi)
+                               << "\t" << to_string(segregating_Sites)
+
+                               << "\t" << to_string(singletons_ne)
+                               << "\t" << to_string(singletons_ns)
+
+                               << "\t" << Fu_Li_D
+                               << "\t" << Fu_Li_D_star
+                               << "\t" << Fu_Li_F
+                               << "\t" << Fu_Li_F_star << "\n";
+
+                        output.flush();
+                    }
+                }
+            }
+            file_Main.close();
+        }
+    }
+
+    output.close();
 }
 
 void fu_li::window(string output_File, float an, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float N_float, long int combinations, vector<pair<string, string>> &folder_Index)

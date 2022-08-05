@@ -40,6 +40,7 @@ private:
 
     // WINDOW parameters
     string calc_Mode = "FILE";
+    string sliding_Mode = "NO";
     int window_Size;
     int step_Size;
 
@@ -114,6 +115,9 @@ public:
     // vector<string> collection_Engine(vector<string> &gene_Collect);
     vector<string> collection_Engine(vector<string> &gene_Collect, string test_Type);
     void process_Window(string test);
+
+    void process_C_sliding_Window(string test);
+    void get_POS_VALID(int start_Co, int gene_ID);
 
     void get_Gene_info_and_catch(string gene_Combo, int gene_ID);
     void forward_Search(int pos, int start_Co, int end_Co, int gene_ID);

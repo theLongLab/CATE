@@ -529,6 +529,7 @@ void print_HELP()
           << "If the calculation mode is \"WINDOW\" then the following two parameters need to be configured:" << endl
           << "1. Window size: Base pair size of the window or range of the combination." << endl
           << "2. Step size  : The base pair amount by which the next window's start will be incemented." << endl
+          << "NOTE: If \"Step size\" is set to \"0\" then CATE will shift to a continous sliding window mode." << endl
           << endl
           << "If the calculation mode is \"FILE\" then the following two parameters need to be configured:" << endl
           << "1. Universal gene list: Configure the location for the tab deliminated gene list file for all tests." << endl

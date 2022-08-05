@@ -50,6 +50,7 @@ public:
     void ingress();
 
     void window(string output_File, float an, float bn, float bn_plus1, float N_float, long int combinations, vector<pair<string, string>> &folder_Index);
+    void window_Sliding(string output_File, float an, float bn, float bn_plus1, float N_float, long int combinations, vector<pair<string, string>> &folder_Index);
 
     void calc_Pre(float &an, float &bn, float &bn_plus1, int N_tot);
     float calc_theta_L(vector<string> &total_Segregrating_sites, float N_tot, int &num_segregrating_Sites, int &Total_iEi, float &tot_pairwise_Differences);

@@ -190,6 +190,7 @@ void tajima::ingress()
 
         float a1, e1, e2;
         calc_Pre(N, a1, e1, e2);
+        string test = "T";
 
         if (this->calc_Mode != "FILE")
         {
@@ -197,16 +198,30 @@ void tajima::ingress()
                                  country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
                                  to_string(window_Size) + "_" + to_string(step_Size) +
                                  ".td";
-                                 
+
             if (prometheus_Activate == "YES")
             {
                 prometheus pro_Tajima_Window = prometheus(output_File, window_Size, step_Size, folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, combinations, a1, e1, e2, N, CPU_cores, SNPs_per_Run, number_of_genes);
-                pro_Tajima_Window.process_Window("T");
+                if (step_Size != 0)
+                {
+                    pro_Tajima_Window.process_Window(test);
+                }
+                else
+                {
+                    pro_Tajima_Window.process_C_sliding_Window(test);
+                }
             }
             else
             {
                 // Prometheus OFF Window Mode
-                window(output_File, a1, e1, e2, N, combinations, folder_Index);
+                if (step_Size != 0)
+                {
+                    window(output_File, a1, e1, e2, N, combinations, folder_Index);
+                }
+                else
+                {
+                    window_Sliding(output_File, a1, e1, e2, N, combinations, folder_Index);
+                }
             }
         }
         else
@@ -261,7 +276,6 @@ void tajima::ingress()
                 // ADD Prometheus HERE
                 if (prometheus_Activate == "YES")
                 {
-                    string test = "T";
                     cout << "Initializing Prometheus:" << endl
                          << endl;
                     // cout << "Processing on " << this->CPU_cores << " CPU cores" << endl;
@@ -493,15 +507,213 @@ void tajima::ingress()
     }
 }
 
+void tajima::window_Sliding(string output_File, float a1, float e1, float e2, int N, long int combinations, vector<pair<string, string>> &folder_Index)
+{
+    functions function = functions();
+
+    cout << "Writing to file\t: " << output_File << endl;
+    cout << endl;
+
+    int file_Count_Start = 0;
+    int line_Num = 0;
+
+    if (filesystem::exists(output_File) == 0)
+    {
+        function.createFile(output_File, "Coordinates\tPi\tS\tTajimas_D");
+    }
+    else
+    {
+        int found = 0;
+
+        fstream output_Check;
+        output_Check.open(output_File, ios::in);
+        if (output_Check.is_open())
+        {
+            string line_Check;
+            getline(output_Check, line_Check); // skip first header line
+
+            for (int file_Count = 0; file_Count < folder_Index.size(); file_Count++)
+            {
+                string file_Path = folder_Index[file_Count].second;
+                fstream file;
+                file.open(file_Path, ios::in);
+
+                int line_Current = 0;
+
+                if (file.is_open())
+                {
+                    string line;
+                    getline(file, line); // skip first header line
+                    while (getline(file, line))
+                    {
+                        line_Current++;
+                        int VALID = function.get_Valid(line);
+                        if (VALID != -1)
+                        {
+                            getline(output_Check, line_Check);
+                            string trim = line_Check.substr(0, line_Check.find('\t'));
+
+                            vector<string> positions;
+                            function.split_getPos_ONLY(positions, line, '\t');
+                            string pos = positions[1] + ":" + to_string((stoi(positions[1]) + window_Size));
+
+                            if (pos != trim)
+                            {
+                                found = 1;
+                                file_Count_Start = file_Count;
+                                line_Num = line_Current;
+                                break;
+                            }
+                        }
+                    }
+                    file.close();
+                }
+                if (found == 1)
+                {
+                    break;
+                }
+            }
+            output_Check.close();
+        }
+    }
+
+    fstream output;
+    output.open(output_File, ios::app);
+
+    int line_Current = 0;
+
+    for (int file_Count = file_Count_Start; file_Count < folder_Index.size(); file_Count++)
+    {
+        string file_Path = folder_Index[file_Count].second;
+        fstream file_Main;
+        file_Main.open(file_Path, ios::in);
+
+        if (file_Main.is_open())
+        {
+            string line_Main;
+            getline(file_Main, line_Main); // skip first header line
+            while (getline(file_Main, line_Main))
+            {
+                if (line_Current < line_Num)
+                {
+                    line_Current++;
+                }
+                else
+                {
+                    // check VALID
+                    int VALID = function.get_Valid(line_Main);
+                    // cout << line_Main << endl;
+                    if (VALID != -1)
+                    {
+                        int start_Co = VALID;
+                        int end_Co = start_Co + window_Size;
+
+                        cout << "Coordinates\t: Start: " << start_Co << " End: " << end_Co << endl;
+
+                        float tot_pairwise_Differences = 0;
+                        int segregating_Sites = 0;
+
+                        vector<string> file_List;
+                        cout << endl;
+                        cout << "System is retrieving file(s)" << endl;
+                        if (folder_Index.size() > 1)
+                        {
+                            file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
+                        }
+                        else
+                        {
+                            file_List.push_back(folder_Index[0].second);
+                        }
+                        cout << "System has retrieved all file(s)" << endl;
+
+                        cout << "System is collecting segregrating site(s)" << endl;
+                        vector<string> collect_Segregrating_sites;
+
+                        for (string files : file_List)
+                        {
+                            // cout << files << endl;
+                            fstream file;
+                            file.open(files, ios::in);
+                            if (file.is_open())
+                            {
+                                string line;
+                                getline(file, line); // skip first header line
+                                while (getline(file, line))
+                                {
+                                    vector<string> positions;
+                                    function.split_getPos_ONLY(positions, line, '\t');
+                                    int pos = stoi(positions[1]);
+
+                                    if (pos >= start_Co && pos <= end_Co)
+                                    {
+                                        collect_Segregrating_sites.push_back(line);
+                                    }
+                                    else if (pos > end_Co)
+                                    {
+                                        break;
+                                    }
+                                }
+                                file.close();
+                            }
+                        }
+
+                        function.process_Seg_sites_tajima(collect_Segregrating_sites, N, segregating_Sites, tot_pairwise_Differences, this->tot_Blocks, this->tot_ThreadsperBlock);
+
+                        cout << endl;
+
+                        float pi = 0;
+                        float D = 0;
+
+                        string Tajima_D;
+                        cout << "Total segregating sites (S)\t: " << segregating_Sites << endl;
+
+                        if (segregating_Sites != 0)
+                        {
+                            pi = (float)tot_pairwise_Differences / combinations;
+                            cout << "Average pairwise polymorphisms (pi)\t: " << pi << endl;
+                            D = (float)(pi - (segregating_Sites / a1)) / sqrt(((e1 * segregating_Sites) + (e2 * segregating_Sites * (segregating_Sites - 1))));
+                            cout << endl;
+                            cout << "Tajima's D\t: " << D << endl;
+                            Tajima_D = to_string(D);
+                        }
+                        else
+                        {
+                            cout << endl;
+                            cout << "Tajima's D\t: "
+                                 << "Not Available" << endl;
+                            Tajima_D = "NA";
+                        }
+
+                        cout << endl;
+
+                        output << to_string(start_Co) << ":" << to_string(end_Co)
+                               << "\t" << to_string(pi)
+                               << "\t" << to_string(segregating_Sites)
+
+                               << "\t" << Tajima_D << "\n";
+
+                        output.flush();
+                    }
+
+                    // REMOVE after test
+                    // break;
+                }
+            }
+            file_Main.close();
+        }
+        // REMOVE after test
+        // break;
+    }
+
+    output.close();
+}
+
 void tajima::window(string output_File, float a1, float e1, float e2, int N, long int combinations, vector<pair<string, string>> &folder_Index)
 {
     functions function = functions();
 
     int start_Value = stoi(folder_Index[0].first.substr(0, folder_Index[0].first.find('_')));
     int end_Value = stoi(folder_Index[folder_Index.size() - 1].first.substr(folder_Index[folder_Index.size() - 1].first.find('_') + 1));
-
-    cout << start_Value << endl;
-    cout << end_Value << endl;
 
     int start_Co = 0;
     int end_Co = start_Co + window_Size;

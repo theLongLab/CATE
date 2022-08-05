@@ -196,8 +196,380 @@ void prometheus::set_Values_Window(string output_File, int window_Size, int step
     this->calc_Mode = "WINDOW";
 
     cout << "Window size: " << window_Size << endl;
-    cout << "Step size: " << step_Size << endl
-         << endl;
+    if (step_Size != 0)
+    {
+        cout << "Step size: " << step_Size << endl;
+    }
+    else
+    {
+        cout << "Sliding Window" << endl;
+    }
+    cout << endl;
+}
+
+void prometheus::process_C_sliding_Window(string test)
+{
+    functions function = functions();
+    this->sliding_Mode = "YES";
+
+    int pre_Lock = 1;
+    int file_Count_Start = 0;
+    int line_Num = 0;
+
+    if (filesystem::exists(output_File) != 0)
+    {
+        int found = 0;
+
+        fstream output_Check;
+        output_Check.open(output_File, ios::in);
+        if (output_Check.is_open())
+        {
+            string line_Check;
+            getline(output_Check, line_Check); // skip first header line
+
+            for (int file_Count = 0; file_Count < folder_Index.size(); file_Count++)
+            {
+                string file_Path = folder_Index[file_Count].second;
+                fstream file;
+                file.open(file_Path, ios::in);
+                int line_Current = 0;
+
+                if (file.is_open())
+                {
+                    string line;
+                    getline(file, line); // skip first header line
+                    while (getline(file, line))
+                    {
+                        line_Current++;
+                        int VALID = function.get_Valid(line);
+                        if (VALID != -1)
+                        {
+                            getline(output_Check, line_Check);
+                            string trim = line_Check.substr(0, line_Check.find('\t'));
+
+                            vector<string> positions;
+                            function.split_getPos_ONLY(positions, line, '\t');
+                            string pos = positions[1] + ":" + to_string((stoi(positions[1]) + window_Size));
+
+                            if (pos != trim)
+                            {
+                                found = 1;
+                                file_Count_Start = file_Count;
+                                line_Num = line_Current;
+                                break;
+                            }
+                        }
+                    }
+                    file.close();
+                }
+                if (found == 1)
+                {
+                    break;
+                }
+            }
+            output_Check.close();
+        }
+    }
+    else
+    {
+        if (test == "T")
+        {
+            function.createFile(output_File, "Coordinates\tPi\tS\tTajimas_D");
+        }
+        else if (test == "FU")
+        {
+            function.createFile(output_File, "Coordinates\tPi\tS\tne\tns\tD\tD_star\tF\tF_star");
+        }
+        else if (test == "FA")
+        {
+            function.createFile(output_File, "Coordinates\tPi\tS\tTotal_iEi\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E");
+        }
+        else if (test == "N")
+        {
+            function.createFile(output_File, "Coordinates\tPi\tS\tne\tns\tTotal_iEi\tTajimas_D\tD\tD_star\tF\tF_star\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E");
+        }
+    }
+
+    vector<int> row_vec;
+
+    fstream output;
+    output.open(output_File, ios::app);
+
+    cout << "Writing to file\t: " << output_File << endl;
+    cout << endl;
+
+    int line_Current = 0;
+
+    for (int file_Count = file_Count_Start; file_Count < folder_Index.size(); file_Count++)
+    {
+        string file_Path = folder_Index[file_Count].second;
+        fstream file;
+        file.open(file_Path, ios::in);
+
+        if (file.is_open())
+        {
+            string line;
+            getline(file, line); // skip first header line
+            while (getline(file, line))
+            {
+                if (line_Current < line_Num)
+                {
+                    line_Current++;
+                }
+                else
+                {
+                    vector<string> positions;
+                    function.split_getPos_ONLY(positions, line, '\t');
+                    int start_Co = stoi(positions[1]);
+                    int end_Co = start_Co + window_Size;
+
+                    // vector<string> file_List = function.forward_Search_Only(file_Count, this->folder_Index, start_Co, end_Co);
+                    all_start_Co.push_back(start_Co);
+                    all_end_Co.push_back(end_Co);
+
+                    string write = to_string(start_Co) + ":" + to_string(end_Co);
+                    write_Lines.push_back(write);
+
+                    seg_catch_points_ALL.push_back(-1);
+                    seg_catch_index_ALL.push_back(-1);
+                    seg_backward_index_ALL.push_back(row_vec);
+                    seg_forward_index_ALL.push_back(row_vec);
+
+                    catch_Point.push_back(1);
+
+                    if (write_Lines.size() == number_of_genes_Window)
+                    {
+                        // Process
+                        // intialize(coordinates);
+                        int folder_Start = all_start_Co[0];
+                        int folder_End = all_end_Co[all_end_Co.size() - 1];
+                        this->gene_Size = write_Lines.size();
+
+                        cout << "Processing windows from " << folder_Start << " to " << folder_End << endl;
+
+                        // Collect FILEs
+                        vector<string> file_List;
+                        if (folder_Index.size() > 1)
+                        {
+                            file_List = function.compound_interpolationSearch(folder_Index, folder_Start, folder_End);
+                        }
+                        else
+                        {
+                            file_List.push_back(folder_Index[0].second);
+                        }
+
+                        if (this->prev_file_List != file_List)
+                        {
+                            if (pre_Lock == 1)
+                            {
+                                pre_Lock = 0;
+                            }
+                            else
+                            {
+                                if (test == "T")
+                                {
+                                    free(pre_MA);
+                                }
+                                else if (test == "FU")
+                                {
+                                    free(pre_MA);
+                                    free(pre_ne);
+                                    free(pre_ns);
+                                }
+                                else if (test == "FA")
+                                {
+                                    free(pre_MA);
+                                    free(pre_Theta_partials);
+                                }
+                                else if (test == "N")
+                                {
+                                    free(pre_MA);
+
+                                    free(pre_Theta_partials);
+
+                                    free(pre_ne);
+                                    free(pre_ns);
+                                }
+
+                                pre_Lock = 1;
+                            }
+
+                            same_Files = "NO";
+
+                            tot_Segs = 0;
+
+                            all_Lines.clear();
+                            position_index_Segs.clear();
+
+                            concat_Segs.clear();
+                            all_site_Index.clear();
+
+                            start_stop.clear();
+
+                            if (Multi_read == "YES")
+                            {
+                                cout << "Intitating multi read based segregating site search" << endl;
+
+                                vector<thread> threads_Multi_read;
+
+                                for (string files : file_List)
+                                {
+                                    // cout << files << endl;
+                                    threads_Multi_read.push_back(thread{&prometheus::file_Reader_multi, this, files});
+                                }
+
+                                for (thread &t : threads_Multi_read)
+                                {
+                                    if (t.joinable())
+                                    {
+                                        t.join();
+                                    }
+                                }
+
+                                threads_Multi_read.clear();
+                            }
+                            else
+                            {
+                                cout << "Intitating single read based segregating site search" << endl;
+                                for (string files : file_List)
+                                {
+                                    fstream file;
+                                    file.open(files, ios::in);
+
+                                    if (file.is_open())
+                                    {
+                                        string line;
+                                        getline(file, line); // skip first header line
+                                        while (getline(file, line))
+                                        {
+                                            all_Lines.push_back(line);
+                                        }
+                                        file.close();
+                                    }
+                                }
+                            }
+
+                            // Process Segs
+                            tot_Segs = all_Lines.size();
+                            cout << "System is processing and filtering " << tot_Segs << " segregating site(s)" << endl;
+                            // all_Files_index.clear();
+
+                            int GPU_rounds_full = tot_Segs / SNPs_per_Run;
+                            int GPU_rounds_partial = tot_Segs % SNPs_per_Run;
+
+                            // vector<pair<int, int>> start_stop;
+                            for (int i = 0; i < GPU_rounds_full; i++)
+                            {
+                                int start = i * SNPs_per_Run;
+                                int stop = start + SNPs_per_Run;
+                                start_stop.push_back(make_pair(start, stop));
+                            }
+
+                            if (GPU_rounds_partial != 0)
+                            {
+                                int start = tot_Segs - GPU_rounds_partial;
+                                int stop = tot_Segs;
+                                start_stop.push_back(make_pair(start, stop));
+                            }
+
+                            vector<thread> threads_vec;
+
+                            for (int rounds = 0; rounds < start_stop.size(); rounds++)
+                            {
+                                concat_Segs.push_back("");
+                                int *row;
+                                all_site_Index.push_back(row);
+                            }
+
+                            for (int rounds = 0; rounds < start_stop.size(); rounds++)
+                            {
+                                threads_vec.push_back(thread{&prometheus::seg_Concat, this, rounds, start_stop[rounds].first, start_stop[rounds].second});
+                            }
+
+                            for (thread &t : threads_vec)
+                            {
+                                if (t.joinable())
+                                {
+                                    t.join();
+                                }
+                            }
+
+                            threads_vec.clear();
+
+                            prev_file_List.clear();
+                            this->prev_file_List = file_List;
+                        }
+                        else
+                        {
+                            same_Files = "YES";
+                        }
+
+                        // Process test
+                        if (test == "T")
+                        {
+                            process_Tajima();
+                            cout << "System has completed Tajima's D for the gene(s)" << endl;
+                        }
+                        else if (test == "FU")
+                        {
+                            process_Fu_Li();
+                            cout << "System has completed Fu and Li for the gene(s)" << endl;
+                        }
+                        else if (test == "FA")
+                        {
+                            process_Fay_Wu();
+                            cout << "System has completed Fay and Wu for the gene(s)" << endl;
+                        }
+                        else if (test == "N")
+                        {
+                            process_Neutrality();
+                            cout << "System has completed Neutrality tests for the gene(s)" << endl;
+                        }
+
+                        for (int gene_Count = 0; gene_Count < write_Lines.size(); gene_Count++)
+                        {
+                            if (seg_catch_points_ALL[gene_Count] != -1)
+                            {
+                                output << write_Lines[gene_Count] << "\n";
+                            }
+                        }
+
+                        // for (string line : write_Lines)
+                        // {
+                        //     output << line << "\n";
+                        // }
+
+                        output.flush();
+
+                        cout << "System has written the results for the batch" << endl
+                             << endl;
+
+                        // coordinates.clear();
+                        all_start_Co.clear();
+                        all_end_Co.clear();
+                        write_Lines.clear();
+
+                        catch_Point.clear();
+
+                        seg_catch_points_ALL.clear();
+                        seg_catch_index_ALL.clear();
+                        seg_backward_index_ALL.clear();
+                        seg_forward_index_ALL.clear();
+
+                        gene_Size = 0;
+                    }
+                }
+            }
+
+            file.close();
+        }
+        // REMOVE AFTER testing
+        break;
+    }
+
+    if (write_Lines.size() != 0)
+    {
+    }
 }
 
 void prometheus::process_Window(string test)
@@ -212,8 +584,8 @@ void prometheus::process_Window(string test)
     int start_Value = stoi(folder_Index[0].first.substr(0, folder_Index[0].first.find('_')));
     int end_Value = stoi(folder_Index[folder_Index.size() - 1].first.substr(folder_Index[folder_Index.size() - 1].first.find('_') + 1));
 
-    cout << start_Value << endl;
-    cout << end_Value << endl;
+    // cout << start_Value << endl;
+    // cout << end_Value << endl;
 
     int start_Co = 0;
     int end_Co = start_Co + window_Size;
@@ -535,8 +907,211 @@ void prometheus::process_Window(string test)
         // intialize(coordinates);
         int folder_Start = all_start_Co[0];
         int folder_End = all_end_Co[all_end_Co.size() - 1];
+        this->gene_Size = write_Lines.size();
 
         cout << "Processing windows from " << folder_Start << " to " << folder_End << endl;
+        vector<string> file_List;
+        if (folder_Index.size() > 1)
+        {
+            file_List = function.compound_interpolationSearch(folder_Index, folder_Start, folder_End);
+        }
+        else
+        {
+            file_List.push_back(folder_Index[0].second);
+        }
+        if (this->prev_file_List != file_List)
+        {
+            if (pre_Lock == 1)
+            {
+                pre_Lock = 0;
+            }
+            else
+            {
+                if (test == "T")
+                {
+                    free(pre_MA);
+                }
+                else if (test == "FU")
+                {
+                    free(pre_MA);
+                    free(pre_ne);
+                    free(pre_ns);
+                }
+                else if (test == "FA")
+                {
+                    free(pre_MA);
+                    free(pre_Theta_partials);
+                }
+                else if (test == "N")
+                {
+                    free(pre_MA);
+
+                    free(pre_Theta_partials);
+
+                    free(pre_ne);
+                    free(pre_ns);
+                }
+
+                pre_Lock = 1;
+            }
+
+            same_Files = "NO";
+
+            tot_Segs = 0;
+
+            all_Lines.clear();
+            position_index_Segs.clear();
+
+            concat_Segs.clear();
+            all_site_Index.clear();
+
+            start_stop.clear();
+
+            if (Multi_read == "YES")
+            {
+                cout << "Intitating multi read based segregating site search" << endl;
+
+                vector<thread> threads_Multi_read;
+
+                for (string files : file_List)
+                {
+                    // cout << files << endl;
+                    threads_Multi_read.push_back(thread{&prometheus::file_Reader_multi, this, files});
+                }
+
+                for (thread &t : threads_Multi_read)
+                {
+                    if (t.joinable())
+                    {
+                        t.join();
+                    }
+                }
+
+                threads_Multi_read.clear();
+            }
+            else
+            {
+                cout << "Intitating single read based segregating site search" << endl;
+                for (string files : file_List)
+                {
+                    fstream file;
+                    file.open(files, ios::in);
+
+                    if (file.is_open())
+                    {
+                        string line;
+                        getline(file, line); // skip first header line
+                        while (getline(file, line))
+                        {
+                            all_Lines.push_back(line);
+                        }
+                        file.close();
+                    }
+                }
+            }
+
+            // Process Segs
+            tot_Segs = all_Lines.size();
+            cout << "System is processing and filtering " << tot_Segs << " segregating site(s)" << endl;
+            // all_Files_index.clear();
+
+            int GPU_rounds_full = tot_Segs / SNPs_per_Run;
+            int GPU_rounds_partial = tot_Segs % SNPs_per_Run;
+
+            // vector<pair<int, int>> start_stop;
+            for (int i = 0; i < GPU_rounds_full; i++)
+            {
+                int start = i * SNPs_per_Run;
+                int stop = start + SNPs_per_Run;
+                start_stop.push_back(make_pair(start, stop));
+            }
+
+            if (GPU_rounds_partial != 0)
+            {
+                int start = tot_Segs - GPU_rounds_partial;
+                int stop = tot_Segs;
+                start_stop.push_back(make_pair(start, stop));
+            }
+
+            vector<thread> threads_vec;
+
+            for (int rounds = 0; rounds < start_stop.size(); rounds++)
+            {
+                concat_Segs.push_back("");
+                int *row;
+                all_site_Index.push_back(row);
+            }
+
+            for (int rounds = 0; rounds < start_stop.size(); rounds++)
+            {
+                threads_vec.push_back(thread{&prometheus::seg_Concat, this, rounds, start_stop[rounds].first, start_stop[rounds].second});
+            }
+
+            for (thread &t : threads_vec)
+            {
+                if (t.joinable())
+                {
+                    t.join();
+                }
+            }
+
+            threads_vec.clear();
+
+            prev_file_List.clear();
+            this->prev_file_List = file_List;
+        }
+        else
+        {
+            same_Files = "YES";
+        }
+
+        // Process test
+        if (test == "T")
+        {
+            process_Tajima();
+            cout << "System has completed Tajima's D for the gene(s)" << endl;
+        }
+        else if (test == "FU")
+        {
+            process_Fu_Li();
+            cout << "System has completed Fu and Li for the gene(s)" << endl;
+        }
+        else if (test == "FA")
+        {
+            process_Fay_Wu();
+            cout << "System has completed Fay and Wu for the gene(s)" << endl;
+        }
+        else if (test == "N")
+        {
+            process_Neutrality();
+            cout << "System has completed Neutrality tests for the gene(s)" << endl;
+        }
+
+        for (string line : write_Lines)
+        {
+            output << line << "\n";
+        }
+
+        output.flush();
+
+        cout << "System has written the results for the batch" << endl
+             << endl;
+
+        // coordinates.clear();
+        all_start_Co.clear();
+        all_end_Co.clear();
+        write_Lines.clear();
+
+        catch_Point.clear();
+
+        seg_catch_points_ALL.clear();
+        seg_catch_index_ALL.clear();
+        seg_backward_index_ALL.clear();
+        seg_forward_index_ALL.clear();
+
+        gene_Size = 0;
+
+        // COMPLETE THIS
     }
 
     output.close();
@@ -1122,58 +1697,96 @@ void prometheus::process_Neutrality()
 
     cout << "Filteration and selection of segregating site(s)" << endl;
 
-    for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
+    if (this->sliding_Mode == "YES")
     {
-        if (catch_Point[gene_ID] != -1)
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
-            threads_vec.push_back(thread{&prometheus::seg_Search_catch_point, this, gene_ID});
+            threads_vec.push_back(thread{&prometheus::get_POS_VALID, this, all_start_Co[gene_ID], gene_ID});
         }
-        else
+
+        for (thread &t : threads_vec)
         {
-            // add to write_lines the blank
-            // Pi\tS\tne\tns\tTotal_iEi\tTajimas_D\tD\tD_star\tF\tF_star\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E
-            string write = "0\t0\t0\t0\t0\tNA\tNA\tNA\tNA\tNA\tNA\tNA";
-            write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
+            if (t.joinable())
+            {
+                t.join();
+            }
         }
-    }
 
-    for (thread &t : threads_vec)
-    {
-        if (t.joinable())
+        threads_vec.clear();
+
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
-            t.join();
-        }
-    }
-
-    threads_vec.clear();
-
-    for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
-    {
-        if (catch_Point[gene_ID] != -1)
-        {
-            if (seg_catch_index_ALL[gene_ID] != -1)
+            if (seg_catch_points_ALL[gene_ID] != -1)
             {
                 threads_vec.push_back(thread{&prometheus::seg_Search_forward, this, gene_ID});
-                threads_vec.push_back(thread{&prometheus::seg_Search_backward, this, gene_ID});
+            }
+        }
+
+        for (thread &t : threads_vec)
+        {
+            if (t.joinable())
+            {
+                t.join();
+            }
+        }
+
+        threads_vec.clear();
+    }
+    else
+    {
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
+        {
+            if (catch_Point[gene_ID] != -1)
+            {
+                threads_vec.push_back(thread{&prometheus::seg_Search_catch_point, this, gene_ID});
             }
             else
             {
                 // add to write_lines the blank
+                // Pi\tS\tne\tns\tTotal_iEi\tTajimas_D\tD\tD_star\tF\tF_star\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E
                 string write = "0\t0\t0\t0\t0\tNA\tNA\tNA\tNA\tNA\tNA\tNA";
                 write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
             }
         }
-    }
 
-    for (thread &t : threads_vec)
-    {
-        if (t.joinable())
+        for (thread &t : threads_vec)
         {
-            t.join();
+            if (t.joinable())
+            {
+                t.join();
+            }
         }
-    }
 
-    threads_vec.clear();
+        threads_vec.clear();
+
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
+        {
+            if (catch_Point[gene_ID] != -1)
+            {
+                if (seg_catch_index_ALL[gene_ID] != -1)
+                {
+                    threads_vec.push_back(thread{&prometheus::seg_Search_forward, this, gene_ID});
+                    threads_vec.push_back(thread{&prometheus::seg_Search_backward, this, gene_ID});
+                }
+                else
+                {
+                    // add to write_lines the blank
+                    string write = "0\t0\t0\t0\t0\tNA\tNA\tNA\tNA\tNA\tNA\tNA";
+                    write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
+                }
+            }
+        }
+
+        for (thread &t : threads_vec)
+        {
+            if (t.joinable())
+            {
+                t.join();
+            }
+        }
+
+        threads_vec.clear();
+    }
 
     // PROCESS NEUTRALITY ALL
     for (size_t gene_ID = 0; gene_ID < gene_Size; gene_ID++)
@@ -1587,58 +2200,96 @@ void prometheus::process_Fay_Wu()
 
     cout << "Filteration and selection of segregating site(s)" << endl;
 
-    for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
+    if (this->sliding_Mode == "YES")
     {
-        if (catch_Point[gene_ID] != -1)
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
-            threads_vec.push_back(thread{&prometheus::seg_Search_catch_point, this, gene_ID});
+            threads_vec.push_back(thread{&prometheus::get_POS_VALID, this, all_start_Co[gene_ID], gene_ID});
         }
-        else
+
+        for (thread &t : threads_vec)
         {
-            // add to write_lines the blank
-            // Pi\tS\tTotal_iEi\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E
-            string write = "0\t0\t0\tNA\tNA";
-            write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
+            if (t.joinable())
+            {
+                t.join();
+            }
         }
-    }
 
-    for (thread &t : threads_vec)
-    {
-        if (t.joinable())
+        threads_vec.clear();
+
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
-            t.join();
-        }
-    }
-
-    threads_vec.clear();
-
-    for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
-    {
-        if (catch_Point[gene_ID] != -1)
-        {
-            if (seg_catch_index_ALL[gene_ID] != -1)
+            if (seg_catch_points_ALL[gene_ID] != -1)
             {
                 threads_vec.push_back(thread{&prometheus::seg_Search_forward, this, gene_ID});
-                threads_vec.push_back(thread{&prometheus::seg_Search_backward, this, gene_ID});
+            }
+        }
+
+        for (thread &t : threads_vec)
+        {
+            if (t.joinable())
+            {
+                t.join();
+            }
+        }
+
+        threads_vec.clear();
+    }
+    else
+    {
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
+        {
+            if (catch_Point[gene_ID] != -1)
+            {
+                threads_vec.push_back(thread{&prometheus::seg_Search_catch_point, this, gene_ID});
             }
             else
             {
                 // add to write_lines the blank
+                // Pi\tS\tTotal_iEi\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E
                 string write = "0\t0\t0\tNA\tNA";
                 write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
             }
         }
-    }
 
-    for (thread &t : threads_vec)
-    {
-        if (t.joinable())
+        for (thread &t : threads_vec)
         {
-            t.join();
+            if (t.joinable())
+            {
+                t.join();
+            }
         }
-    }
 
-    threads_vec.clear();
+        threads_vec.clear();
+
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
+        {
+            if (catch_Point[gene_ID] != -1)
+            {
+                if (seg_catch_index_ALL[gene_ID] != -1)
+                {
+                    threads_vec.push_back(thread{&prometheus::seg_Search_forward, this, gene_ID});
+                    threads_vec.push_back(thread{&prometheus::seg_Search_backward, this, gene_ID});
+                }
+                else
+                {
+                    // add to write_lines the blank
+                    string write = "0\t0\t0\tNA\tNA";
+                    write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
+                }
+            }
+        }
+
+        for (thread &t : threads_vec)
+        {
+            if (t.joinable())
+            {
+                t.join();
+            }
+        }
+
+        threads_vec.clear();
+    }
 
     // Process Fay Wu
     for (size_t gene_ID = 0; gene_ID < gene_Size; gene_ID++)
@@ -2039,38 +2690,49 @@ void prometheus::process_Fu_Li()
 
     cout << "Filteration and selection of segregating site(s)" << endl;
 
-    for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
+    if (this->sliding_Mode == "YES")
     {
-        if (catch_Point[gene_ID] != -1)
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
-            threads_vec.push_back(thread{&prometheus::seg_Search_catch_point, this, gene_ID});
+            threads_vec.push_back(thread{&prometheus::get_POS_VALID, this, all_start_Co[gene_ID], gene_ID});
         }
-        else
+
+        for (thread &t : threads_vec)
         {
-            // add to write_lines the blank
-            string write = "0\t0\t0\t0\tNA\tNA\tNA\tNA";
-            write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
+            if (t.joinable())
+            {
+                t.join();
+            }
         }
-    }
 
-    for (thread &t : threads_vec)
-    {
-        if (t.joinable())
+        threads_vec.clear();
+
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
-            t.join();
-        }
-    }
-
-    threads_vec.clear();
-
-    for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
-    {
-        if (catch_Point[gene_ID] != -1)
-        {
-            if (seg_catch_index_ALL[gene_ID] != -1)
+            if (seg_catch_points_ALL[gene_ID] != -1)
             {
                 threads_vec.push_back(thread{&prometheus::seg_Search_forward, this, gene_ID});
-                threads_vec.push_back(thread{&prometheus::seg_Search_backward, this, gene_ID});
+            }
+        }
+
+        for (thread &t : threads_vec)
+        {
+            if (t.joinable())
+            {
+                t.join();
+            }
+        }
+
+        threads_vec.clear();
+    }
+    else
+    {
+
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
+        {
+            if (catch_Point[gene_ID] != -1)
+            {
+                threads_vec.push_back(thread{&prometheus::seg_Search_catch_point, this, gene_ID});
             }
             else
             {
@@ -2079,17 +2741,45 @@ void prometheus::process_Fu_Li()
                 write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
             }
         }
-    }
 
-    for (thread &t : threads_vec)
-    {
-        if (t.joinable())
+        for (thread &t : threads_vec)
         {
-            t.join();
+            if (t.joinable())
+            {
+                t.join();
+            }
         }
-    }
 
-    threads_vec.clear();
+        threads_vec.clear();
+
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
+        {
+            if (catch_Point[gene_ID] != -1)
+            {
+                if (seg_catch_index_ALL[gene_ID] != -1)
+                {
+                    threads_vec.push_back(thread{&prometheus::seg_Search_forward, this, gene_ID});
+                    threads_vec.push_back(thread{&prometheus::seg_Search_backward, this, gene_ID});
+                }
+                else
+                {
+                    // add to write_lines the blank
+                    string write = "0\t0\t0\t0\tNA\tNA\tNA\tNA";
+                    write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
+                }
+            }
+        }
+
+        for (thread &t : threads_vec)
+        {
+            if (t.joinable())
+            {
+                t.join();
+            }
+        }
+
+        threads_vec.clear();
+    }
 
     // Process Fu Li
     for (size_t gene_ID = 0; gene_ID < gene_Size; gene_ID++)
@@ -2676,38 +3366,54 @@ void prometheus::process_Tajima()
 
     cout << "Filteration and selection of segregating site(s)" << endl;
 
-    for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
+    if (this->sliding_Mode == "YES")
     {
-        if (catch_Point[gene_ID] != -1)
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
-            threads_vec.push_back(thread{&prometheus::seg_Search_catch_point, this, gene_ID});
+            threads_vec.push_back(thread{&prometheus::get_POS_VALID, this, all_start_Co[gene_ID], gene_ID});
         }
-        else
+
+        for (thread &t : threads_vec)
         {
-            // add to write_lines the blank
-            string write = "0\t0\tNA";
-            write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
+            if (t.joinable())
+            {
+                t.join();
+            }
         }
-    }
 
-    for (thread &t : threads_vec)
-    {
-        if (t.joinable())
-        {
-            t.join();
-        }
-    }
+        threads_vec.clear();
 
-    threads_vec.clear();
-
-    for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
-    {
-        if (catch_Point[gene_ID] != -1)
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
             if (seg_catch_points_ALL[gene_ID] != -1)
             {
                 threads_vec.push_back(thread{&prometheus::seg_Search_forward, this, gene_ID});
-                threads_vec.push_back(thread{&prometheus::seg_Search_backward, this, gene_ID});
+            }
+            // else
+            // {
+            //     string write = "0\t0\tNA";
+            //     write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
+            // }
+        }
+
+        for (thread &t : threads_vec)
+        {
+            if (t.joinable())
+            {
+                t.join();
+            }
+        }
+
+        threads_vec.clear();
+    }
+    else
+    {
+
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
+        {
+            if (catch_Point[gene_ID] != -1)
+            {
+                threads_vec.push_back(thread{&prometheus::seg_Search_catch_point, this, gene_ID});
             }
             else
             {
@@ -2716,17 +3422,45 @@ void prometheus::process_Tajima()
                 write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
             }
         }
-    }
 
-    for (thread &t : threads_vec)
-    {
-        if (t.joinable())
+        for (thread &t : threads_vec)
         {
-            t.join();
+            if (t.joinable())
+            {
+                t.join();
+            }
         }
-    }
 
-    threads_vec.clear();
+        threads_vec.clear();
+
+        for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
+        {
+            if (catch_Point[gene_ID] != -1)
+            {
+                if (seg_catch_points_ALL[gene_ID] != -1)
+                {
+                    threads_vec.push_back(thread{&prometheus::seg_Search_forward, this, gene_ID});
+                    threads_vec.push_back(thread{&prometheus::seg_Search_backward, this, gene_ID});
+                }
+                else
+                {
+                    // add to write_lines the blank
+                    string write = "0\t0\tNA";
+                    write_Lines[gene_ID] = write_Lines[gene_ID] + "\t" + write;
+                }
+            }
+        }
+
+        for (thread &t : threads_vec)
+        {
+            if (t.joinable())
+            {
+                t.join();
+            }
+        }
+
+        threads_vec.clear();
+    }
 
     // process Tajima
 
@@ -2748,6 +3482,41 @@ void prometheus::process_Tajima()
 
     free(MA_Count);
     cout << "System has processed all segregating site(s)" << endl;
+}
+
+void prometheus::get_POS_VALID(int start_Co, int gene_ID)
+{
+    int top = 0;
+    int bottom = position_index_Segs.size() - 1;
+    int middle = top + ((bottom - top) / 2);
+
+    int seg_catch_point = -1;
+
+    while (top <= bottom)
+    {
+        if (position_index_Segs[middle].first == start_Co)
+        {
+            seg_catch_point = middle;
+            // found = 'Y';
+            break;
+        }
+        else if (position_index_Segs[middle].first < start_Co)
+        {
+            top = middle + 1;
+        }
+        else
+        {
+            bottom = middle - 1;
+        }
+        middle = top + ((bottom - top) / 2);
+    }
+
+    unique_lock<shared_mutex> ul(g_mutex);
+    seg_catch_points_ALL[gene_ID] = seg_catch_point;
+    if (seg_catch_point != -1)
+    {
+        seg_catch_index_ALL[gene_ID] = position_index_Segs[seg_catch_point].second;
+    }
 }
 
 void prometheus::calc_Tajima_Segs(int gene_ID, int *MA_Count)

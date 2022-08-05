@@ -51,6 +51,7 @@ public:
     void ingress();
 
     void window(string output_File, float an, float e1, float e2, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float bn, float bn_plus1, float N_float, long int combinations, vector<pair<string, string>> &folder_Index);
+    void window_Sliding(string output_File, float an, float e1, float e2, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float bn, float bn_plus1, float N_float, long int combinations, vector<pair<string, string>> &folder_Index);
 
     void get_Prerequisites(int N_tot, float &an, float &e1, float &e2, float &vd, float &ud, float &vd_star, float &ud_star, float &uf, float &vf, float &uf_star, float &vf_star, float &bn, float &bn_plus1);
     void pre_Tajima(float N_tot, float an, float bn, promise<float> &e1_set, promise<float> &e2_set);

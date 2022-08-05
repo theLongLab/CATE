@@ -30,12 +30,14 @@ public:
     vector<string> compound_interpolationSearch(vector<pair<string, string>> &folder_Index, int &start_Co, int &end_Co);
     void forward_Search(int pos, vector<pair<string, string>> folder_Index, int start_Co, int end_Co, promise<vector<int>> &forward_Found);
     void backward_Search(int pos, vector<pair<string, string>> folder_Index, int start_Co, int end_Co, promise<vector<int>> &backward_Found);
+    // vector<string> forward_Search_Only(int pos, vector<pair<string, string>> &folder_Index, int start_Co, int end_Co);
 
     void split(vector<string> &line_Data, string line, char delim);
     void split_space(vector<string> &line_Data, string line, string delim);
     void split_getPos_ONLY(vector<string> &line_Data, string line, char delim);
-    //void split_getPos(vector<string> &line_Data, string line, string delim);
+    // void split_getPos(vector<string> &line_Data, string line, string delim);
     int getN_Split(string file);
+    int get_Valid(string line);
     void split_to_MA(vector<string> &line_Data, string line, char delim);
 
     long int fact_half(int count);

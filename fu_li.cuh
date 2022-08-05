@@ -49,6 +49,7 @@ public:
     void ingress();
 
     void window(string output_File, float an, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float N_float, long int combinations, vector<pair<string, string>> &folder_Index);
+    void window_Sliding(string output_File, float an, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float N_float, long int combinations, vector<pair<string, string>> &folder_Index);
 
     void calc_Pre(int N_tot, float &an, float &vd, float &ud, float &vd_star, float &ud_star, float &uf, float &vf, float &uf_star, float &vf_star);
     int outgroup_Singleton(vector<string> &info, vector<string> &positions);

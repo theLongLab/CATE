@@ -52,6 +52,7 @@ public:
     void ingress();
 
     void window(string output_File, float a1, float e1, float e2, int N, long int combinations, vector<pair<string, string>> &folder_Index);
+    void window_Sliding(string output_File, float a1, float e1, float e2, int N, long int combinations, vector<pair<string, string>> &folder_Index);
 
     vector<string> get_Countries();
     vector<pair<string, string>> index_Folder(string &country);

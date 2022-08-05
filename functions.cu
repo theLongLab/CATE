@@ -751,6 +751,67 @@ vector<string> functions::compound_interpolationSearch(vector<pair<string, strin
 //     }
 // }
 
+int functions::get_Valid(string line)
+{
+    int VALID = -1;
+    int POS = -1;
+    int count = 0;
+    char delim = '\t';
+
+    while (line.find(delim) != string::npos)
+    {
+        if (count == 1)
+        {
+            // line_Data.push_back(line.substr(0, line.find(delim)));
+            POS = stoi(line.substr(0, line.find(delim)));
+        }
+
+        if (count == 9)
+        {
+            line = line.substr(line.find(delim) + 1);
+            break;
+        }
+
+        line = line.substr(line.find(delim) + 1);
+        count++;
+    }
+
+    int found_0 = 0;
+    int found_1 = 0;
+    // cout << POS << endl;
+
+    for (int i = 0; i < line.size(); i++)
+    {
+        char val = line.at(i);
+
+        if (val == '0')
+        {
+            if (found_0 == 0)
+            {
+                found_0 = 1;
+            }
+        }
+        else if (val == '1')
+        {
+            if (found_1 == 0)
+            {
+                found_1 = 1;
+            }
+        }
+
+        // cout << val << endl;
+        // cout << val << "\t" << found_0 << "\t" << found_1 << endl;
+
+        if ((found_0 == 1) && (found_1 == 1))
+        {
+            VALID = POS;
+            break;
+        }
+    }
+
+    return VALID;
+}
+
 void functions::split_getPos_ONLY(vector<string> &line_Data, string line, char delim)
 {
     line_Data.clear();
