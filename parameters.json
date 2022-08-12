@@ -34,7 +34,7 @@
 
     # WINDOW mode parameters
     "Window size":10000,
-    "Step size":0,
+    "Step size":10000,
 
     # FILE mode paramters
     # Any tab-deliminated text based formats such as but not limited to (*.txt, *.csv)

@@ -48,19 +48,28 @@ fst::fst(string calc_Mode, int window_Size, int step_Size, string input_Folder, 
     this->pop_List = pop_List;
 
     this->calc_Mode = "WINDOW";
-
-    set_Values("", input_Folder, output_Path, cuda_ID, "", ploidy);
-
     this->window_Size = window_Size;
     this->step_Size = step_Size;
+
+    set_Values("", input_Folder, output_Path, cuda_ID, "", ploidy);
 }
 
 void fst::set_Values(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
     if (this->calc_Mode == "WINDOW")
     {
-        cout << "Calculation mode: WINDOW" << endl
-             << endl;
+        cout << "Calculation mode: WINDOW" << endl;
+        cout << "Window size: " << this->window_Size << endl;
+        if (step_Size != 0)
+        {
+            cout << "Step size: " << this->step_Size << endl;
+        }
+        else
+        {
+            cout << "ERROR STEP SIZE CANNOT BE \"0\" FOR Fst" << endl;
+            exit(1);
+        }
+        cout << endl;
     }
     else
     {

@@ -195,16 +195,16 @@ void prometheus::set_Values_Window(string output_File, int window_Size, int step
 
     this->calc_Mode = "WINDOW";
 
-    cout << "Window size: " << window_Size << endl;
-    if (step_Size != 0)
-    {
-        cout << "Step size: " << step_Size << endl;
-    }
-    else
-    {
-        cout << "Sliding Window" << endl;
-    }
-    cout << endl;
+    //cout << "Window size: " << window_Size << endl;
+    // if (step_Size != 0)
+    // {
+    //     cout << "Step size: " << step_Size << endl;
+    // }
+    // else
+    // {
+    //     cout << "Sliding Window" << endl;
+    // }
+    //cout << endl;
 }
 
 void prometheus::process_C_sliding_Window(string test)

@@ -33,10 +33,10 @@ fu_li::fu_li(string calc_Mode, int window_Size, int step_Size, string input_Fold
          << endl;
 
     this->calc_Mode = "WINDOW";
-    set_Values("", input_Folder, ouput_Path, cuda_ID, "", ploidy);
-
     this->window_Size = window_Size;
     this->step_Size = step_Size;
+
+    set_Values("", input_Folder, ouput_Path, cuda_ID, "", ploidy);
 
     this->prometheus_Activate = "YES";
     this->CPU_cores = CPU_cores;
@@ -54,10 +54,10 @@ fu_li::fu_li(string calc_Mode, int window_Size, int step_Size, string input_Fold
          << endl;
 
     this->calc_Mode = "WINDOW";
-    set_Values("", input_Folder, ouput_Path, cuda_ID, "", ploidy);
-
     this->window_Size = window_Size;
     this->step_Size = step_Size;
+
+    set_Values("", input_Folder, ouput_Path, cuda_ID, "", ploidy);
 }
 
 void fu_li::set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
@@ -71,6 +71,16 @@ void fu_li::set_Values(string gene_List, string input_Folder, string ouput_Path,
     else
     {
         cout << "Calculation mode: WINDOW" << endl;
+        cout << "Window size: " << this->window_Size << endl;
+        if (step_Size != 0)
+        {
+            cout << "Step size: " << this->step_Size << endl;
+        }
+        else
+        {
+            cout << "Sliding Window mode" << endl;
+        }
+        cout << endl;
     }
     cout << endl;
     this->input_Folder = input_Folder;

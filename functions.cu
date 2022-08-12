@@ -659,12 +659,13 @@ vector<string> functions::compound_interpolationSearch(vector<pair<string, strin
     while (start <= end && start_Co <= high_Value)
     {
         vector<string> line_Data_get;
-
-        int pos = start + ((double)(end - start) / ((high_Value - low_Value)) * (start_Co - low_Value));
+        int pos = start + ((((double)(end - start) / (high_Value - low_Value)) * (start_Co - low_Value)));
 
         split(line_Data_get, folder_Index[pos].first, '_');
         int low_Value_atpos = stoi(line_Data_get[0]);
         int high_Value_atpos = stoi(line_Data_get[1]);
+
+        // cout << low_Value_atpos << "\t" << high_Value_atpos << endl;
 
         if ((start_Co >= low_Value_atpos && start_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co >= high_Value_atpos))
         {
@@ -706,11 +707,28 @@ vector<string> functions::compound_interpolationSearch(vector<pair<string, strin
         }
         else if (start_Co > low_Value_atpos)
         {
-            start = pos + 1;
+            // cout << pos << "\t";
+            int new_pos = pos;
+
+            do
+            {
+                new_pos = new_pos + 1;
+            } while (new_pos <= start);
+
+            start = new_pos;
+
+            // cout << start << endl;
         }
         else
         {
-            end = pos - 1;
+            int new_pos = pos;
+
+            do
+            {
+                new_pos = new_pos - 1;
+            } while (new_pos >= end);
+
+            end = new_pos;
         }
 
         split(line_Data_get, folder_Index[start].first, '_');

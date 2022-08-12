@@ -82,11 +82,12 @@ tajima::tajima(string calc_Mode, int window_Size, int step_Size, string input_Fo
 
     cout << "Initiating CUDA powered Tajima's D calculator on PROMETHEUS" << endl
          << endl;
-    this->calc_Mode = "WINDOW";
-    set_Values("", input_Folder, ouput_Path, cuda_ID, "", ploidy);
 
+    this->calc_Mode = "WINDOW";
     this->window_Size = window_Size;
     this->step_Size = step_Size;
+
+    set_Values("", input_Folder, ouput_Path, cuda_ID, "", ploidy);
 
     this->prometheus_Activate = "YES";
     this->CPU_cores = CPU_cores;
@@ -104,18 +105,28 @@ tajima::tajima(string calc_Mode, int window_Size, int step_Size, string input_Fo
          << endl;
 
     this->calc_Mode = "WINDOW";
-    set_Values("", input_Folder, ouput_Path, cuda_ID, "", ploidy);
 
     this->window_Size = window_Size;
     this->step_Size = step_Size;
+
+    set_Values("", input_Folder, ouput_Path, cuda_ID, "", ploidy);
 }
 
 void tajima::set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
     if (this->calc_Mode == "WINDOW")
     {
-        cout << "Calculation mode: WINDOW" << endl
-             << endl;
+        cout << "Calculation mode: WINDOW" << endl;
+        cout << "Window size: " << this->window_Size << endl;
+        if (step_Size != 0)
+        {
+            cout << "Step size: " << this->step_Size << endl;
+        }
+        else
+        {
+            cout << "Sliding Window mode" << endl;
+        }
+        cout << endl;
     }
     else
     {
@@ -772,6 +783,9 @@ void tajima::window(string output_File, float a1, float e1, float e2, int N, lon
 
     fstream output;
     output.open(output_File, ios::app);
+
+    // start_Co = 26820000;
+    // end_Co = 26830000;
 
     while (start_Co <= end_Value)
     {
