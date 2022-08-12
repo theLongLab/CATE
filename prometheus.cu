@@ -195,16 +195,16 @@ void prometheus::set_Values_Window(string output_File, int window_Size, int step
 
     this->calc_Mode = "WINDOW";
 
-    //cout << "Window size: " << window_Size << endl;
-    // if (step_Size != 0)
-    // {
-    //     cout << "Step size: " << step_Size << endl;
-    // }
-    // else
-    // {
-    //     cout << "Sliding Window" << endl;
-    // }
-    //cout << endl;
+    // cout << "Window size: " << window_Size << endl;
+    //  if (step_Size != 0)
+    //  {
+    //      cout << "Step size: " << step_Size << endl;
+    //  }
+    //  else
+    //  {
+    //      cout << "Sliding Window" << endl;
+    //  }
+    // cout << endl;
 }
 
 void prometheus::process_C_sliding_Window(string test)
@@ -3835,7 +3835,8 @@ void prometheus::get_Gene_info_and_catch(string gene_Combo, int gene_ID)
         {
             vector<string> line_Data_get;
 
-            int pos = start + ((double)(end - start) / ((high_Value - low_Value)) * (start_Co - low_Value));
+            // int pos = start + ((double)(end - start) / ((high_Value - low_Value)) * (start_Co - low_Value));
+            int pos = start + ((((double)(end - start) / (high_Value - low_Value)) * (start_Co - low_Value)));
 
             query_Line = folder_Index[pos].first;
             while (query_Line.find('_') != string::npos)
@@ -3862,11 +3863,27 @@ void prometheus::get_Gene_info_and_catch(string gene_Combo, int gene_ID)
             }
             else if (start_Co > low_Value_atpos)
             {
-                start = pos + 1;
+                // start = pos + 1;
+                int new_pos = pos;
+
+                do
+                {
+                    new_pos = new_pos + 1;
+                } while (new_pos <= start);
+
+                start = new_pos;
             }
             else
             {
-                end = pos - 1;
+                // end = pos - 1;
+                int new_pos = pos;
+
+                do
+                {
+                    new_pos = new_pos - 1;
+                } while (new_pos >= end);
+
+                end = new_pos;
             }
 
             line_Data_get.clear();
