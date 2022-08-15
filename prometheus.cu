@@ -564,12 +564,232 @@ void prometheus::process_C_sliding_Window(string test)
             file.close();
         }
         // REMOVE AFTER testing
-        break;
+        // break;
     }
 
     if (write_Lines.size() != 0)
     {
+        // Process
+        // intialize(coordinates);
+        int folder_Start = all_start_Co[0];
+        int folder_End = all_end_Co[all_end_Co.size() - 1];
+        this->gene_Size = write_Lines.size();
+
+        cout << "Processing windows from " << folder_Start << " to " << folder_End << endl;
+
+        // Collect FILEs
+        vector<string> file_List;
+        if (folder_Index.size() > 1)
+        {
+            file_List = function.compound_interpolationSearch(folder_Index, folder_Start, folder_End);
+        }
+        else
+        {
+            file_List.push_back(folder_Index[0].second);
+        }
+
+        if (this->prev_file_List != file_List)
+        {
+            if (pre_Lock == 1)
+            {
+                pre_Lock = 0;
+            }
+            else
+            {
+                if (test == "T")
+                {
+                    free(pre_MA);
+                }
+                else if (test == "FU")
+                {
+                    free(pre_MA);
+                    free(pre_ne);
+                    free(pre_ns);
+                }
+                else if (test == "FA")
+                {
+                    free(pre_MA);
+                    free(pre_Theta_partials);
+                }
+                else if (test == "N")
+                {
+                    free(pre_MA);
+
+                    free(pre_Theta_partials);
+
+                    free(pre_ne);
+                    free(pre_ns);
+                }
+
+                pre_Lock = 1;
+            }
+
+            same_Files = "NO";
+
+            tot_Segs = 0;
+
+            all_Lines.clear();
+            position_index_Segs.clear();
+
+            concat_Segs.clear();
+            all_site_Index.clear();
+
+            start_stop.clear();
+
+            if (Multi_read == "YES")
+            {
+                cout << "Intitating multi read based segregating site search" << endl;
+
+                vector<thread> threads_Multi_read;
+
+                for (string files : file_List)
+                {
+                    // cout << files << endl;
+                    threads_Multi_read.push_back(thread{&prometheus::file_Reader_multi, this, files});
+                }
+
+                for (thread &t : threads_Multi_read)
+                {
+                    if (t.joinable())
+                    {
+                        t.join();
+                    }
+                }
+
+                threads_Multi_read.clear();
+            }
+            else
+            {
+                cout << "Intitating single read based segregating site search" << endl;
+                for (string files : file_List)
+                {
+                    fstream file;
+                    file.open(files, ios::in);
+
+                    if (file.is_open())
+                    {
+                        string line;
+                        getline(file, line); // skip first header line
+                        while (getline(file, line))
+                        {
+                            all_Lines.push_back(line);
+                        }
+                        file.close();
+                    }
+                }
+            }
+
+            // Process Segs
+            tot_Segs = all_Lines.size();
+            cout << "System is processing and filtering " << tot_Segs << " segregating site(s)" << endl;
+            // all_Files_index.clear();
+
+            int GPU_rounds_full = tot_Segs / SNPs_per_Run;
+            int GPU_rounds_partial = tot_Segs % SNPs_per_Run;
+
+            // vector<pair<int, int>> start_stop;
+            for (int i = 0; i < GPU_rounds_full; i++)
+            {
+                int start = i * SNPs_per_Run;
+                int stop = start + SNPs_per_Run;
+                start_stop.push_back(make_pair(start, stop));
+            }
+
+            if (GPU_rounds_partial != 0)
+            {
+                int start = tot_Segs - GPU_rounds_partial;
+                int stop = tot_Segs;
+                start_stop.push_back(make_pair(start, stop));
+            }
+
+            vector<thread> threads_vec;
+
+            for (int rounds = 0; rounds < start_stop.size(); rounds++)
+            {
+                concat_Segs.push_back("");
+                int *row;
+                all_site_Index.push_back(row);
+            }
+
+            for (int rounds = 0; rounds < start_stop.size(); rounds++)
+            {
+                threads_vec.push_back(thread{&prometheus::seg_Concat, this, rounds, start_stop[rounds].first, start_stop[rounds].second});
+            }
+
+            for (thread &t : threads_vec)
+            {
+                if (t.joinable())
+                {
+                    t.join();
+                }
+            }
+
+            threads_vec.clear();
+
+            prev_file_List.clear();
+            this->prev_file_List = file_List;
+        }
+        else
+        {
+            same_Files = "YES";
+        }
+
+        // Process test
+        if (test == "T")
+        {
+            process_Tajima();
+            cout << "System has completed Tajima's D for the gene(s)" << endl;
+        }
+        else if (test == "FU")
+        {
+            process_Fu_Li();
+            cout << "System has completed Fu and Li for the gene(s)" << endl;
+        }
+        else if (test == "FA")
+        {
+            process_Fay_Wu();
+            cout << "System has completed Fay and Wu for the gene(s)" << endl;
+        }
+        else if (test == "N")
+        {
+            process_Neutrality();
+            cout << "System has completed Neutrality tests for the gene(s)" << endl;
+        }
+
+        for (int gene_Count = 0; gene_Count < write_Lines.size(); gene_Count++)
+        {
+            if (seg_catch_points_ALL[gene_Count] != -1)
+            {
+                output << write_Lines[gene_Count] << "\n";
+            }
+        }
+
+        // for (string line : write_Lines)
+        // {
+        //     output << line << "\n";
+        // }
+
+        output.flush();
+
+        cout << "System has written the results for the batch" << endl
+             << endl;
+
+        // coordinates.clear();
+        all_start_Co.clear();
+        all_end_Co.clear();
+        write_Lines.clear();
+
+        catch_Point.clear();
+
+        seg_catch_points_ALL.clear();
+        seg_catch_index_ALL.clear();
+        seg_backward_index_ALL.clear();
+        seg_forward_index_ALL.clear();
+
+        gene_Size = 0;
     }
+
+    output.close();
 }
 
 void prometheus::process_Window(string test)
