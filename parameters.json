@@ -4,9 +4,9 @@
 
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPERATE PARAMTER FILES WITH SEPERATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
-    "Input path":"split_VCF",
-    "Output path":"extract",
-    "Intermediate path":"intermediate",
+    "Input path":"test_VCF",
+    "Output path":"extract_3",
+    "Intermediate path":"intermediate_2",
 
     # Prometheus settings
     # Prometheus is a high performance mode in CATE. It is greedy on hardware resources but has extremely fast processing speeds.
@@ -30,7 +30,7 @@
 
     # Neutrality and FST calculation mode
     # Calculation mode can be FILE (to calculate the tests for predefined regions) or WINDOW
-    "Calculation mode":"WINDOW",
+    "Calculation mode":"FILE",
 
     # WINDOW mode parameters
     "Window size":10000,
@@ -38,7 +38,7 @@
 
     # FILE mode paramters
     # Any tab-deliminated text based formats such as but not limited to (*.txt, *.csv)
-    "Universal gene list":"test_san.txt",
+    "Universal gene list":"genelist.txt",
 
     # VCF split parameters
     # Column numbers are non zero digits, i.e. Column numbers start with one
@@ -109,7 +109,7 @@
     # Ensure population_ID values are unique to each super population and do not overlap
     "Population index file path":"fst_pop/population.txt",
     "Fst gene list":"universal",
-    "Population ID":"EAL,AFR,AMS",
+    "Population ID":"AFR,XKY,ZXY",
 
     # EHH or Extended Haplotype Homozygosity
     # Define the extended haplotype region specification mode by either using a seperate gene list file (FILE mode) or state the standard displacement value (FIXED mode) in bases

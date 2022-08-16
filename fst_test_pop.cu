@@ -338,7 +338,7 @@ void fst_test_pop::index_Samples()
     for (size_t i = 9; i < split_Header.size(); i++)
     {
         string query_ID = split_Header[i];
-
+        // cout << query_ID << endl;
         for (string sample_ID : this->sample_IDs)
         {
             if (query_ID == sample_ID)
@@ -347,6 +347,13 @@ void fst_test_pop::index_Samples()
                 this->sample_Location.push_back(i);
                 break;
             }
+            // else
+            // {
+            //     if (this->Pop_ID == "ZXY")
+            //     {
+            //         cout << query_ID << "\t" << sample_ID << endl;
+            //     }
+            // }
         }
     }
 
