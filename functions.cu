@@ -461,8 +461,13 @@ void functions::split(vector<string> &line_Data, string line, char delim)
         line = line.substr(line.find(delim) + 1);
     }
 
-    line.erase(remove(line.begin(), line.end(), '\r'), line.cend());
-  
+    if (!line.empty() && line[line.length() - 1] == '\r')
+    {
+        line.erase(line.length() - 1);
+    }
+
+    //line.erase(remove(line.begin(), line.end(), '\r'), line.cend());
+
     line_Data.push_back(line);
 }
 
