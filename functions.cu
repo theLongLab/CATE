@@ -461,12 +461,15 @@ void functions::split(vector<string> &line_Data, string line, char delim)
         line = line.substr(line.find(delim) + 1);
     }
 
-    if (!line.empty() && line[line.length() - 1] == '\r')
+    if (!line.empty())
     {
-        line.erase(line.length() - 1);
+        if (line[line.length() - 1] == '\r' || line[line.length() - 1] == '\n' || line[line.length() - 1] == '\t')
+        {
+            line.erase(line.length() - 1);
+        }
     }
 
-    //line.erase(remove(line.begin(), line.end(), '\r'), line.cend());
+    // line.erase(remove(line.begin(), line.end(), '\r'), line.cend());
 
     line_Data.push_back(line);
 }
