@@ -285,6 +285,7 @@ void ehh::ingress()
                     for (int core = 0; core < core_Haplotype_Collection.size(); core++)
                     {
                         cout << "Processing core haplotype " << core + 1 << ": " << endl;
+                        // cout << core_Haplotype_Collection[core] << endl;
                         int core_Hap_Sum = (core_Haplotype_Collection[core] * (core_Haplotype_Collection[core] - 1)) / 2;
                         cout << "Core combinations: " << core_Hap_Sum << endl;
                         int ext_Sum = extended_Haplotype_Sums[core];
@@ -729,6 +730,8 @@ void ehh::process_EHH(vector<string> &total_Segregrating_sites, vector<int> &cor
             int Ext_sum = 0;
             for (size_t unique_Haps = 0; unique_Haps < ext_Haplotypes_count.size(); unique_Haps++)
             {
+                // cout << "Haps: " << unique_Haps + 1 << endl;
+                // cout << ext_Haplotypes_count[unique_Haps].second << endl;
                 int sum_Partial = (ext_Haplotypes_count[unique_Haps].second * (ext_Haplotypes_count[unique_Haps].second - 1)) / 2;
                 Ext_sum = Ext_sum + sum_Partial;
             }

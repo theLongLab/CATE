@@ -1030,7 +1030,7 @@ vector<string> tajima::compound_interpolationSearch(vector<pair<string, string>>
     {
         vector<string> line_Data_get;
 
-        int pos = start + ((double)(end - start) / ((high_Value - low_Value)) * (start_Co - low_Value));
+        int pos = start + ((((double)(end - start) / (high_Value - low_Value)) * (start_Co - low_Value)));
         // cout << pos << endl;
 
         split(line_Data_get, folder_Index[pos].first, "_");

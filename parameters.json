@@ -4,7 +4,7 @@
 
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPERATE PARAMTER FILES WITH SEPERATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
-    "Input path":"test_VCF",
+    "Input path":"split_VCF",
     "Output path":"extract_3",
     "Intermediate path":"intermediate_2",
 

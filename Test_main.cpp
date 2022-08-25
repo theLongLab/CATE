@@ -8,10 +8,10 @@
 #include "fu_li.cuh"
 #include "fay_wu.cuh"
 #include "neutral.cuh"
-#include "gff2gene.cuh"
 #include "ehh.cuh"
 #include "mk_test.cuh"
 #include "fst.cuh"
+#include "gff2gene.cuh"
 #include "hap_extract.cuh"
 #include "vcf_splitter.h"
 #include "print_param.h"
@@ -473,16 +473,15 @@ int main(int argc, char *argv[])
 void print_Cate()
 {
 
-     cout << "   /\\\\\\\\\\\\\\\\\\     /\\\\\\\\\\\\\\\\\\     /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\  /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ " << endl;
-     cout << " /\\\\\\////////    /\\\\\\\\\\\\\\\\\\\\\\\\\\  \\///////\\\\\\/////  \\/\\\\\\///////////  " << endl;
-     cout << "/\\\\\\/            /\\\\\\/////////\\\\\\       \\/\\\\\\       \\/\\\\\\             " << endl;
-     cout << "/\\\\\\             \\/\\\\\\       \\/\\\\\\       \\/\\\\\\       \\/\\\\\\\\\\\\\\\\\\\\\\     " << endl;
-     cout << "\\/\\\\\\             \\/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\       \\/\\\\\\       \\/\\\\\\///////      " << endl;
-     cout << " \\//\\\\\\            \\/\\\\\\/////////\\\\\\       \\/\\\\\\       \\/\\\\\\             " << endl;
-     cout << "   \\///\\\\\\          \\/\\\\\\       \\/\\\\\\       \\/\\\\\\       \\/\\\\\\             " << endl;
-     cout << "      \\////\\\\\\\\\\\\\\\\\\ \\/\\\\\\       \\/\\\\\\       \\/\\\\\\       \\/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ " << endl;
-     cout << "          \\/////////  \\///        \\///        \\///        \\///////////////  " << endl;
-     cout << endl;
+     cout << "   /\\\\\\\\\\\\\\\\\\     /\\\\\\\\\\\\\\\\\\     /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\  /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n"
+          << " /\\\\\\////////    /\\\\\\\\\\\\\\\\\\\\\\\\\\  \\///////\\\\\\/////  \\/\\\\\\///////////\n"
+          << "/\\\\\\/            /\\\\\\/////////\\\\\\       \\/\\\\\\       \\/\\\\\\\n"
+          << "/\\\\\\             \\/\\\\\\       \\/\\\\\\       \\/\\\\\\       \\/\\\\\\\\\\\\\\\\\\\\\\\n"
+          << "\\/\\\\\\             \\/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\       \\/\\\\\\       \\/\\\\\\///////\n"
+          << " \\//\\\\\\            \\/\\\\\\/////////\\\\\\       \\/\\\\\\       \\/\\\\\\\n"
+          << "   \\///\\\\\\          \\/\\\\\\       \\/\\\\\\       \\/\\\\\\       \\/\\\\\\\n"
+          << "      \\////\\\\\\\\\\\\\\\\\\ \\/\\\\\\       \\/\\\\\\       \\/\\\\\\       \\/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n"
+          << "          \\/////////  \\///        \\///        \\///        \\///////////////\n\n";
 
      // cout << "   0000000    00000   0000000   0000000" << endl;
      // cout << "  0000       00   00    000     00" << endl;
@@ -561,7 +560,7 @@ void print_HELP()
           << "--hapfromvcf or -hapext : Extracts haplotypes and their sequences for a predefined gene list from a (split) VCF (indexed) folder provided the reference sequence." << endl
           << "                          The reference genome must be provided in a FASTA file." << endl
           << "                          The system will automatically identify each haplotype present." << endl
-          << "                          In addition to the summary output each haplotype present for each gene will be generate in a seperate FASTA file." << endl
+          << "                          In addition to the summary output each haplotype present for each gene will be generated in a seperate FASTA file." << endl
           << "                          Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "                          File format is *.hsum (a tab deliminated text file)." << endl
           << endl

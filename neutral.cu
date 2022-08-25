@@ -747,8 +747,8 @@ void neutral::window(string output_File, float an, float e1, float e2, float vd,
      int start_Value = stoi(folder_Index[0].first.substr(0, folder_Index[0].first.find('_')));
      int end_Value = stoi(folder_Index[folder_Index.size() - 1].first.substr(folder_Index[folder_Index.size() - 1].first.find('_') + 1));
 
-     cout << start_Value << endl;
-     cout << end_Value << endl;
+     // cout << start_Value << endl;
+     // cout << end_Value << endl;
 
      int start_Co = 0;
      int end_Co = start_Co + window_Size;
