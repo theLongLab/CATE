@@ -372,7 +372,7 @@ int main(int argc, char *argv[])
                               {
                                    gene_List = properties.where("Universal gene list");
                               }
-                              mk_test mk = mk_test(properties.where("Reference genome mk"), properties.where("Alignment file"), gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Genetic code"), properties.where("Start codon(s)"), properties.where("Stop codon(s)"), properties.where("Alignment mode"));
+                              mk_test mk = mk_test(properties.where("Reference genome mk"), properties.where("Alignment file"), gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Genetic code"), properties.where("Start codon(s)"), properties.where("Stop codon(s)"), properties.where("Alignment mode"), properties.where("ORF known"));
                               mk.ingress();
 
                               cout << "CUDA powered McDonald–Kreitman Neutrality Index (NI) test has been completed." << endl;
@@ -472,7 +472,6 @@ int main(int argc, char *argv[])
 
 void print_Cate()
 {
-
      cout << "   /\\\\\\\\\\\\\\\\\\     /\\\\\\\\\\\\\\\\\\     /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\  /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n"
           << " /\\\\\\////////    /\\\\\\\\\\\\\\\\\\\\\\\\\\  \\///////\\\\\\/////  \\/\\\\\\///////////\n"
           << "/\\\\\\/            /\\\\\\/////////\\\\\\       \\/\\\\\\       \\/\\\\\\\n"

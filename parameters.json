@@ -100,6 +100,7 @@
     # CHROM mode would require the outgroup species chromosome's genome to be aligned with the entire chromosome of the query species reference genome.
     # File created would have the extension *.mk (tab deliminated text file). File Name: CountryName_GeneListFileName.mk
     "Alignment mode":"GENE",
+    "ORF known":"No",
     "Reference genome mk":"reference/Human_1.fasta",
     "Alignment file":"reference/results.maf",
     "McDonald–Kreitman gene list":"gene_4.txt",

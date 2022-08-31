@@ -31,6 +31,7 @@ private:
     int ploidy;
 
     string mode;
+    string ORF_mode = "NO";
 
     string genetic_Code;
     string start_Codons;
@@ -50,7 +51,7 @@ private:
     int reference_size;
 
 public:
-    mk_test(string reference_Path, string alignment_Path, string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string genetic_Code, string start_Codons, string stop_Codons, string mode);
+    mk_test(string reference_Path, string alignment_Path, string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string genetic_Code, string start_Codons, string stop_Codons, string mode, string ORF_mode);
 
     void ingress();
 

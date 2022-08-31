@@ -1,7 +1,7 @@
 #include "mk_test.cuh"
 #include "functions.cuh"
 
-mk_test::mk_test(string reference_Path, string alignment_Path, string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string genetic_Code, string start_Codons, string stop_Codons, string mode)
+mk_test::mk_test(string reference_Path, string alignment_Path, string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string genetic_Code, string start_Codons, string stop_Codons, string mode, string ORF_mode)
 {
     cout << "Initiating CUDA powered McDonald–Kreitman Neutrality Index (NI) test calculator" << endl
          << endl;
@@ -15,7 +15,15 @@ mk_test::mk_test(string reference_Path, string alignment_Path, string gene_List,
     this->ploidy = ploidy;
 
     this->mode = mode;
-    cout << "Alignment mode: " << mode << endl
+
+    transform(ORF_mode.begin(), ORF_mode.end(), ORF_mode.begin(), ::toupper);
+    if (ORF_mode != "NO")
+    {
+        this->ORF_mode = "YES";
+    }
+
+    cout << "Alignment mode: " << this->mode << endl
+         << "ORF's known: " << this->ORF_mode << endl
          << endl;
 
     this->genetic_Code = genetic_Code;
@@ -1493,41 +1501,51 @@ void mk_test::reference_Prep()
 
             if (filesystem::exists(file_Name) == 0)
             {
-                cout << endl
-                     << "Initiating Open Reading Frame (ORF) search:" << endl;
-
-                vector<int> start_ORFs;
-
-                for (int i = start_Co; i < end_Co; i++)
-                {
-                    if ((i + 3) < end_Co)
-                    {
-                        string check_Current{full_Reference.at(i), full_Reference.at(i + 1), full_Reference.at(i + 2)};
-                        for (string check : this->start_Codons_list)
-                        {
-                            if (check_Current == check)
-                            {
-                                start_ORFs.push_back(i);
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
+                cout << endl;
+                
                 int found = 0;
-
                 int ORF_start;
                 int ORF_stop;
 
-                if (start_ORFs.size() > 0)
+                if (this->ORF_mode != "NO")
                 {
-                    ORF_search(start_ORFs, found, ORF_start, ORF_stop, end_Co);
-                }
+                    // Automatically search for ORF
+                    cout << "Initiating Open Reading Frame (ORF) search:" << endl;
 
+                    vector<int> start_ORFs;
+
+                    for (int i = start_Co; i < end_Co; i++)
+                    {
+                        if ((i + 3) < end_Co)
+                        {
+                            string check_Current{full_Reference.at(i), full_Reference.at(i + 1), full_Reference.at(i + 2)};
+                            for (string check : this->start_Codons_list)
+                            {
+                                if (check_Current == check)
+                                {
+                                    start_ORFs.push_back(i);
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+                    if (start_ORFs.size() > 0)
+                    {
+                        ORF_search(start_ORFs, found, ORF_start, ORF_stop, end_Co);
+                    }
+                }
+                else
+                {
+                    // ORF is known and gene config is ORF config
+                    found = 1;
+                    ORF_start = start_Co;
+                    ORF_stop = end_Co;
+                }
                 if (found == 1)
                 {
                     cout << "Start codon location\t: " << setfill('0') << setw(to_string(ORF_stop + 1).length()) << ORF_start + 1
@@ -1943,114 +1961,128 @@ void mk_test::reference_Prep(vector<pair<int, int>> TEMP_file_index)
 
             if (filesystem::exists(file_Name) == 0)
             {
-                cout << endl
-                     << "Initiating Open Reading Frame (ORF) search:" << endl;
-
-                vector<int> start_ORFs;
-
-                for (int i = start_Co; i < end_Co; i++)
-                {
-                    if ((i + 3) < end_Co)
-                    {
-                        string check_Current{full_Reference.at(i), full_Reference.at(i + 1), full_Reference.at(i + 2)};
-                        for (string check : this->start_Codons_list)
-                        {
-                            if (check_Current == check)
-                            {
-                                // cout << check << endl;
-                                // ORF_start = i;
-                                // start_ORF_end = i + 3;
-                                // start_Found = 1;
-                                start_ORFs.push_back(i);
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                    // if (start_Found == 1)
-                    // {
-                    //     break;
-                    // }
-                }
-
-                // if (start_Found == 1)
-                // {
-                //     for (int i = start_ORF_end; i < end_Co; i = i + 3)
-                //     {
-                //         if ((i + 3) < end_Co)
-                //         {
-                //             string check_Current{full_Reference.at(i), full_Reference.at(i + 1), full_Reference.at(i + 2)};
-                //             for (string check : this->stop_Codons_list)
-                //             {
-                //                 if (check_Current == check)
-                //                 {
-                //                     ORF_stop = i;
-                //                     stop_Found = 1;
-                //                     break;
-                //                 }
-                //             }
-                //         }
-                //         else
-                //         {
-                //             break;
-                //         }
-                //     }
-                // }
-
-                // for (int i = start_Co; i < end_Co; i++)
-                // {
-                //     if ((i + 3) < end_Co)
-                //     {
-                //         string check_Current{full_Reference.at(i), full_Reference.at(i + 1), full_Reference.at(i + 2)};
-                //         if (start_Found == 0)
-                //         {
-                //             for (string check : this->start_Codons_list)
-                //             {
-                //                 if (check_Current == check)
-                //                 {
-                //                     //cout << check << endl;
-                //                     ORF_start = i;
-                //                     start_Found = 1;
-                //                     break;
-                //                 }
-                //             }
-                //         }
-                //         else
-                //         {
-                //             //look for stop codons only if start codon has been found
-                //             for (string check : this->stop_Codons_list)
-                //             {
-                //                 if (check_Current == check)
-                //                 {
-                //                     ORF_stop = i;
-                //                     stop_Found = 1;
-                //                     break;
-                //                 }
-                //             }
-                //         }
-                //     }
-                //     else
-                //     {
-                //         break;
-                //     }
-                // }
-
+                cout << endl;
                 int found = 0;
-                // int start_Found = 0;
-                //  int start_ORF_end;
-                // int stop_Found = 0;
-
                 int ORF_start;
                 int ORF_stop;
 
-                if (start_ORFs.size() > 0)
+                if (this->ORF_mode != "NO")
                 {
-                    ORF_search(start_ORFs, found, ORF_start, ORF_stop, end_Co);
+
+                    cout << "Initiating Open Reading Frame (ORF) search:" << endl;
+
+                    vector<int> start_ORFs;
+
+                    for (int i = start_Co; i < end_Co; i++)
+                    {
+                        if ((i + 3) < end_Co)
+                        {
+                            string check_Current{full_Reference.at(i), full_Reference.at(i + 1), full_Reference.at(i + 2)};
+                            for (string check : this->start_Codons_list)
+                            {
+                                if (check_Current == check)
+                                {
+                                    // cout << check << endl;
+                                    // ORF_start = i;
+                                    // start_ORF_end = i + 3;
+                                    // start_Found = 1;
+                                    start_ORFs.push_back(i);
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        // if (start_Found == 1)
+                        // {
+                        //     break;
+                        // }
+                    }
+
+                    // if (start_Found == 1)
+                    // {
+                    //     for (int i = start_ORF_end; i < end_Co; i = i + 3)
+                    //     {
+                    //         if ((i + 3) < end_Co)
+                    //         {
+                    //             string check_Current{full_Reference.at(i), full_Reference.at(i + 1), full_Reference.at(i + 2)};
+                    //             for (string check : this->stop_Codons_list)
+                    //             {
+                    //                 if (check_Current == check)
+                    //                 {
+                    //                     ORF_stop = i;
+                    //                     stop_Found = 1;
+                    //                     break;
+                    //                 }
+                    //             }
+                    //         }
+                    //         else
+                    //         {
+                    //             break;
+                    //         }
+                    //     }
+                    // }
+
+                    // for (int i = start_Co; i < end_Co; i++)
+                    // {
+                    //     if ((i + 3) < end_Co)
+                    //     {
+                    //         string check_Current{full_Reference.at(i), full_Reference.at(i + 1), full_Reference.at(i + 2)};
+                    //         if (start_Found == 0)
+                    //         {
+                    //             for (string check : this->start_Codons_list)
+                    //             {
+                    //                 if (check_Current == check)
+                    //                 {
+                    //                     //cout << check << endl;
+                    //                     ORF_start = i;
+                    //                     start_Found = 1;
+                    //                     break;
+                    //                 }
+                    //             }
+                    //         }
+                    //         else
+                    //         {
+                    //             //look for stop codons only if start codon has been found
+                    //             for (string check : this->stop_Codons_list)
+                    //             {
+                    //                 if (check_Current == check)
+                    //                 {
+                    //                     ORF_stop = i;
+                    //                     stop_Found = 1;
+                    //                     break;
+                    //                 }
+                    //             }
+                    //         }
+                    //     }
+                    //     else
+                    //     {
+                    //         break;
+                    //     }
+                    // }
+
+                    // int found = 0;
+                    //  int start_Found = 0;
+                    //   int start_ORF_end;
+                    //  int stop_Found = 0;
+
+                    // int ORF_start;
+                    // int ORF_stop;
+
+                    if (start_ORFs.size() > 0)
+                    {
+                        ORF_search(start_ORFs, found, ORF_start, ORF_stop, end_Co);
+                    }
+                    // cout << endl;
                 }
-                // cout << endl;
+                else
+                {
+                    found = 1;
+                    ORF_start = start_Co;
+                    ORF_stop = end_Co;
+                }
                 if (found == 1)
                 {
                     cout << "Start codon location\t: " << setfill('0') << setw(to_string(ORF_stop + 1).length()) << ORF_start + 1
