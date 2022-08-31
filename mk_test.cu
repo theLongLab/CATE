@@ -1502,7 +1502,7 @@ void mk_test::reference_Prep()
             if (filesystem::exists(file_Name) == 0)
             {
                 cout << endl;
-                
+
                 int found = 0;
                 int ORF_start;
                 int ORF_stop;
@@ -2365,11 +2365,25 @@ vector<string> mk_test::compound_Interpolation_folder(vector<pair<int, int>> fol
         }
         else if (start_Co > low_Value_atpos)
         {
-            start = pos + 1;
+            int new_pos = pos;
+
+            do
+            {
+                new_pos = new_pos + 1;
+            } while (new_pos <= start);
+
+            start = new_pos;
         }
         else
         {
-            end = pos - 1;
+            int new_pos = pos;
+
+            do
+            {
+                new_pos = new_pos - 1;
+            } while (new_pos >= end);
+
+            end = new_pos;
         }
         low_Value = folder_Index[start].first;
         high_Value = folder_Index[end].second;
