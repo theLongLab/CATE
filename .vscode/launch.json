@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "args": ["-egenes","/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/parameters.json"],
+            "args": ["-m","/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/parameters.json"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

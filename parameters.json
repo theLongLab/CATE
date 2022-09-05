@@ -5,8 +5,8 @@
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPERATE PARAMTER FILES WITH SEPERATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
     "Input path":"split_VCF",
-    "Output path":"extract_3",
-    "Intermediate path":"intermediate_2",
+    "Output path":"extract_4",
+    "Intermediate path":"intermediate_3",
 
     # Prometheus settings
     # Prometheus is a high performance mode in CATE. It is greedy on hardware resources but has extremely fast processing speeds.
@@ -73,7 +73,7 @@
     # Haplotype INFO extract
     # Extract haplotype information fron VCFs
     # IF population out is set to YES then the entire populations FASTA configuration will be generated. ELSE only the unique haplotypes FASTA will be generated.
-    "Reference genome hap":"reference/19.fasta",
+    "Reference genome hap":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_merge/One.fasta",
     "Population out":"Yes",
     "Hap extract gene list":"universal",
 
@@ -102,10 +102,10 @@
     # CHROM mode would require the outgroup species chromosome's genome to be aligned with the entire chromosome of the query species reference genome.
     # File created would have the extension *.mk (tab deliminated text file). File Name: CountryName_GeneListFileName.mk
     "Alignment mode":"GENE",
-    "ORF known":"No",
-    "Reference genome mk":"reference/Human_1.fasta",
-    "Alignment file":"reference/results.maf",
-    "McDonald–Kreitman gene list":"gene_4.txt",
+    "ORF known":"Yes",
+    "Reference genome mk":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_merge/One.fasta",
+    "Alignment file":"extract_3/align/alignment.txt",
+    "McDonald–Kreitman gene list":"universal",
 
     # Fst or Fixation Index
     # Indexed population file should be a THREE column tab delimiated *.txt file with headings: Sample_name	population_ID	Super_population

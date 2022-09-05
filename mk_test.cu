@@ -1507,7 +1507,7 @@ void mk_test::reference_Prep()
                 int ORF_start;
                 int ORF_stop;
 
-                if (this->ORF_mode != "NO")
+                if (this->ORF_mode == "NO")
                 {
                     // Automatically search for ORF
                     cout << "Initiating Open Reading Frame (ORF) search:" << endl;
@@ -1548,8 +1548,8 @@ void mk_test::reference_Prep()
                 }
                 if (found == 1)
                 {
-                    cout << "Start codon location\t: " << setfill('0') << setw(to_string(ORF_stop + 1).length()) << ORF_start + 1
-                         << "\t Start Codon: " << full_Reference.at(ORF_start) << full_Reference.at(ORF_start + 1) << full_Reference.at(ORF_start + 2) << endl;
+                    cout << "Start codon location\t: " << setfill('0') << setw(to_string(ORF_stop + 1).length()) << to_string(ORF_start + 1)
+                    << "\t Start Codon: " << full_Reference.at(ORF_start) << full_Reference.at(ORF_start + 1) << full_Reference.at(ORF_start + 2) << endl;
                     cout << "Stop codon location\t: " << ORF_stop + 1
                          << "\t Stop Codon: " << full_Reference.at(ORF_stop) << full_Reference.at(ORF_stop + 1) << full_Reference.at(ORF_stop + 2) << endl;
                     cout << endl;
@@ -1966,7 +1966,7 @@ void mk_test::reference_Prep(vector<pair<int, int>> TEMP_file_index)
                 int ORF_start;
                 int ORF_stop;
 
-                if (this->ORF_mode != "NO")
+                if (this->ORF_mode == "NO")
                 {
 
                     cout << "Initiating Open Reading Frame (ORF) search:" << endl;
@@ -2085,8 +2085,8 @@ void mk_test::reference_Prep(vector<pair<int, int>> TEMP_file_index)
                 }
                 if (found == 1)
                 {
-                    cout << "Start codon location\t: " << setfill('0') << setw(to_string(ORF_stop + 1).length()) << ORF_start + 1
-                         << "\t Start Codon: " << full_Reference.at(ORF_start) << full_Reference.at(ORF_start + 1) << full_Reference.at(ORF_start + 2) << endl;
+                    cout << "Start codon location\t: " << setfill('0') << setw(to_string(ORF_stop + 1).length()) << to_string(ORF_start + 1)
+                    << "\t Start Codon: " << full_Reference.at(ORF_start) << full_Reference.at(ORF_start + 1) << full_Reference.at(ORF_start + 2) << endl;
                     cout << "Stop codon location\t: " << ORF_stop + 1
                          << "\t Stop Codon: " << full_Reference.at(ORF_stop) << full_Reference.at(ORF_stop + 1) << full_Reference.at(ORF_stop + 2) << endl;
                     cout << endl;
