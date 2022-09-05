@@ -1,7 +1,7 @@
 #include "functions.cuh"
 #include "hap_extract.cuh"
 
-hap_extract::hap_extract(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy, string reference_File)
+hap_extract::hap_extract(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy, string reference_File, string pop_Out)
 {
     cout << "Initiating CUDA powered Haplotype extractor" << endl
          << endl;
@@ -9,6 +9,12 @@ hap_extract::hap_extract(string gene_List, string input_Folder, string output_Pa
     set_Values(gene_List, input_Folder, output_Path, cuda_ID, intermediate_Path, ploidy);
 
     this->reference_File = reference_File;
+
+    transform(pop_Out.begin(), pop_Out.end(), pop_Out.begin(), ::toupper);
+    if (pop_Out != "NO")
+    {
+        this->pop_Out = "YES";
+    }
 }
 
 void hap_extract::set_Values(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy)
@@ -232,7 +238,6 @@ void hap_extract::ingress()
                 // GET Haps
                 if (collect_Segregrating_sites.size() != 0)
                 {
-
                     vector<string> write_Lines, write_Sequences;
                     hap_extraction(write_Lines, write_Sequences, collect_Segregrating_sites, pos_INDEX, gene_Name, coordinates[0], start_Co, end_Co);
 
@@ -240,10 +245,39 @@ void hap_extract::ingress()
                     fstream FASTA_out;
                     FASTA_out.open(FASTA_File, ios::out);
 
-                    for (int hap = 0; hap < write_Lines.size(); hap++)
+                    if (pop_Out != "NO")
                     {
-                        output << write_Lines[hap] + "\n";
-                        FASTA_out << write_Sequences[hap] + "\n";
+                        string FASTA_pop_File = FASTA_folder + "/" + gene_Name + "_population.fasta";
+                        fstream FASTA_out_pop;
+                        FASTA_out_pop.open(FASTA_pop_File, ios::out);
+
+                        for (int hap = 0; hap < write_Lines.size(); hap++)
+                        {
+                            output << write_Lines[hap] + "\n";
+                            FASTA_out << write_Sequences[hap] + "\n";
+
+                            vector<string> write_Split;
+                            vector<string> sequence_Split;
+
+                            function.split(write_Split, write_Lines[hap], '\t');
+                            function.split(sequence_Split, write_Sequences[hap], '\n');
+
+                            int number_of_Sequences = stoi(write_Split[4]);
+                            for (int seq = 0; seq < number_of_Sequences; seq++)
+                            {
+                                string seq_ID = sequence_Split[0] + "_" + to_string(seq + 1);
+                                FASTA_out_pop << seq_ID + "\n" + sequence_Split[1] + "\n";
+                            }
+                        }
+                        FASTA_out_pop.close();
+                    }
+                    else
+                    {
+                        for (int hap = 0; hap < write_Lines.size(); hap++)
+                        {
+                            output << write_Lines[hap] + "\n";
+                            FASTA_out << write_Sequences[hap] + "\n";
+                        }
                     }
                     output.flush();
                     FASTA_out.close();

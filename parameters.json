@@ -63,7 +63,7 @@
 
     # Extract genes parameters
     # Extract gene FASTA seqeunces from REFERENCE FASTA file and outputs them as seperate FASTA files
-    "Reference genome ex":"reference/19.fasta",
+    "Reference genome ex":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_merge/One.fasta",
     "Extract gene list":"universal",
 
     # GFF to Genes parameters
@@ -72,7 +72,9 @@
 
     # Haplotype INFO extract
     # Extract haplotype information fron VCFs
+    # IF population out is set to YES then the entire populations FASTA configuration will be generated. ELSE only the unique haplotypes FASTA will be generated.
     "Reference genome hap":"reference/19.fasta",
+    "Population out":"Yes",
     "Hap extract gene list":"universal",
 
     # All Neutrality tests

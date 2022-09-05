@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
                                    gene_List = properties.where("Universal gene list");
                               }
 
-                              hap_extract haplotype_Extractor = hap_extract(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Reference genome hap"));
+                              hap_extract haplotype_Extractor = hap_extract(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Reference genome hap"), properties.where("Population out"));
                               haplotype_Extractor.ingress();
 
                               cout << endl
@@ -560,6 +560,7 @@ void print_HELP()
           << "                          The reference genome must be provided in a FASTA file." << endl
           << "                          The system will automatically identify each haplotype present." << endl
           << "                          In addition to the summary output each haplotype present for each gene will be generated in a seperate FASTA file." << endl
+          << "                          IF \"Population out\" is set to \"YES\" then the entire population's FASTA configuration will be generated as well." << endl
           << "                          Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "                          File format is *.hsum (a tab deliminated text file)." << endl
           << endl

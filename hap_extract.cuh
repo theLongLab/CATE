@@ -26,6 +26,8 @@ private:
     string gene_List;
     string reference_File;
 
+    string pop_Out = "NO";
+
     int ploidy;
     int N;
 
@@ -36,7 +38,7 @@ private:
     // int reference_size;
 
 public:
-    hap_extract(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy, string reference_File);
+    hap_extract(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy, string reference_File, string pop_Out);
     void set_Values(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy);
 
     void ingress();

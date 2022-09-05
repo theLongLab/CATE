@@ -1544,7 +1544,7 @@ void mk_test::reference_Prep()
                     // ORF is known and gene config is ORF config
                     found = 1;
                     ORF_start = start_Co;
-                    ORF_stop = end_Co;
+                    ORF_stop = end_Co - 1;
                 }
                 if (found == 1)
                 {
@@ -2081,7 +2081,7 @@ void mk_test::reference_Prep(vector<pair<int, int>> TEMP_file_index)
                 {
                     found = 1;
                     ORF_start = start_Co;
-                    ORF_stop = end_Co;
+                    ORF_stop = end_Co - 1;
                 }
                 if (found == 1)
                 {

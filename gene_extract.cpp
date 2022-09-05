@@ -3,8 +3,7 @@
 
 gene_extract::gene_extract(string gene_List, string reference_Path, string output_Path, string intermediate_Path)
 {
-    cout << "Starting up Gene extractor" << endl
-         << endl;
+    cout << "Starting up Gene extractor" << endl;
     this->gene_List = gene_List;
     this->reference_Path = reference_Path;
     this->output_Path = output_Path;
