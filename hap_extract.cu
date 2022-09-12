@@ -207,6 +207,7 @@ void hap_extract::ingress()
                 cout << "System is collecting segregrating site(s)" << endl;
                 for (string files : file_List)
                 {
+                    //cout << files << endl;
                     fstream file;
                     file.open(files, ios::in);
                     if (file.is_open())

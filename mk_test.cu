@@ -1416,6 +1416,7 @@ void mk_test::prepration()
 
 void mk_test::reference_Prep()
 {
+    // GENE VERSION
     cout << "Preparing reference file: " << this->reference_Path << endl
          << endl;
 
@@ -1549,7 +1550,7 @@ void mk_test::reference_Prep()
                 if (found == 1)
                 {
                     cout << "Start codon location\t: " << setfill('0') << setw(to_string(ORF_stop + 1).length()) << to_string(ORF_start + 1)
-                    << "\t Start Codon: " << full_Reference.at(ORF_start) << full_Reference.at(ORF_start + 1) << full_Reference.at(ORF_start + 2) << endl;
+                         << "\t Start Codon: " << full_Reference.at(ORF_start) << full_Reference.at(ORF_start + 1) << full_Reference.at(ORF_start + 2) << endl;
                     cout << "Stop codon location\t: " << ORF_stop + 1
                          << "\t Stop Codon: " << full_Reference.at(ORF_stop) << full_Reference.at(ORF_stop + 1) << full_Reference.at(ORF_stop + 2) << endl;
                     cout << endl;
@@ -1569,7 +1570,7 @@ void mk_test::reference_Prep()
                     // }
 
                     cout << "Generating target ORF alignment:" << endl;
-                    codon_Alignment_print(compound_Interpolation_folder(alignment_Prep(alignment_File, full_Reference, start_Co, temp_index_Folder), ORF_start + 1, ORF_stop + 3), ORF_start + 1, ORF_stop + 3, temp_index_Folder, intermediate_Reference, file_Name);
+                    codon_Alignment_print(alignment_Prep(alignment_File, full_Reference, start_Co, temp_index_Folder), ORF_start + 1, ORF_stop + 3, temp_index_Folder, intermediate_Reference, file_Name);
                     // PURGE THE TEMP FOLDER
                 }
                 else
@@ -1586,16 +1587,17 @@ void mk_test::reference_Prep()
 
     cout << "Purging temporary alignment index: " << this->primary_Intermediate_Path + "/alignments" << endl
          << endl;
-    filesystem::remove_all(this->primary_Intermediate_Path + "/alignments");
+    // filesystem::remove_all(this->primary_Intermediate_Path + "/alignments");
 
     // REMOVE AFTER TEST
     log_Write("reference_mapping_per_GENE_complete");
 }
 
-vector<pair<int, int>> mk_test::alignment_Prep(string Gene_alignment_Path, string &full_Reference, int start_Co, string temp_index_Folder)
+vector<string> mk_test::alignment_Prep(string Gene_alignment_Path, string &full_Reference, int start_Co, string temp_index_Folder)
 {
     functions function = functions();
 
+    vector<string> file_List;
     vector<pair<int, int>> TEMP_file_index;
 
     cout << "STEP 1 OF 3: Processing alignment file" << endl;
@@ -1678,17 +1680,18 @@ vector<pair<int, int>> mk_test::alignment_Prep(string Gene_alignment_Path, strin
                 write_Temp.close();
                 string new_Name = temp_index_Folder + "/" + to_string(ref_Pos + 1) + "_" + to_string(iterate_Value - 1) + ".temp";
                 rename(temp_File_name.c_str(), new_Name.c_str());
-                TEMP_file_index.push_back(make_pair(ref_Pos + 1, iterate_Value - 1));
+                file_List.push_back(to_string(ref_Pos + 1) + "_" + to_string(iterate_Value - 1) + ".temp");
+                // TEMP_file_index.push_back(make_pair(ref_Pos + 1, iterate_Value - 1));
             }
         }
         alignment_File.close();
     }
 
-    sort(TEMP_file_index.begin(), TEMP_file_index.end());
+    // sort(TEMP_file_index.begin(), TEMP_file_index.end());
     cout << "STEP 3 OF 3: Completed alignment file processing" << endl;
     cout << endl;
 
-    return TEMP_file_index;
+    return file_List;
 }
 
 vector<pair<int, int>> mk_test::index_alignment_Folder()
@@ -2086,7 +2089,7 @@ void mk_test::reference_Prep(vector<pair<int, int>> TEMP_file_index)
                 if (found == 1)
                 {
                     cout << "Start codon location\t: " << setfill('0') << setw(to_string(ORF_stop + 1).length()) << to_string(ORF_start + 1)
-                    << "\t Start Codon: " << full_Reference.at(ORF_start) << full_Reference.at(ORF_start + 1) << full_Reference.at(ORF_start + 2) << endl;
+                         << "\t Start Codon: " << full_Reference.at(ORF_start) << full_Reference.at(ORF_start + 1) << full_Reference.at(ORF_start + 2) << endl;
                     cout << "Stop codon location\t: " << ORF_stop + 1
                          << "\t Stop Codon: " << full_Reference.at(ORF_stop) << full_Reference.at(ORF_stop + 1) << full_Reference.at(ORF_stop + 2) << endl;
                     cout << endl;
@@ -2108,7 +2111,7 @@ void mk_test::reference_Prep(vector<pair<int, int>> TEMP_file_index)
     }
     cout << "Purging temporary alignment index: " << temp_index_Folder << endl
          << endl;
-    filesystem::remove_all(temp_index_Folder);
+    // filesystem::remove_all(temp_index_Folder);
     cudaFree(cuda_stop_Codons);
     cudaFree(cuda_reference);
 
@@ -2260,6 +2263,7 @@ void mk_test::codon_Alignment_print(vector<string> file_List, int start_Codon, i
         // cout << file << endl;
         fstream align_Index;
         align_Index.open(temp_index_Folder + "/" + file, ios::in);
+        // cout << file << endl;
         if (align_Index.is_open())
         {
             string alignment;
@@ -2268,16 +2272,18 @@ void mk_test::codon_Alignment_print(vector<string> file_List, int start_Codon, i
                 vector<string> line_Split;
                 function.split(line_Split, alignment, '\t');
                 int location = stoi(line_Split[0]);
+                // cout << location << endl;
                 if (location >= start_Codon && location <= end_Codon)
                 {
-                    vector<int>::iterator itr = std::find(locations.begin(), locations.end(), location);
-                    if (itr != end(locations))
+                    // vector<int>::iterator itr = std::find(locations.begin(), locations.end(), location);
+                    if (binary_search(locations.begin(), locations.end(), location))
                     {
                     }
                     else
                     {
                         write_To_file.push_back(make_pair(location, alignment));
                         locations.push_back(location);
+                        sort(locations.begin(), locations.end());
                     }
                 }
             }

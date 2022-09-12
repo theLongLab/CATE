@@ -4,8 +4,8 @@
 
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPERATE PARAMTER FILES WITH SEPERATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
-    "Input path":"split_VCF",
-    "Output path":"extract_4",
+    "Input path":"test_VCF",
+    "Output path":"extract_5",
     "Intermediate path":"intermediate_3",
 
     # Prometheus settings
@@ -13,7 +13,7 @@
     # User is capable of determining the number of gene combinations and number of SNPs to be processed by CATE.
     # When setting these parameters be mindful of system hardware availability.
     # WARNING: Multi read CAN CAUSE A BOTTLENECK IF HARDWARE DOES NOT SUPPORT IT. NVMe DRIVES CONNECTED VIA PCIe BUS WILL SUPPORT MULTI READ. TYPICAL HDD DRIVES DO NOT.
-    "Prometheus activate":"No",
+    "Prometheus activate":"Yes",
     "CPU cores":10,
     "SNPs per time":1000,
     "Number of genes":2,
@@ -104,7 +104,7 @@
     "Alignment mode":"GENE",
     "ORF known":"Yes",
     "Reference genome mk":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_merge/One.fasta",
-    "Alignment file":"extract_3/align/alignment.txt",
+    "Alignment file":"extract_5/align/alignment.txt",
     "McDonald–Kreitman gene list":"universal",
 
     # Fst or Fixation Index

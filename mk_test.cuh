@@ -62,7 +62,7 @@ public:
 
     // GENE mode
     void reference_Prep();
-    vector<pair<int, int>> alignment_Prep(string Gene_alignment_Path, string &full_Reference, int start_Co, string temp_index_Folder);
+    vector<string> alignment_Prep(string Gene_alignment_Path, string &full_Reference, int start_Co, string temp_index_Folder);
 
     void codon_Alignment_print(vector<string> file_List, int start_Codon, int end_Codon, string &temp_index_Folder, string &intermediate_Reference, string &file_Name);
 
