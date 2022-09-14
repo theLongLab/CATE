@@ -502,6 +502,7 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
         Pn[tid] = 0;
 
         int start_Pos = (tid * 3) + codon_Start;
+        // printf("%d\n", start_Pos);
 
         // binary search
         char found = 'N';
@@ -538,6 +539,11 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
                 int third_Pos = start_Pos + 2;
                 if (positions[pos_Value + 2] == third_Pos)
                 {
+                    // if (start_Pos == 206331091 || start_Pos == 206331100 || start_Pos == 206331118 || start_Pos == 206331190)
+                    // {
+                    //     printf("%d\n", start_Pos);
+                    // }
+
                     // process codon if all 3 match up
                     char REF_codon_pos_1 = REF[pos_Value];
                     char REF_codon_pos_2 = REF[pos_Value + 1];
@@ -547,9 +553,9 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
                     char Outgroup_codon_pos_2 = Outgroup[pos_Value + 1];
                     char Outgroup_codon_pos_3 = Outgroup[pos_Value + 2];
 
-                    int top_SEG = 0;
-                    int bottom_SEG = SEG_size - 1;
-                    int middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
+                    // int top_SEG = 0;
+                    // int bottom_SEG = SEG_size - 1;
+                    // int middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
 
                     int SEG_position_location_pos_1 = -1;
                     int SEG_position_location_pos_2 = -1;
@@ -559,110 +565,141 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
                     char seg_Found_pos_3 = 'N';
 
                     // first codon position
-                    while (top_SEG < bottom_SEG)
+                    // while (top_SEG < bottom_SEG)
+                    // {
+                    //     if (SEG_positions[middle_SEG] >= start_Pos && SEG_positions[middle_SEG] <= third_Pos)
+                    //     {
+                    //         // SEG_position_location_pos_1 = middle_SEG;
+                    //         catch_Point = 'Y';
+                    //         // seg_Found_pos_1 = 'Y';
+                    //         break;
+                    //     }
+                    //     else if (SEG_positions[middle_SEG] < start_Pos)
+                    //     {
+                    //         top_SEG = middle_SEG + 1;
+                    //     }
+                    //     else
+                    //     {
+                    //         bottom_SEG = middle_SEG - 1;
+                    //     }
+                    //     middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
+                    // }
+
+                    for (size_t i = 0; i < SEG_size; i++)
                     {
-                        if (SEG_positions[middle_SEG] == start_Pos)
+                        if (SEG_positions[i] == start_Pos)
                         {
-                            SEG_position_location_pos_1 = middle_SEG;
+                            SEG_position_location_pos_1 = i;
                             seg_Found_pos_1 = 'Y';
+                        }
+                        else if (SEG_positions[i] == second_Pos)
+                        {
+                            SEG_position_location_pos_2 = i;
+                            seg_Found_pos_2 = 'Y';
+                        }
+                        else if (SEG_positions[i] == third_Pos)
+                        {
+                            SEG_position_location_pos_3 = i;
+                            seg_Found_pos_3 = 'Y';
+                        }
+
+                        if (SEG_positions[i] > third_Pos)
+                        {
                             break;
                         }
-                        else if (SEG_positions[middle_SEG] < start_Pos)
-                        {
-                            top_SEG = middle_SEG + 1;
-                        }
-                        else
-                        {
-                            bottom_SEG = middle_SEG - 1;
-                        }
-                        middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
                     }
 
                     // Use first codon position to try and find second and third
-                    if (seg_Found_pos_1 == 'Y')
-                    {
-                        if (SEG_positions[SEG_position_location_pos_1 + 1] == second_Pos)
-                        {
-                            SEG_position_location_pos_2 = SEG_position_location_pos_1 + 1;
-                            seg_Found_pos_2 = 'Y';
-                        }
+                    // if (seg_Found_pos_1 == 'Y')
+                    // {
+                    //     if (SEG_positions[SEG_position_location_pos_1 + 1] == second_Pos)
+                    //     {
+                    //         SEG_position_location_pos_2 = SEG_position_location_pos_1 + 1;
+                    //         seg_Found_pos_2 = 'Y';
+                    //     }
 
-                        if (SEG_positions[SEG_position_location_pos_1 + 2] == third_Pos)
-                        {
-                            SEG_position_location_pos_3 = SEG_position_location_pos_1 + 2;
-                            seg_Found_pos_3 = 'Y';
-                        }
-                        else if (SEG_positions[SEG_position_location_pos_1 + 1] == third_Pos)
-                        {
-                            SEG_position_location_pos_3 = SEG_position_location_pos_1 + 1;
-                            seg_Found_pos_3 = 'Y';
-                        }
-                    }
+                    //     if (SEG_positions[SEG_position_location_pos_1 + 2] == third_Pos)
+                    //     {
+                    //         SEG_position_location_pos_3 = SEG_position_location_pos_1 + 2;
+                    //         seg_Found_pos_3 = 'Y';
+                    //     }
+                    //     else if (SEG_positions[SEG_position_location_pos_1 + 1] == third_Pos)
+                    //     {
+                    //         SEG_position_location_pos_3 = SEG_position_location_pos_1 + 1;
+                    //         seg_Found_pos_3 = 'Y';
+                    //     }
+                    // }
 
                     // if second is not present then go find second from scratch
-                    if (seg_Found_pos_2 == 'N')
-                    {
-                        top_SEG = 0;
-                        bottom_SEG = SEG_size - 1;
-                        // top + ((bottom - top) / 2)
-                        middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
+                    // if (seg_Found_pos_2 == 'N')
+                    // {
 
-                        while (top_SEG < bottom_SEG)
-                        {
-                            if (SEG_positions[middle_SEG] == second_Pos)
-                            {
-                                SEG_position_location_pos_2 = middle_SEG;
-                                seg_Found_pos_2 = 'Y';
-                                break;
-                            }
-                            else if (SEG_positions[middle_SEG] < second_Pos)
-                            {
-                                top_SEG = middle_SEG + 1;
-                            }
-                            else
-                            {
-                                bottom_SEG = middle_SEG - 1;
-                            }
-                            middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
-                        }
-                    }
+                    //     if (start_Pos == 206331100)
+                    //     {
+                    //         printf("%d\n", second_Pos);
+                    //     }
 
-                    // if second is present use it to find third if third is not already found
-                    if ((seg_Found_pos_2 == 'Y') && (seg_Found_pos_3 == 'N'))
-                    {
-                        if (SEG_positions[SEG_position_location_pos_2 + 1] == third_Pos)
-                        {
-                            SEG_position_location_pos_2 = SEG_position_location_pos_2 + 1;
-                            seg_Found_pos_3 = 'Y';
-                        }
-                    }
+                    //     top_SEG = 0;
+                    //     bottom_SEG = SEG_size - 1;
+                    //     // top + ((bottom - top) / 2)
+                    //     middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
 
-                    // if neither second nor first can be used to find third , find third from scratch
-                    if (seg_Found_pos_3 == 'N')
-                    {
-                        top_SEG = 0;
-                        bottom_SEG = SEG_size - 1;
-                        middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
+                    //     while (top_SEG < bottom_SEG)
+                    //     {
+                    //         if (SEG_positions[middle_SEG] == second_Pos)
+                    //         {
+                    //             SEG_position_location_pos_2 = middle_SEG;
+                    //             seg_Found_pos_2 = 'Y';
+                    //             break;
+                    //         }
+                    //         else if (SEG_positions[middle_SEG] < second_Pos)
+                    //         {
+                    //             top_SEG = middle_SEG + 1;
+                    //         }
+                    //         else
+                    //         {
+                    //             bottom_SEG = middle_SEG - 1;
+                    //         }
+                    //         middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
+                    //     }
+                    // }
 
-                        while (top_SEG < bottom_SEG)
-                        {
-                            if (SEG_positions[middle_SEG] == third_Pos)
-                            {
-                                SEG_position_location_pos_3 = middle_SEG;
-                                seg_Found_pos_3 = 'Y';
-                                break;
-                            }
-                            else if (SEG_positions[middle_SEG] < third_Pos)
-                            {
-                                top_SEG = middle_SEG + 1;
-                            }
-                            else
-                            {
-                                bottom_SEG = middle_SEG - 1;
-                            }
-                            middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
-                        }
-                    }
+                    // // if second is present use it to find third if third is not already found
+                    // if ((seg_Found_pos_2 == 'Y') && (seg_Found_pos_3 == 'N'))
+                    // {
+                    //     if (SEG_positions[SEG_position_location_pos_2 + 1] == third_Pos)
+                    //     {
+                    //         SEG_position_location_pos_2 = SEG_position_location_pos_2 + 1;
+                    //         seg_Found_pos_3 = 'Y';
+                    //     }
+                    // }
+
+                    // // if neither second nor first can be used to find third , find third from scratch
+                    // if (seg_Found_pos_3 == 'N')
+                    // {
+                    //     top_SEG = 0;
+                    //     bottom_SEG = SEG_size - 1;
+                    //     middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
+
+                    //     while (top_SEG < bottom_SEG)
+                    //     {
+                    //         if (SEG_positions[middle_SEG] == third_Pos)
+                    //         {
+                    //             SEG_position_location_pos_3 = middle_SEG;
+                    //             seg_Found_pos_3 = 'Y';
+                    //             break;
+                    //         }
+                    //         else if (SEG_positions[middle_SEG] < third_Pos)
+                    //         {
+                    //             top_SEG = middle_SEG + 1;
+                    //         }
+                    //         else
+                    //         {
+                    //             bottom_SEG = middle_SEG - 1;
+                    //         }
+                    //         middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
+                    //     }
+                    // }
 
                     // get the counts needed for NI
 
@@ -673,7 +710,7 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
 
                     if (seg_Found_pos_1 == 'Y')
                     {
-                        if (seg_REF_count[SEG_position_location_pos_1] == 0 || seg_ALT_count[SEG_position_location_pos_1] == 0)
+                        if (seg_ALT_count[SEG_position_location_pos_1] == 0)
                         {
                             Seg_codon_pos_1 = REF_codon_pos_1;
                         }
@@ -690,7 +727,8 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
 
                     if (seg_Found_pos_2 == 'Y')
                     {
-                        if (seg_REF_count[SEG_position_location_pos_2] == 0 || seg_ALT_count[SEG_position_location_pos_2] == 0)
+
+                        if (seg_ALT_count[SEG_position_location_pos_2] == 0)
                         {
                             Seg_codon_pos_2 = REF_codon_pos_2;
                         }
@@ -701,12 +739,16 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
                     }
                     else
                     {
+                        // if (start_Pos == 206331100)
+                        // {
+                        //     printf("%d\n", second_Pos);
+                        // }
                         Seg_codon_pos_2 = REF_codon_pos_2;
                     }
 
                     if (seg_Found_pos_3 == 'Y')
                     {
-                        if (seg_REF_count[SEG_position_location_pos_3] == 0 || seg_ALT_count[SEG_position_location_pos_3] == 0)
+                        if (seg_ALT_count[SEG_position_location_pos_3] == 0)
                         {
                             Seg_codon_pos_3 = REF_codon_pos_3;
                         }
@@ -872,6 +914,7 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
                             }
                             if (REF_found == 'Y' && Seg_found == 'Y')
                             {
+                                // printf("%d\n", start_Pos);
                                 if (REF_amino_acid == Seg_amino_acid)
                                 {
                                     Ps[tid] = Ps[tid] + 1;
@@ -981,6 +1024,7 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
                             }
                             if (REF_found == 'Y' && Seg_found == 'Y')
                             {
+                                // printf("%d\n", start_Pos);
                                 if (REF_amino_acid == Seg_amino_acid)
                                 {
                                     Ps[tid] = Ps[tid] + 1;
@@ -1096,7 +1140,8 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
                             // check if both are found
                             if (REF_found == 'Y' && Seg_found == 'Y')
                             {
-                                // printf("FOUND");
+                                // printf("%d\n", start_Pos);
+                                //  printf("FOUND");
                                 if (REF_amino_acid == Seg_amino_acid)
                                 {
                                     Ps[tid] = Ps[tid] + 1;
@@ -1196,6 +1241,7 @@ void mk_test::process_ORF(vector<pair<int, string>> &collect_Segregrating_site_P
     for (size_t i = 0; i < num_segregrating_Sites; i++)
     {
         SEG_positions[i] = collect_Segregrating_site_POS[i].first;
+        // cout << SEG_positions[i] << endl;
     }
 
     cout << "STEP 2 OF 2: Processing " << num_of_Codons << " codons " << endl;
@@ -1282,6 +1328,15 @@ void mk_test::process_ORF(vector<pair<int, string>> &collect_Segregrating_site_P
     cout << "             Launching GPU" << endl;
     cuda_process_Codons<<<tot_Blocks, tot_ThreadsperBlock>>>(num_of_Codons, cuda_positions_ARRAY, cuda_REF_array, cuda_Outroup_array, cuda_REF, cuda_ALT, num_segregrating_Sites, cuda_Seg_positions, cuda_REF_Count, cuda_ALT_Count, codon_Start, size_of_alignment_File, size_of_genetic_Code, cuda_index_Gen_code, cuda_VALID_or_NOT, cuda_Ds, cuda_Dn, cuda_Ps, cuda_Pn);
     cudaDeviceSynchronize();
+
+    cudaError_t err = cudaGetLastError();
+
+    if (err != cudaSuccess)
+    {
+        printf("CUDA Error: %s\n", cudaGetErrorString(err));
+
+        // Possibly: exit(-1) if program cannot continue....
+    }
 
     cudaMemcpy(VALID_or_NOT, cuda_VALID_or_NOT, num_of_Codons * sizeof(int), cudaMemcpyDeviceToHost);
     cudaMemcpy(Dn, cuda_Dn, num_of_Codons * sizeof(int), cudaMemcpyDeviceToHost);
@@ -1587,7 +1642,7 @@ void mk_test::reference_Prep()
 
     cout << "Purging temporary alignment index: " << this->primary_Intermediate_Path + "/alignments" << endl
          << endl;
-    // filesystem::remove_all(this->primary_Intermediate_Path + "/alignments");
+    filesystem::remove_all(this->primary_Intermediate_Path + "/alignments");
 
     // REMOVE AFTER TEST
     log_Write("reference_mapping_per_GENE_complete");
@@ -2111,7 +2166,7 @@ void mk_test::reference_Prep(vector<pair<int, int>> TEMP_file_index)
     }
     cout << "Purging temporary alignment index: " << temp_index_Folder << endl
          << endl;
-    // filesystem::remove_all(temp_index_Folder);
+    filesystem::remove_all(temp_index_Folder);
     cudaFree(cuda_stop_Codons);
     cudaFree(cuda_reference);
 
@@ -2285,6 +2340,10 @@ void mk_test::codon_Alignment_print(vector<string> file_List, int start_Codon, i
                         locations.push_back(location);
                         sort(locations.begin(), locations.end());
                     }
+                }
+                else if (location > end_Codon)
+                {
+                    break;
                 }
             }
             align_Index.close();
