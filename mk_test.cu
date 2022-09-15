@@ -570,7 +570,7 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
 
                     while (top_SEG < bottom_SEG)
                     {
-                        if (SEG_positions[middle_SEG] >= start_Pos && SEG_positions[middle_SEG] <= third_Pos)
+                        if ((SEG_positions[middle_SEG] >= start_Pos) && (SEG_positions[middle_SEG] <= third_Pos))
                         {
                             break;
                         }
@@ -614,11 +614,12 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
                     if (seg_Found_pos_1 != 'Y' || seg_Found_pos_2 != 'Y' || seg_Found_pos_3 != 'Y')
                     {
 
+                        // prevernt redundancy of the search space
                         if (seg_Found_pos_1 == 'Y' && seg_Found_pos_2 == 'N')
                         {
                             middle_SEG = seg_Found_pos_1;
                         }
-                        else if (seg_Found_pos_1 == 'Y' && seg_Found_pos_2 == 'Y')
+                        else if (seg_Found_pos_2 == 'Y')
                         {
                             middle_SEG = seg_Found_pos_2;
                         }
