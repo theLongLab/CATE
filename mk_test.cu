@@ -553,9 +553,9 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
                     char Outgroup_codon_pos_2 = Outgroup[pos_Value + 1];
                     char Outgroup_codon_pos_3 = Outgroup[pos_Value + 2];
 
-                    // int top_SEG = 0;
-                    // int bottom_SEG = SEG_size - 1;
-                    // int middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
+                    int top_SEG = 0;
+                    int bottom_SEG = SEG_size - 1;
+                    int middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
 
                     int SEG_position_location_pos_1 = -1;
                     int SEG_position_location_pos_2 = -1;
@@ -564,28 +564,29 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
                     char seg_Found_pos_2 = 'N';
                     char seg_Found_pos_3 = 'N';
 
-                    // first codon position
-                    // while (top_SEG < bottom_SEG)
-                    // {
-                    //     if (SEG_positions[middle_SEG] >= start_Pos && SEG_positions[middle_SEG] <= third_Pos)
-                    //     {
-                    //         // SEG_position_location_pos_1 = middle_SEG;
-                    //         catch_Point = 'Y';
-                    //         // seg_Found_pos_1 = 'Y';
-                    //         break;
-                    //     }
-                    //     else if (SEG_positions[middle_SEG] < start_Pos)
-                    //     {
-                    //         top_SEG = middle_SEG + 1;
-                    //     }
-                    //     else
-                    //     {
-                    //         bottom_SEG = middle_SEG - 1;
-                    //     }
-                    //     middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
-                    // }
+                    // char catch_Point = 'N';
 
-                    for (size_t i = 0; i < SEG_size; i++)
+                    // first codon position
+
+                    while (top_SEG < bottom_SEG)
+                    {
+                        if (SEG_positions[middle_SEG] >= start_Pos && SEG_positions[middle_SEG] <= third_Pos)
+                        {
+                            break;
+                        }
+                        else if (SEG_positions[middle_SEG] < start_Pos)
+                        {
+                            top_SEG = middle_SEG + 1;
+                        }
+                        else
+                        {
+                            bottom_SEG = middle_SEG - 1;
+                        }
+                        middle_SEG = top_SEG + ((bottom_SEG - top_SEG) / 2);
+                    }
+
+                    // backward
+                    for (int i = middle_SEG; i >= 0; i--)
                     {
                         if (SEG_positions[i] == start_Pos)
                         {
@@ -603,9 +604,47 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
                             seg_Found_pos_3 = 'Y';
                         }
 
-                        if (SEG_positions[i] > third_Pos)
+                        if ((SEG_positions[i] < start_Pos) || (seg_Found_pos_1 != 'Y' && seg_Found_pos_2 != 'Y' && seg_Found_pos_3 != 'Y'))
                         {
                             break;
+                        }
+                    }
+
+                    // forward
+                    if (seg_Found_pos_1 != 'Y' || seg_Found_pos_2 != 'Y' || seg_Found_pos_3 != 'Y')
+                    {
+
+                        if (seg_Found_pos_1 == 'Y' && seg_Found_pos_2 == 'N')
+                        {
+                            middle_SEG = seg_Found_pos_1;
+                        }
+                        else if (seg_Found_pos_1 == 'Y' && seg_Found_pos_2 == 'Y')
+                        {
+                            middle_SEG = seg_Found_pos_2;
+                        }
+
+                        for (size_t i = middle_SEG; i < SEG_size; i++)
+                        {
+                            if (SEG_positions[i] == start_Pos)
+                            {
+                                SEG_position_location_pos_1 = i;
+                                seg_Found_pos_1 = 'Y';
+                            }
+                            else if (SEG_positions[i] == second_Pos)
+                            {
+                                SEG_position_location_pos_2 = i;
+                                seg_Found_pos_2 = 'Y';
+                            }
+                            else if (SEG_positions[i] == third_Pos)
+                            {
+                                SEG_position_location_pos_3 = i;
+                                seg_Found_pos_3 = 'Y';
+                            }
+
+                            if ((SEG_positions[i] > third_Pos) || (seg_Found_pos_1 != 'Y' && seg_Found_pos_2 != 'Y' && seg_Found_pos_3 != 'Y'))
+                            {
+                                break;
+                            }
                         }
                     }
 
