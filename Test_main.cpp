@@ -33,35 +33,75 @@ int main(int argc, char *argv[])
 {
      cout.precision(10);
 
+     /**
+      * RENEGADES... LET US BEGIN
+      * TODO: FINISH COMMENTING!
+      **/
+
      print_Cate();
      cout << "CATE: CUDA Accelerated Testing of Evolution" << endl;
      cout << "Evolutionary tests for large scale genome data" << endl
           << "----------------------------------------------" << endl
           << endl;
 
+     /**
+      * The title of CATE is an acronym.
+      * C.A.T.E stands for CUDA Accelerated Testing of Evolution.
+      * It is a software designed with the aim of utilizing the computers multiprocessing technologies of both the CPU and GPU.
+      * ! At present, CATE is compatible only with CUDA enabled NVIDIA GPU's.
+      **/
+
+     /**
+      * Since CATE is command line executable it depends on the one or two parameters passed via the CLI.
+      * @param argv is used to get these inputs.
+      * * [1] will be used to get the function.
+      * * [2] if required will point to the location of the parameter file.
+      **/
+
+     /**
+      * @param gene_List can be specific to each function or be set as universal.
+      * Universal enables all functions to access the same gene list file.
+      **/
+
+     /**
+      * @param prometheus_Activate is used to activate the HPC catered high speed mode of CATE dubbed Prometheus.
+      * ! Prometheus, is only available for the Neutrality tests of Tajima, Fay and Wu and, Fu and Li.
+      **/
+
      if (argv[1] != NULL)
      {
           string function(argv[1]);
+          /**
+           * * Functions are converted to lowercase formats so that they will not be case sensetive.
+           **/
           transform(function.begin(), function.end(), function.begin(), ::tolower);
 
           if (function == "--help" || function == "-h")
           {
+               /**
+                * Prints the help menu to the CLI.
+                **/
                print_HELP();
           }
           else if (function == "--godmode")
           {
+               /**
+                * CATE testing framework not required nor usable by the end user.
+                **/
                test try_something = test();
                try_something.thread_test();
-               ;
           }
           else if (function == "--cuda" || function == "-c")
           {
+               /**
+                * Prints all available CUDA devices present on the current system.
+                * User can use this list to determine which CUDA device to be used via the CUDA ID.
+                **/
                cudaDevices cudaList = cudaDevices();
                cout << "All CUDA capable devices have been listed" << endl;
           }
           else
           {
-
                if (argv[2] != NULL)
                {
                     string parameter_File(argv[2]);
@@ -71,6 +111,9 @@ int main(int argc, char *argv[])
 
                     if (function == "--printparam" || function == "-pparam")
                     {
+                         /**
+                          * Prints a default parameter.json file for the user.
+                          **/
                          print_param print = print_param(parameter_File);
                          print.ingress();
 
@@ -79,7 +122,14 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
+                         /**
+                          * The parameter Class is used to read the parameter *.json file.
+                          **/
                          parameter properties = parameter(parameter_File);
+
+                         /**
+                          * Configure, check for the presence and, create if auxillary folders are unavailable.
+                          **/
 
                          string output_Path = properties.where("Output path");
                          if (filesystem::exists(output_Path) == 0)
@@ -107,8 +157,20 @@ int main(int argc, char *argv[])
 
                          cout << endl;
 
+                         /**
+                          * The execution of all supplementary and main evolutionary functions.
+                          **/
+
                          if (function == "--splitvcf" || function == "-svcf")
                          {
+                              /**
+                               * * Execution of the SPLIT VCF function.
+                               * The function is responsible for the creation of the indexed folder hierarchy,
+                               * which is crucial for the functioning of CATE.
+                               *  * Enables the VCF files to be not only split by the number of SNPS, but by population and other
+                               *  * pre-defined filters.
+                               **/
+
                               // string input = properties.where("Input folder entry");
                               vcf_splitter split = vcf_splitter(tmp, properties.where("Input path"), properties.where("Population file path"), output_Path, properties.where_Int("Reference allele count"), properties.where_Int("Alternate allele count"), properties.where_Int("SNP count per file"), properties.where_Int("Sample_ID Column number"), properties.where_Int("Population_ID Column number"));
                               split.index_population();
@@ -119,6 +181,12 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--splitfasta" || function == "-sfasta")
                          {
+                              /**
+                               * * Execution of the SPLIT FASTA function.
+                               * Can split a merged FASTA file into its individual sequences.
+                               * It can also be used to extract a specific sequence by its sequence ID.
+                               **/
+
                               fasta_splitter split = fasta_splitter(properties.where("Raw FASTA file"), output_Path, properties.where("Sequence"));
                               split.ingress();
 
@@ -127,6 +195,11 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--mergefasta" || function == "-mfasta")
                          {
+                              /**
+                               * * Execution of the MERGE FASTA function.
+                               * Merges all FASTA files in the folder into a single FASTA file.
+                               **/
+
                               fasta_merge merge = fasta_merge(properties.where("FASTA files folder"), properties.where("Merge FASTA path"));
                               merge.ingress();
 
@@ -135,6 +208,13 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--extractgenes" || function == "-egenes")
                          {
+                              /**
+                               * * Execution of the EXTRACT GENE function.
+                               * Extracts gene sequences using a pre determined reference sequence file.
+                               * The reference FASTA file should only have a single sequence.
+                               * Positions of the gene list file should align with that of the reference sequence.
+                               **/
+
                               string gene_List = properties.where("Extract gene list");
                               if (gene_List == "universal")
                               {
@@ -148,6 +228,11 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--gff2gene" || function == "-g2g")
                          {
+                              /**
+                               * * Execution of the GFF to GENE function.
+                               * Collects and writes all GENE's in a *.GFF file to a CATE format gene list file.
+                               **/
+
                               // gff2gene(string input_File, string output_Path);
                               gff2gene g2g = gff2gene(properties.where("GFF file"), output_Path);
                               g2g.ingress();
@@ -157,6 +242,13 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--hapfromvcf" || function == "-hapext")
                          {
+                              /**
+                               * * Execution of the Haplotypes from VCF function.
+                               * Uses the VCF file folder and the reference genome FASTA file to reconstruct all unique haplotypes in a gene region.
+                               * Can also be used to recreate the FASTA file of the VCF file population. 
+                               * ! Essentially ALL FASTA sequences per individual per ploidy will be generated.
+                               **/
+
                               string gene_List = properties.where("Hap extract gene list");
                               if (gene_List == "universal")
                               {

@@ -566,8 +566,6 @@ __global__ void cuda_process_Codons(int codon_Number, int *positions, char *REF,
 
                     // char catch_Point = 'N';
 
-                    // first codon position
-
                     while (top_SEG < bottom_SEG)
                     {
                         if ((SEG_positions[middle_SEG] >= start_Pos) && (SEG_positions[middle_SEG] <= third_Pos))
