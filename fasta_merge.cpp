@@ -3,6 +3,11 @@
 
 fasta_merge::fasta_merge(string fasta_Folder, string output_FASTA)
 {
+    /**
+     * * Constructor Function
+     * Assigns passed variables to the classes' private variable.
+     **/
+
     cout << "Starting up FASTA MERGER" << endl
          << endl;
     this->fasta_Folder = fasta_Folder;
@@ -12,12 +17,26 @@ fasta_merge::fasta_merge(string fasta_Folder, string output_FASTA)
 
 void fasta_merge::ingress()
 {
+    /**
+     * Execution function.
+     **/
+
+    /**
+     * Call the "functions" class. Bespoke functions commonly used by CATE.
+     **/
     functions function = functions();
+
+    /**
+     * Gets all the FASTA compatible files from the fasta_Folder.
+     **/
     vector<string> files = index_FASTA_folder();
 
     cout << endl
-         << "Intitating MERGE:" << endl;
+         << "Initiating MERGE:" << endl;
 
+    /**
+     * Creates the merged FASTA file.
+     **/
     function.createFile(output_FASTA);
     fstream FASTA_file;
     FASTA_file.open(this->output_FASTA, ios::app);
@@ -45,6 +64,10 @@ void fasta_merge::ingress()
 
 vector<string> fasta_merge::index_FASTA_folder()
 {
+    /**
+     * Collects all the FASTA compatible files present in the fasta_Folder folder.
+     **/
+
     cout << "Indexing FASTA Folder" << endl;
     vector<string> files;
 
@@ -53,6 +76,9 @@ vector<string> fasta_merge::index_FASTA_folder()
         string file = entry.path().string();
         string ext = file.substr(file.find_last_of("."), file.length());
         transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+        /**
+         * All supported FASTA formats.
+         **/
         if (ext == ".fasta" || ext == ".fna" || ext == ".ffn" || ext == ".faa" || ext == ".frn" || ext == "fa")
         {
             files.push_back(file);

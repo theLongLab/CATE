@@ -4,7 +4,7 @@ print_param::print_param(string file_Name)
 {
        /**
         * * Constructor Function
-        * Assigns passed file location variable to the private class variable.
+        * Assigns passed file location variable to the classes' private variable.
         **/
 
        cout << "Starting up Parameter Print" << endl
@@ -14,6 +14,9 @@ print_param::print_param(string file_Name)
 
 void print_param::ingress()
 {
+       /**
+        * Execution function prints the paramater file to the user defined location in *.json format.
+        **/
        // string original = this->file_Name;
 
        // for (size_t i = 1; i <= 22; i++)

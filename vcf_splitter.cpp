@@ -2,6 +2,11 @@
 
 vcf_splitter::vcf_splitter(char folder[], string vcf_Folder, string population_File, string output_Path, int REF, int ALT, int snp_Count, int sample_Column, int pop_Column)
 {
+    /**
+     * RENEGADES... LET US BEGIN
+     * TODO: ADD MAF Filter!
+     **/
+
     cout << "Starting up VCF SPLITTER" << endl
          << endl;
     strcpy(this->folder, folder);
@@ -43,7 +48,7 @@ void vcf_splitter::index_population()
 
             line_Data[pop_Column - 1].erase(remove(line_Data[pop_Column - 1].begin(), line_Data[pop_Column - 1].end(), '\r'), line_Data[pop_Column - 1].end());
             line_Data[sample_Column - 1].erase(remove(line_Data[sample_Column - 1].begin(), line_Data[sample_Column - 1].end(), '\r'), line_Data[sample_Column - 1].end());
-            
+
             super_pops.insert(line_Data[pop_Column - 1]);
             // cout<<line_Data[0]<<endl<<line_Data[5]<<endl;
             pop_Index.push_back(make_pair(line_Data[sample_Column - 1], line_Data[pop_Column - 1]));

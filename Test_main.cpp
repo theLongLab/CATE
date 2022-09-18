@@ -149,6 +149,9 @@ int main(int argc, char *argv[])
                           * Configure, check for the presence and, create if auxillary folders are unavailable.
                           **/
 
+                         /**
+                          * @param output_Path defines the output folder path to which all outputs will be printed to.
+                          **/
                          string output_Path = properties.where("Output path");
                          if (filesystem::exists(output_Path) == 0)
                          {
@@ -161,6 +164,10 @@ int main(int argc, char *argv[])
                               cout << "Output folder exists: " << output_Path << endl;
                          }
 
+                         /**
+                          * @param intermediate_Path defines the intermediate folder path to which all the intermediate outputs will be printed to.
+                          * The intermediate folder is used to initialise the resume functions and keep track of the program's progress.
+                          **/
                          string intermediate_Path = properties.where("Intermediate path");
                          if (filesystem::exists(intermediate_Path) == 0)
                          {
@@ -187,6 +194,12 @@ int main(int argc, char *argv[])
                                * which is crucial for the functioning of CATE.
                                *  * Enables the VCF files to be not only split by the number of SNPS, but by population and other
                                *  * pre-defined filters.
+                               **/
+
+                              /**
+                               * RENEGADES... LET US BEGIN
+                               * TODO: ADD MAF FILTER!
+                               * TODO: FINISH COMMENTING!
                                **/
 
                               // string input = properties.where("Input folder entry");
