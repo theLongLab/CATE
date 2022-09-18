@@ -46,13 +46,13 @@ int main(int argc, char *argv[])
 
      /**
       * The title of CATE is an acronym.
-      * C.A.T.E stands for CUDA Accelerated Testing of Evolution.
-      * It is a software designed with the aim of utilizing the computers multiprocessing technologies of both the CPU and GPU.
+      * C.A.T.E. stands for CUDA Accelerated Testing of Evolution.
+      * It is a software designed with the aim of utilizing the computer's multiprocessing technologies of both the CPU and GPU.
       * ! At present, CATE is compatible only with CUDA enabled NVIDIA GPU's.
       **/
 
      /**
-      * Since CATE is command line executable it depends on the one or two parameters passed via the CLI.
+      * Since CATE is command line executable it depends on one or two parameters passed via the CLI.
       * @param argv is used to get these inputs.
       * * [1] will be used to get the function.
       * * [2] if required will point to the location of the parameter file.
@@ -65,7 +65,15 @@ int main(int argc, char *argv[])
 
      /**
       * @param prometheus_Activate is used to activate the HPC catered high speed mode of CATE dubbed Prometheus.
-      * ! Prometheus, is only available for the Neutrality tests of Tajima, Fay and Wu and, Fu and Li.
+      * ! Prometheus, is available only for the Neutrality tests of Tajima, Fay and Wu and, Fu and Li.
+      **/
+
+     /**
+      * @param calc_Mode is used for all three aforementioned Neutrality tests and, the Fst function.
+      * CATE is designed to bridge te gap between current WINDOW based mechanisms and GENE based calculations.
+      * However, it does not shy away from providing WINDOW based calculations.
+      * calc_Mode enables users to shift between WINDOW and FILE (gene based) modes.
+      * calc_Mode is not case sensitive.
       **/
 
      if (argv[1] != NULL)
@@ -81,6 +89,7 @@ int main(int argc, char *argv[])
                /**
                 * Prints the help menu to the CLI.
                 **/
+
                print_HELP();
           }
           else if (function == "--godmode")
@@ -88,6 +97,7 @@ int main(int argc, char *argv[])
                /**
                 * CATE testing framework not required nor usable by the end user.
                 **/
+
                test try_something = test();
                try_something.thread_test();
           }
@@ -97,6 +107,7 @@ int main(int argc, char *argv[])
                 * Prints all available CUDA devices present on the current system.
                 * User can use this list to determine which CUDA device to be used via the CUDA ID.
                 **/
+
                cudaDevices cudaList = cudaDevices();
                cout << "All CUDA capable devices have been listed" << endl;
           }
@@ -114,6 +125,7 @@ int main(int argc, char *argv[])
                          /**
                           * Prints a default parameter.json file for the user.
                           **/
+
                          print_param print = print_param(parameter_File);
                          print.ingress();
 
@@ -125,6 +137,7 @@ int main(int argc, char *argv[])
                          /**
                           * The parameter Class is used to read the parameter *.json file.
                           **/
+                         
                          parameter properties = parameter(parameter_File);
 
                          /**
@@ -244,8 +257,9 @@ int main(int argc, char *argv[])
                          {
                               /**
                                * * Execution of the Haplotypes from VCF function.
-                               * Uses the VCF file folder and the reference genome FASTA file to reconstruct all unique haplotypes in a gene region.
-                               * Can also be used to recreate the FASTA file of the VCF file population. 
+                               * Uses the VCF file folder and the reference genome FASTA file to reconstruct all unique
+                               * haplotypes in a gene region.
+                               * Can also be used to recreate the FASTA file of the VCF file population.
                                * ! Essentially ALL FASTA sequences per individual per ploidy will be generated.
                                **/
 
@@ -263,6 +277,10 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--tajima" || function == "-t")
                          {
+                              /**
+                               * * Execution of the Tajima's D function.
+                               **/
+
                               string prometheus_Activate = properties.where("Prometheus activate");
                               transform(prometheus_Activate.begin(), prometheus_Activate.end(), prometheus_Activate.begin(), ::toupper);
 
@@ -312,6 +330,12 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--fuli" || function == "-f")
                          {
+                              /**
+                               * * Execution of the Fu and Li function.
+                               * Calculates all four Fu and Li statistics, namely:
+                               * Fu and Li's D, D*, F and F*.
+                               **/
+
                               string prometheus_Activate = properties.where("Prometheus activate");
                               transform(prometheus_Activate.begin(), prometheus_Activate.end(), prometheus_Activate.begin(), ::toupper);
 
@@ -358,9 +382,14 @@ int main(int argc, char *argv[])
 
                               cout << "CUDA powered Fu and Li's D, D*, F and F* calculator has been completed." << endl;
                          }
-
                          else if (function == "--faywu" || function == "-w")
                          {
+                              /**
+                               * * Execution of the Fay and Wu function.
+                               * Calculates all two Fay and Wu statistics, namely:
+                               * Fay and Wu's normalized H and E.
+                               **/
+
                               string prometheus_Activate = properties.where("Prometheus activate");
                               transform(prometheus_Activate.begin(), prometheus_Activate.end(), prometheus_Activate.begin(), ::toupper);
 
@@ -410,6 +439,11 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--neutrality" || function == "-n")
                          {
+                              /**
+                               * * Execution of the all three Neutrality tests together.
+                               * Optimized to calculate all three neutrality tests together.
+                               **/
+
                               string prometheus_Activate = properties.where("Prometheus activate");
                               transform(prometheus_Activate.begin(), prometheus_Activate.end(), prometheus_Activate.begin(), ::toupper);
 
@@ -459,6 +493,12 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--mk" || function == "-m")
                          {
+                              /**
+                               * * Execution of the McDonald–Kreitman (MK) function.
+                               * MK test can be configured to calculate Chromosome wide or Gene wide analyses.
+                               * Test can be configured to do automatic ORF searches or user pre-defined ORF searches.
+                               **/
+
                               string gene_List = properties.where("McDonald–Kreitman gene list");
                               if (gene_List == "universal")
                               {
@@ -471,6 +511,14 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--fst" || function == "-x")
                          {
+                              /**
+                               * * Execution of the Fixation Index or Fst function.
+                               * Calculates te population wide Fixation index using the,
+                               * Hs and Ht statistics.
+                               * Hs = expected heterozygosities in subpopulations.
+                               * Ht = expected heterozygosities for overall total population.
+                               **/
+
                               string calc_Mode = properties.where("Calculation mode");
                               transform(calc_Mode.begin(), calc_Mode.end(), calc_Mode.begin(), ::toupper);
 
@@ -496,6 +544,10 @@ int main(int argc, char *argv[])
                          }
                          else if (function == "--ehh" || function == "-e")
                          {
+                              /**
+                               * * Execution of the Extended Haplotype Homozygosity (EHH) function.
+                               **/
+
                               string mode = properties.where("Range mode");
                               transform(mode.begin(), mode.end(), mode.begin(), ::toupper);
 
@@ -540,6 +592,10 @@ int main(int argc, char *argv[])
                          }
                          else
                          {
+                              /**
+                               * ! Initialized when an incorrect function has been entered.
+                               **/
+
                               cout << "INVALID FUNCTION PASSED AS A RUNTIME ARGUMENT" << endl
                                    << "To see available functions type --help or -h." << endl;
                          }
@@ -547,14 +603,26 @@ int main(int argc, char *argv[])
                }
                else
                {
+                    /**
+                     * ! Initialized when the parameter file has not been configured for a function that requires a parameter file.
+                     **/
+
                     cout << "PLEASE SPECIFY A PARAMETER JSON FILE. PROGRAM REQUIRES A PARAMETER FILE TO EXECUTE.";
                }
           }
      }
      else
      {
+          /**
+           * ! Initialized when CATE has been executed without a function.
+           **/
+
           cout << "PLEASE ENTER A FUNCTION. ENTER -h OR --help TO LIST ALL AVAILABLE FUNCTIONS";
      }
+
+     /**
+      * ! After all executions of code this prompt signifies the successful completion of the program.
+      **/
 
      cout << endl
           << "Program has completed its run." << endl;
@@ -564,6 +632,10 @@ int main(int argc, char *argv[])
 
 void print_Cate()
 {
+     /**
+      * * CATE banner design.
+      **/
+
      cout << "   /\\\\\\\\\\\\\\\\\\     /\\\\\\\\\\\\\\\\\\     /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\  /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n"
           << " /\\\\\\////////    /\\\\\\\\\\\\\\\\\\\\\\\\\\  \\///////\\\\\\/////  \\/\\\\\\///////////\n"
           << "/\\\\\\/            /\\\\\\/////////\\\\\\       \\/\\\\\\       \\/\\\\\\\n"
@@ -586,11 +658,15 @@ void print_Cate()
 
 void print_HELP()
 {
+     /**
+      * * Prints CATE's complete help menu.
+      **/
+
      cout << "HELP MENU" << endl
           << "---------"
           << endl
           << endl
-          << "Excecution format: \"[--function or -f] properties_file.json\"" << endl
+          << "Execution format: \"[--function or -f] properties_file.json\"" << endl
           << endl
           << "** Available functions are (not CaSe sensitive) **" << endl
           << endl
@@ -604,11 +680,11 @@ void print_HELP()
           << "PROMETHEUS uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << endl
           << "PROMETHEUS can be configured by the following five parameters:" << endl
-          << "1. Prometheus activate: \"YES\" or \"NO\" paramters used to turn the mode ON or OFF." << endl
+          << "1. Prometheus activate: \"YES\" or \"NO\" parameters used to turn the mode ON or OFF." << endl
           << "2. CPU cores          : Controls the maximum number of cores that can be used at a time." << endl
           << "3. SNPs per time      : Controls the max number of SNPs that will be processed on the GPU at a time." << endl
           << "4. Number of genes    : Controls the number gene combinations that will be processed at a time." << endl
-          << "5. Multi read         : \"YES\" or \"NO\" paramters used to control the ability to read multiple files at once." << endl
+          << "5. Multi read         : \"YES\" or \"NO\" parameters used to control the ability to read multiple files at once." << endl
           << endl
           << "CALCULATION MODES:" << endl
           << "CATE can perform tests for pre-defined gene regions or the classical sliding window mechanism." << endl
@@ -618,8 +694,8 @@ void print_HELP()
           << endl
           << "If the calculation mode is \"WINDOW\" then the following two parameters need to be configured:" << endl
           << "1. Window size: Base pair size of the window or range of the combination." << endl
-          << "2. Step size  : The base pair amount by which the next window's start will be incemented." << endl
-          << "NOTE: If \"Step size\" is set to \"0\" then CATE will shift to a continous sliding window mode." << endl
+          << "2. Step size  : The base pair amount by which the next window's start will be incremented." << endl
+          << "NOTE: If \"Step size\" is set to \"0\" then CATE will shift to a continuous sliding window mode." << endl
           << endl
           << "If the calculation mode is \"FILE\" then the following two parameters need to be configured:" << endl
           << "1. Universal gene list: Configure the location for the tab deliminated gene list file for all tests." << endl
@@ -636,14 +712,14 @@ void print_HELP()
           << "-sfasta or --splitfasta\t: Split a user specified FASTA file to individual FASTA files." << endl
           << "             \t\t  Can be used to extract a singular user specified sequence as well." << endl
           << "             \t\t  Split files are placed in a user specified folder." << endl
-          << "             \t\t  Each FASTA file name will be the name of the respectve sequence entry." << endl
+          << "             \t\t  Each FASTA file name will be the name of the respective sequence entry." << endl
           << endl
           << "-mfasta or --mergefasta\t: Merge all FASTA files in a user specified folder to an individual FASTA file." << endl
           << "             \t\t  Ensure that the FASTA files have the APPROPRIATE extensions: .fasta, .fna, .ffn, .faa, .frn, .fa" << endl
           << endl
           << "-egenes or --extractgenes : Reads the gene list file to extract the gene sequences from the reference genome." << endl
           << "                            FASTA format reference genome must be specified." << endl
-          << "                            All gene sequences will be generated into seperate FASTA files." << endl
+          << "                            All gene sequences will be generated into separate FASTA files." << endl
           << endl
           << "--gff2gene or -g2g      : Creates the gene list file in a *.txt format from the input GFF3 file." << endl
           << "                          Note that only regions annotated as genes will be extracted." << endl
@@ -651,7 +727,7 @@ void print_HELP()
           << "--hapfromvcf or -hapext : Extracts haplotypes and their sequences for a predefined gene list from a (split) VCF (indexed) folder provided the reference sequence." << endl
           << "                          The reference genome must be provided in a FASTA file." << endl
           << "                          The system will automatically identify each haplotype present." << endl
-          << "                          In addition to the summary output each haplotype present for each gene will be generated in a seperate FASTA file." << endl
+          << "                          In addition to the summary output each haplotype present for each gene will be generated in a separate FASTA file." << endl
           << "                          IF \"Population out\" is set to \"YES\" then the entire population's FASTA configuration will be generated as well." << endl
           << "                          Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "                          File format is *.hsum (a tab deliminated text file)." << endl
@@ -698,7 +774,7 @@ void print_HELP()
           << "              \t  File format is *.mc (a tab deliminated text file)." << endl
           << endl
           << "-x or --fst   \t: Calculates the Fixation Index (Fst) (1965) for a predefined gene list using a (split) vcf (indexed) folder." << endl
-          << "              \t  The population index of the seqeunced samples must be provided in a tab deliminated *txt format file." << endl
+          << "              \t  The population index of the sequenced samples must be provided in a tab deliminated *txt format file." << endl
           << "              \t  Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "              \t  File format is *.fst (a tab deliminated text file)." << endl
           << endl
@@ -708,7 +784,7 @@ void print_HELP()
           << "              \t             Formats include \"START_position:END_position\" or +VALUE or -VALUE." << endl
           << "              \t             \"+\" Causes the START_position of the gene region to be incremented by the user specified value." << endl
           << "              \t             \"-\" Causes the START_position of the gene region to be reduced by the user specified value." << endl
-          << "              \t  FIXED mode: In the paramters file's \"FIXED mode\" section specify the +VALUE or -VALUE. It will be applied to all gene regions." << endl
+          << "              \t  FIXED mode: In the parameters file's \"FIXED mode\" section specify the +VALUE or -VALUE. It will be applied to all gene regions." << endl
           << "              \t  Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "              \t  File format is *.ehh (a tab deliminated text file)." << endl
           << endl
