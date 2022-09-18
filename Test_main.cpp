@@ -115,6 +115,11 @@ int main(int argc, char *argv[])
           {
                if (argv[2] != NULL)
                {
+                    /**
+                     * @param parameter_File is used to capture the parameter file location.
+                     * Converts parameter file location to a string.
+                     **/
+
                     string parameter_File(argv[2]);
 
                     char tmp[256];
@@ -137,7 +142,7 @@ int main(int argc, char *argv[])
                          /**
                           * The parameter Class is used to read the parameter *.json file.
                           **/
-                         
+
                          parameter properties = parameter(parameter_File);
 
                          /**
