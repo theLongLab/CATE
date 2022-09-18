@@ -12,7 +12,6 @@ using namespace std;
 
 class gene_extract
 {
-
     /**
      * Extracts gene sequences using from a reference sequence file.
      **/
