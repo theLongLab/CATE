@@ -26,11 +26,23 @@
 
 using namespace std;
 
+/**
+ * Function that prints the banner.
+ **/
 void print_Cate();
+
+/**
+ * Function that prints the help menu.
+ **/
 void print_HELP();
 
 int main(int argc, char *argv[])
 {
+     /**
+      * * MAIN FUNCTION OF CATE
+      * Provides ingress into CATE.
+      **/
+
      cout.precision(10);
 
      /**
