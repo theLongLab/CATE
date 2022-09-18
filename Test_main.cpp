@@ -259,6 +259,9 @@ int main(int argc, char *argv[])
                                **/
 
                               string gene_List = properties.where("Extract gene list");
+                              /**
+                               * Get the gene file.
+                               **/
                               if (gene_List == "universal")
                               {
                                    gene_List = properties.where("Universal gene list");
@@ -294,6 +297,9 @@ int main(int argc, char *argv[])
                                **/
 
                               string gene_List = properties.where("Hap extract gene list");
+                              /**
+                               * Get the gene file.
+                               **/
                               if (gene_List == "universal")
                               {
                                    gene_List = properties.where("Universal gene list");
@@ -320,6 +326,9 @@ int main(int argc, char *argv[])
                               string gene_List;
                               if (calc_Mode == "FILE")
                               {
+                                   /**
+                                    * Get the gene file.
+                                    **/
                                    gene_List = properties.where("Tajima gene list");
                                    if (gene_List == "universal")
                                    {
@@ -329,6 +338,10 @@ int main(int argc, char *argv[])
 
                               if (prometheus_Activate != "YES")
                               {
+                                   /**
+                                    * Configures the normal, NON Prometheus mode.
+                                    **/
+
                                    if (calc_Mode == "FILE")
                                    {
                                         tajima tajimasD = tajima(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
@@ -342,6 +355,10 @@ int main(int argc, char *argv[])
                               }
                               else
                               {
+                                   /**
+                                    * Configures the PROMETHEUS mode.
+                                    **/
+
                                    if (calc_Mode == "FILE")
                                    {
                                         tajima tajimasD_Prometheus = tajima(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
@@ -375,6 +392,9 @@ int main(int argc, char *argv[])
                               string gene_List;
                               if (calc_Mode == "FILE")
                               {
+                                   /**
+                                    * Get the gene file.
+                                    **/
                                    gene_List = properties.where("Fu and Li gene list");
                                    if (gene_List == "universal")
                                    {
@@ -384,6 +404,10 @@ int main(int argc, char *argv[])
 
                               if (prometheus_Activate != "YES")
                               {
+                                   /**
+                                    * Configures the normal, NON Prometheus mode.
+                                    **/
+
                                    if (calc_Mode == "FILE")
                                    {
                                         fu_li fuli = fu_li(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
@@ -397,6 +421,10 @@ int main(int argc, char *argv[])
                               }
                               else
                               {
+                                   /**
+                                    * Configures the PROMETHEUS mode.
+                                    **/
+
                                    if (calc_Mode == "FILE")
                                    {
                                         fu_li fuli_Prometheus = fu_li(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
@@ -429,6 +457,9 @@ int main(int argc, char *argv[])
                               string gene_List;
                               if (calc_Mode == "FILE")
                               {
+                                   /**
+                                    * Get the gene file.
+                                    **/
                                    gene_List = properties.where("Fay and Wu gene list");
                                    if (gene_List == "universal")
                                    {
@@ -438,6 +469,10 @@ int main(int argc, char *argv[])
 
                               if (prometheus_Activate != "YES")
                               {
+                                   /**
+                                    * Configures the normal, NON Prometheus mode.
+                                    **/
+
                                    if (calc_Mode == "FILE")
                                    {
                                         fay_wu faywu = fay_wu(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
@@ -452,6 +487,10 @@ int main(int argc, char *argv[])
                               }
                               else
                               {
+                                   /**
+                                    * Configures the PROMETHEUS mode.
+                                    **/
+
                                    if (calc_Mode == "FILE")
                                    {
                                         fay_wu faywu_Prometheus = fay_wu(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
@@ -483,6 +522,9 @@ int main(int argc, char *argv[])
                               string gene_List;
                               if (calc_Mode == "FILE")
                               {
+                                   /**
+                                    * Get the gene file.
+                                    **/
                                    gene_List = properties.where("Neutrality gene list");
                                    if (gene_List == "universal")
                                    {
@@ -492,6 +534,10 @@ int main(int argc, char *argv[])
 
                               if (prometheus_Activate != "YES")
                               {
+                                   /**
+                                    * Configures the normal, NON Prometheus mode.
+                                    **/
+
                                    if (calc_Mode == "FILE")
                                    {
                                         neutral neutrality = neutral(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
@@ -506,6 +552,10 @@ int main(int argc, char *argv[])
                               }
                               else
                               {
+                                   /**
+                                    * Configures the PROMETHEUS mode.
+                                    **/
+
                                    if (calc_Mode == "FILE")
                                    {
                                         neutral neutrality_Prometheus = neutral(gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), prometheus_Activate, properties.where("Multi read"), properties.where_Int("Number of genes"), properties.where_Int("CPU cores"), properties.where_Int("SNPs per time"));
@@ -532,6 +582,9 @@ int main(int argc, char *argv[])
                               string gene_List = properties.where("McDonald–Kreitman gene list");
                               if (gene_List == "universal")
                               {
+                                   /**
+                                    * Get the gene file.
+                                    **/
                                    gene_List = properties.where("Universal gene list");
                               }
                               mk_test mk = mk_test(properties.where("Reference genome mk"), properties.where("Alignment file"), gene_List, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), properties.where("Genetic code"), properties.where("Start codon(s)"), properties.where("Stop codon(s)"), properties.where("Alignment mode"), properties.where("ORF known"));
@@ -554,6 +607,9 @@ int main(int argc, char *argv[])
 
                               if (calc_Mode == "FILE")
                               {
+                                   /**
+                                    * Get the gene file.
+                                    **/
                                    string gene_List = properties.where("Fst gene list");
                                    if (gene_List == "universal")
                                    {
@@ -590,6 +646,9 @@ int main(int argc, char *argv[])
 
                               if (mode == "FILE")
                               {
+                                   /**
+                                    * Get the gene file.
+                                    **/
                                    file_mode_Path = properties.where("EHH FILE path");
                                    if (file_mode_Path == "universal")
                                    {
