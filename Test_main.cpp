@@ -27,6 +27,20 @@
 using namespace std;
 
 /**
+ * ! FOR THOSE WHO READ THE CODE.
+ * ! THE CODE HAS BEEN COMMENTED AS MUCH AS POSSIBLE.
+ * ! IN CERTAIN INSTANCES THERE WILL BE COMMENTED OUT SECTIONS OF CODE.
+ * ! THESE ARE USUALLY RELICS OF PREVIOUS TRIALS, FAILED EFFORTS TO GET THE BEST POSSIBLE SPEED AND ACCURACIES FROM CATE.
+ * ! CONSIDER THEM AS MORALS AND LESSONS OF WHAT CAN AND CANNOT BE DONE.
+ * ! GOOD LUCK.
+ **/
+
+/**
+ * RENEGADES... LET US BEGIN
+ * TODO: FINISH COMMENTING!
+ **/
+
+/**
  * Function that prints the banner.
  **/
 void print_Cate();
@@ -44,11 +58,6 @@ int main(int argc, char *argv[])
       **/
 
      cout.precision(10);
-
-     /**
-      * RENEGADES... LET US BEGIN
-      * TODO: FINISH COMMENTING!
-      **/
 
      print_Cate();
      cout << "CATE: CUDA Accelerated Testing of Evolution" << endl;
