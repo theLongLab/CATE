@@ -162,7 +162,7 @@ void tajima::set_Values(string gene_List, string input_Folder, string ouput_Path
 void tajima::ingress()
 {
     functions function = functions();
-    vector<string> countries = get_Countries();
+    vector<string> countries = function.get_Countries(this->input_Folder);
     cout << countries.size() << " population(s) were found: ";
     for (int count = 0; count < countries.size(); count++)
     {
@@ -195,7 +195,7 @@ void tajima::ingress()
         cout << "Number of samples in " << country.substr(country.find_last_of("/") + 1, country.length()) << " population\t: " << samples << endl;
         int N = samples * ploidy;
         cout << "Number of sequences in " << country.substr(country.find_last_of("/") + 1, country.length()) << " population [ " << samples << " x " << ploidy << " ] (N)\t: " << N << endl;
-        long int combinations = combos_N(N);
+        long int combinations = function.combos_N(N);
         cout << "Pairwise combinations\t: " << combinations << endl;
         cout << endl;
 
@@ -882,21 +882,21 @@ void tajima::window(string output_File, float a1, float e1, float e2, int N, lon
     output.close();
 }
 
-void tajima::createFile(string path)
-{
-    fstream file;
-    file.open(path, ios::out);
-    file.close();
-}
+// void tajima::createFile(string path)
+// {
+//     fstream file;
+//     file.open(path, ios::out);
+//     file.close();
+// }
 
-void tajima::createFile(string path, string text)
-{
-    fstream file;
-    file.open(path, ios::out);
-    file << text;
-    file << "\n";
-    file.close();
-}
+// void tajima::createFile(string path, string text)
+// {
+//     fstream file;
+//     file.open(path, ios::out);
+//     file << text;
+//     file << "\n";
+//     file.close();
+// }
 
 __global__ void pairwise_Cuda(int N, int *SNP, int *differences)
 {
@@ -919,229 +919,229 @@ __global__ void pairwise_Cuda(int N, int *SNP, int *differences)
     }
 }
 
-int tajima::calc_Pairwise(string &line, int N)
-{
-    int pairwise_Differences = 0;
+// int tajima::calc_Pairwise(string &line, int N)
+// {
+//     int pairwise_Differences = 0;
 
-    // int *line_temp = (int *)malloc(N * sizeof(int));
-    int *line_temp = new int[N];
-    split_Convert(line_temp, line, "\t");
-    // for (int i = 0; i < N; i++)
-    // {
-    //     cout << i << "\t" << line_temp[i] << endl;
-    // }
+//     // int *line_temp = (int *)malloc(N * sizeof(int));
+//     int *line_temp = new int[N];
+//     split_Convert(line_temp, line, "\t");
+//     // for (int i = 0; i < N; i++)
+//     // {
+//     //     cout << i << "\t" << line_temp[i] << endl;
+//     // }
 
-    int *cuda_line_Data;
-    cudaMallocManaged(&cuda_line_Data, N * sizeof(int));
+//     int *cuda_line_Data;
+//     cudaMallocManaged(&cuda_line_Data, N * sizeof(int));
 
-    int *differences, *cuda_Differences;
-    cudaMallocManaged(&cuda_Differences, N * sizeof(int));
-    differences = (int *)malloc(N * sizeof(int));
+//     int *differences, *cuda_Differences;
+//     cudaMallocManaged(&cuda_Differences, N * sizeof(int));
+//     differences = (int *)malloc(N * sizeof(int));
 
-    cudaMemcpy(cuda_line_Data, line_temp, (N * sizeof(int)), cudaMemcpyHostToDevice);
+//     cudaMemcpy(cuda_line_Data, line_temp, (N * sizeof(int)), cudaMemcpyHostToDevice);
 
-    pairwise_Cuda<<<tot_Blocks, tot_ThreadsperBlock>>>(N, cuda_line_Data, cuda_Differences);
-    cudaDeviceSynchronize();
+//     pairwise_Cuda<<<tot_Blocks, tot_ThreadsperBlock>>>(N, cuda_line_Data, cuda_Differences);
+//     cudaDeviceSynchronize();
 
-    cudaMemcpy(differences, cuda_Differences, N * sizeof(int), cudaMemcpyDeviceToHost);
+//     cudaMemcpy(differences, cuda_Differences, N * sizeof(int), cudaMemcpyDeviceToHost);
 
-    cudaFree(cuda_line_Data);
-    cudaFree(cuda_Differences);
+//     cudaFree(cuda_line_Data);
+//     cudaFree(cuda_Differences);
 
-    for (int i = 0; i < N; i++)
-    {
-        pairwise_Differences = pairwise_Differences + differences[i];
-    }
+//     for (int i = 0; i < N; i++)
+//     {
+//         pairwise_Differences = pairwise_Differences + differences[i];
+//     }
 
-    // cout << "pairwise: " << pairwise_Differences << endl;
+//     // cout << "pairwise: " << pairwise_Differences << endl;
 
-    free(differences);
-    free(line_temp);
+//     free(differences);
+//     free(line_temp);
 
-    return pairwise_Differences;
-}
+//     return pairwise_Differences;
+// }
 
-void tajima::split_getPos(vector<string> &line_Data, string line, string delim)
-{
-    vector<string>().swap(line_Data);
-    char *convert;
-    string capture(line);
-    convert = &capture[0];
-    // cout<<convert;
+// void tajima::split_getPos(vector<string> &line_Data, string line, string delim)
+// {
+//     vector<string>().swap(line_Data);
+//     char *convert;
+//     string capture(line);
+//     convert = &capture[0];
+//     // cout<<convert;
 
-    char deliminator[delim.length() + 1];
-    strcpy(deliminator, delim.c_str());
+//     char deliminator[delim.length() + 1];
+//     strcpy(deliminator, delim.c_str());
 
-    char *split_data;
-    split_data = strtok(convert, deliminator);
-    int count = 0;
+//     char *split_data;
+//     split_data = strtok(convert, deliminator);
+//     int count = 0;
 
-    while (split_data != NULL)
-    {
-        // cout<<split_data<<endl;
-        string char2string;
-        char2string.append(split_data);
-        // cout << char2string << endl;
-        line_Data.push_back(char2string);
-        if (count == 7)
-        {
-            break;
-        }
-        split_data = strtok(NULL, deliminator);
-        count++;
-    }
-}
+//     while (split_data != NULL)
+//     {
+//         // cout<<split_data<<endl;
+//         string char2string;
+//         char2string.append(split_data);
+//         // cout << char2string << endl;
+//         line_Data.push_back(char2string);
+//         if (count == 7)
+//         {
+//             break;
+//         }
+//         split_data = strtok(NULL, deliminator);
+//         count++;
+//     }
+// }
 
-long int tajima::combos_N(int count)
-{
-    long int combinations;
+// long int tajima::combos_N(int count)
+// {
+//     long int combinations;
 
-    combinations = fact_half(count) / 2;
+//     combinations = fact_half(count) / 2;
 
-    return combinations;
-}
+//     return combinations;
+// }
 
-long int tajima::fact_half(int count)
-{
-    long int tot = 1;
-    for (int i = count; i > count - 2; i--)
-    {
-        // cout << tot;
-        tot = tot * i;
-    }
-    return tot;
-}
+// long int tajima::fact_half(int count)
+// {
+//     long int tot = 1;
+//     for (int i = count; i > count - 2; i--)
+//     {
+//         // cout << tot;
+//         tot = tot * i;
+//     }
+//     return tot;
+// }
 
-vector<string> tajima::compound_interpolationSearch(vector<pair<string, string>> &folder_Index, int &start_Co, int &end_Co)
-{
-    vector<string> file_List;
+// vector<string> tajima::compound_interpolationSearch(vector<pair<string, string>> &folder_Index, int &start_Co, int &end_Co)
+// {
+//     vector<string> file_List;
 
-    vector<string> line_Data;
-    split(line_Data, folder_Index[0].first, "_");
-    int low_Value = stoi(line_Data[0]);
-    split(line_Data, folder_Index[folder_Index.size() - 1].first, "_");
-    int high_Value = stoi(line_Data[1]);
-    // cout << "first: " << low_Value << " last: " << high_Value << endl;
+//     vector<string> line_Data;
+//     split(line_Data, folder_Index[0].first, "_");
+//     int low_Value = stoi(line_Data[0]);
+//     split(line_Data, folder_Index[folder_Index.size() - 1].first, "_");
+//     int high_Value = stoi(line_Data[1]);
+//     // cout << "first: " << low_Value << " last: " << high_Value << endl;
 
-    int start = 0;
-    int end = folder_Index.size() - 1;
+//     int start = 0;
+//     int end = folder_Index.size() - 1;
 
-    while (start <= end && start_Co >= low_Value && start_Co <= high_Value)
-    {
-        vector<string> line_Data_get;
+//     while (start <= end && start_Co >= low_Value && start_Co <= high_Value)
+//     {
+//         vector<string> line_Data_get;
 
-        int pos = start + ((((double)(end - start) / (high_Value - low_Value)) * (start_Co - low_Value)));
-        // cout << pos << endl;
+//         int pos = start + ((((double)(end - start) / (high_Value - low_Value)) * (start_Co - low_Value)));
+//         // cout << pos << endl;
 
-        split(line_Data_get, folder_Index[pos].first, "_");
-        int low_Value_atpos = stoi(line_Data_get[0]);
-        int high_Value_atpos = stoi(line_Data_get[1]);
+//         split(line_Data_get, folder_Index[pos].first, "_");
+//         int low_Value_atpos = stoi(line_Data_get[0]);
+//         int high_Value_atpos = stoi(line_Data_get[1]);
 
-        if ((start_Co >= low_Value_atpos && start_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co >= high_Value_atpos))
-        {
-            // cout << low_Value_atpos << "_" << high_Value_atpos << endl;
-            // backward_Search(pos, backward_get, folder_Index, start_Co, end_Co);
+//         if ((start_Co >= low_Value_atpos && start_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co >= high_Value_atpos))
+//         {
+//             // cout << low_Value_atpos << "_" << high_Value_atpos << endl;
+//             // backward_Search(pos, backward_get, folder_Index, start_Co, end_Co);
 
-            // thread backward(&tajima::backward_Search, this, pos, ref(backward_get), ref(folder_Index), ref(start_Co), ref(end_Co));
-            // thread forward(&tajima::forward_Search, this, pos, ref(forward_get), ref(folder_Index), ref(start_Co), ref(end_Co));
+//             // thread backward(&tajima::backward_Search, this, pos, ref(backward_get), ref(folder_Index), ref(start_Co), ref(end_Co));
+//             // thread forward(&tajima::forward_Search, this, pos, ref(forward_get), ref(folder_Index), ref(start_Co), ref(end_Co));
 
-            // backward.join();
-            // forward.join();
+//             // backward.join();
+//             // forward.join();
 
-            vector<int> backward_get;
-            vector<int> forward_get;
+//             vector<int> backward_get;
+//             vector<int> forward_get;
 
-            future<vector<int>> backward_thread = async(&tajima::backward_Search, this, pos, folder_Index, start_Co, end_Co);
-            future<vector<int>> forward_thread = async(&tajima::forward_Search, this, pos, folder_Index, start_Co, end_Co);
+//             future<vector<int>> backward_thread = async(&tajima::backward_Search, this, pos, folder_Index, start_Co, end_Co);
+//             future<vector<int>> forward_thread = async(&tajima::forward_Search, this, pos, folder_Index, start_Co, end_Co);
 
-            backward_get = backward_thread.get();
-            forward_get = forward_thread.get();
+//             backward_get = backward_thread.get();
+//             forward_get = forward_thread.get();
 
-            for (auto positions : backward_get)
-            {
-                file_List.push_back(folder_Index[positions].second);
-            }
+//             for (auto positions : backward_get)
+//             {
+//                 file_List.push_back(folder_Index[positions].second);
+//             }
 
-            // cout << "caught :" << folder_Index[pos].second << endl;
-            file_List.push_back(folder_Index[pos].second);
+//             // cout << "caught :" << folder_Index[pos].second << endl;
+//             file_List.push_back(folder_Index[pos].second);
 
-            for (auto positions : forward_get)
-            {
-                file_List.push_back(folder_Index[positions].second);
-            }
+//             for (auto positions : forward_get)
+//             {
+//                 file_List.push_back(folder_Index[positions].second);
+//             }
 
-            break;
-        }
-        else if (start_Co > low_Value_atpos)
-        {
-            start = pos + 1;
-        }
-        else
-        {
-            end = pos - 1;
-        }
+//             break;
+//         }
+//         else if (start_Co > low_Value_atpos)
+//         {
+//             start = pos + 1;
+//         }
+//         else
+//         {
+//             end = pos - 1;
+//         }
 
-        split(line_Data_get, folder_Index[start].first, "_");
-        low_Value = stoi(line_Data_get[0]);
+//         split(line_Data_get, folder_Index[start].first, "_");
+//         low_Value = stoi(line_Data_get[0]);
 
-        split(line_Data_get, folder_Index[end].first, "_");
-        high_Value = stoi(line_Data_get[1]);
-    }
+//         split(line_Data_get, folder_Index[end].first, "_");
+//         high_Value = stoi(line_Data_get[1]);
+//     }
 
-    return file_List;
-}
+//     return file_List;
+// }
 
-vector<int> tajima::backward_Search(int pos, vector<pair<string, string>> folder_Index, int start_Co, int end_Co)
-{
-    vector<int> backward_get;
-    pos = pos - 1;
-    vector<string> line_Data_get;
-    while (pos >= 0)
-    {
-        split(line_Data_get, folder_Index[pos].first, "_");
-        int low_Value_atpos = stoi(line_Data_get[0]);
-        int high_Value_atpos = stoi(line_Data_get[1]);
+// vector<int> tajima::backward_Search(int pos, vector<pair<string, string>> folder_Index, int start_Co, int end_Co)
+// {
+//     vector<int> backward_get;
+//     pos = pos - 1;
+//     vector<string> line_Data_get;
+//     while (pos >= 0)
+//     {
+//         split(line_Data_get, folder_Index[pos].first, "_");
+//         int low_Value_atpos = stoi(line_Data_get[0]);
+//         int high_Value_atpos = stoi(line_Data_get[1]);
 
-        if (start_Co > high_Value_atpos)
-        {
-            break;
-        }
+//         if (start_Co > high_Value_atpos)
+//         {
+//             break;
+//         }
 
-        if ((start_Co >= low_Value_atpos && start_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co >= high_Value_atpos))
-        {
-            backward_get.push_back(pos);
-        }
+//         if ((start_Co >= low_Value_atpos && start_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co >= high_Value_atpos))
+//         {
+//             backward_get.push_back(pos);
+//         }
 
-        pos = pos - 1;
-    }
-    return backward_get;
-}
+//         pos = pos - 1;
+//     }
+//     return backward_get;
+// }
 
-vector<int> tajima::forward_Search(int pos, vector<pair<string, string>> folder_Index, int start_Co, int end_Co)
-{
-    vector<int> forward_get;
-    pos = pos + 1;
-    vector<string> line_Data_get;
-    while (pos < folder_Index.size())
-    {
-        split(line_Data_get, folder_Index[pos].first, "_");
-        int low_Value_atpos = stoi(line_Data_get[0]);
-        int high_Value_atpos = stoi(line_Data_get[1]);
+// vector<int> tajima::forward_Search(int pos, vector<pair<string, string>> folder_Index, int start_Co, int end_Co)
+// {
+//     vector<int> forward_get;
+//     pos = pos + 1;
+//     vector<string> line_Data_get;
+//     while (pos < folder_Index.size())
+//     {
+//         split(line_Data_get, folder_Index[pos].first, "_");
+//         int low_Value_atpos = stoi(line_Data_get[0]);
+//         int high_Value_atpos = stoi(line_Data_get[1]);
 
-        if (end_Co < low_Value_atpos)
-        {
-            break;
-        }
+//         if (end_Co < low_Value_atpos)
+//         {
+//             break;
+//         }
 
-        if ((start_Co >= low_Value_atpos && start_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co >= high_Value_atpos))
-        {
-            forward_get.push_back(pos);
-        }
+//         if ((start_Co >= low_Value_atpos && start_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co >= high_Value_atpos))
+//         {
+//             forward_get.push_back(pos);
+//         }
 
-        pos = pos + 1;
-    }
-    return forward_get;
-}
+//         pos = pos + 1;
+//     }
+//     return forward_get;
+// }
 
 __global__ void a_Calculation(int N, float *a1_CUDA, float *a2_CUDA)
 {
@@ -1230,171 +1230,171 @@ void tajima::calc_Pre(int &N_tot, float &a1, float &e1, float &e2)
     cout << endl;
 }
 
-int tajima::getN_Split(string file)
-{
-    fstream file_nCount;
-    file_nCount.open(file);
+// int tajima::getN_Split(string file)
+// {
+//     fstream file_nCount;
+//     file_nCount.open(file);
 
-    string header;
-    getline(file_nCount, header);
-    file_nCount.close();
+//     string header;
+//     getline(file_nCount, header);
+//     file_nCount.close();
 
-    vector<string> header_Columns;
-    split(header_Columns, header, "\t");
+//     vector<string> header_Columns;
+//     split(header_Columns, header, "\t");
 
-    int N = header_Columns.size() - 9;
-    // cout << N << endl;
-    return N;
-}
+//     int N = header_Columns.size() - 9;
+//     // cout << N << endl;
+//     return N;
+// }
 
-vector<pair<string, string>> tajima::index_Folder(string &country)
-{
-    cout << "Initiating indexing folder\t: " << country << endl;
-    string country_Only = country.substr(country.find_last_of("/") + 1, country.length());
+// vector<pair<string, string>> tajima::index_Folder(string &country)
+// {
+//     cout << "Initiating indexing folder\t: " << country << endl;
+//     string country_Only = country.substr(country.find_last_of("/") + 1, country.length());
 
-    vector<string> index_pass_1;
-    vector<pair<string, string>> file_coordinate;
+//     vector<string> index_pass_1;
+//     vector<pair<string, string>> file_coordinate;
 
-    for (const auto &entry : filesystem::directory_iterator(country))
-    {
-        // cout << entry.path() << endl;
-        string coordinates = entry.path().string();
-        int trim_start = coordinates.find(country_Only + "_") + country_Only.length() + 1;
-        int trim_end = coordinates.find_last_of(".") - trim_start;
-        string trim = coordinates.substr(trim_start, trim_end);
-        index_pass_1.push_back(trim);
-        file_coordinate.push_back(make_pair(trim, coordinates));
-    }
+//     for (const auto &entry : filesystem::directory_iterator(country))
+//     {
+//         // cout << entry.path() << endl;
+//         string coordinates = entry.path().string();
+//         int trim_start = coordinates.find(country_Only + "_") + country_Only.length() + 1;
+//         int trim_end = coordinates.find_last_of(".") - trim_start;
+//         string trim = coordinates.substr(trim_start, trim_end);
+//         index_pass_1.push_back(trim);
+//         file_coordinate.push_back(make_pair(trim, coordinates));
+//     }
 
-    vector<pair<int, int>> start_stop;
-    vector<int> starts;
+//     vector<pair<int, int>> start_stop;
+//     vector<int> starts;
 
-    for (string file : index_pass_1)
-    {
-        vector<string> file_start_end;
-        split(file_start_end, file, "_");
-        starts.push_back(stoi(file_start_end[0]));
-        start_stop.push_back(make_pair(stoi(file_start_end[0]), stoi(file_start_end[1])));
-    }
+//     for (string file : index_pass_1)
+//     {
+//         vector<string> file_start_end;
+//         split(file_start_end, file, "_");
+//         starts.push_back(stoi(file_start_end[0]));
+//         start_stop.push_back(make_pair(stoi(file_start_end[0]), stoi(file_start_end[1])));
+//     }
 
-    sort(starts.begin(), starts.end());
+//     sort(starts.begin(), starts.end());
 
-    vector<pair<string, string>> sorted_Index;
+//     vector<pair<string, string>> sorted_Index;
 
-    for (int nums : starts)
-    {
-        // cout << nums << endl;
-        for (auto index_check : start_stop)
-        {
-            if (index_check.first == nums)
-            {
-                string sort_Line = to_string(index_check.first) + "_" + to_string(index_check.second);
-                for (auto coordinates : file_coordinate)
-                {
-                    if (coordinates.first == sort_Line)
-                    {
-                        sorted_Index.push_back(make_pair(sort_Line, coordinates.second));
-                        break;
-                    }
-                }
-                break;
-            }
-        }
-    }
+//     for (int nums : starts)
+//     {
+//         // cout << nums << endl;
+//         for (auto index_check : start_stop)
+//         {
+//             if (index_check.first == nums)
+//             {
+//                 string sort_Line = to_string(index_check.first) + "_" + to_string(index_check.second);
+//                 for (auto coordinates : file_coordinate)
+//                 {
+//                     if (coordinates.first == sort_Line)
+//                     {
+//                         sorted_Index.push_back(make_pair(sort_Line, coordinates.second));
+//                         break;
+//                     }
+//                 }
+//                 break;
+//             }
+//         }
+//     }
 
-    return sorted_Index;
-}
+//     return sorted_Index;
+// }
 
-vector<string> tajima::get_Countries()
-{
-    vector<string> folders;
-    for (auto &check : std::filesystem::recursive_directory_iterator(this->input_Folder))
-    {
-        if (check.is_directory())
-        {
-            folders.push_back(check.path().string());
-        }
-    }
-    return folders;
-}
+// vector<string> tajima::get_Countries()
+// {
+//     vector<string> folders;
+//     for (auto &check : std::filesystem::recursive_directory_iterator(this->input_Folder))
+//     {
+//         if (check.is_directory())
+//         {
+//             folders.push_back(check.path().string());
+//         }
+//     }
+//     return folders;
+// }
 
-void tajima::split(vector<string> &line_Data, string line, string delim)
-{
-    vector<string>().swap(line_Data);
-    char *convert;
-    string capture(line);
-    convert = &capture[0];
-    // cout<<convert;
+// void tajima::split(vector<string> &line_Data, string line, string delim)
+// {
+//     vector<string>().swap(line_Data);
+//     char *convert;
+//     string capture(line);
+//     convert = &capture[0];
+//     // cout<<convert;
 
-    char deliminator[delim.length() + 1];
-    strcpy(deliminator, delim.c_str());
+//     char deliminator[delim.length() + 1];
+//     strcpy(deliminator, delim.c_str());
 
-    char *split_data;
-    split_data = strtok(convert, deliminator);
+//     char *split_data;
+//     split_data = strtok(convert, deliminator);
 
-    while (split_data != NULL)
-    {
-        // cout<<split_data<<endl;
-        string char2string;
-        char2string.append(split_data);
-        // cout << char2string << endl;
-        line_Data.push_back(char2string);
-        split_data = strtok(NULL, deliminator);
-    }
+//     while (split_data != NULL)
+//     {
+//         // cout<<split_data<<endl;
+//         string char2string;
+//         char2string.append(split_data);
+//         // cout << char2string << endl;
+//         line_Data.push_back(char2string);
+//         split_data = strtok(NULL, deliminator);
+//     }
 
-    // delete convert;
-    // delete split_data;
-}
+//     // delete convert;
+//     // delete split_data;
+// }
 
-void tajima::split_Convert(int *line_temp, string line, string delim)
-{
-    char *convert;
-    string capture(line);
-    convert = &capture[0];
-    // cout<<convert;
+// void tajima::split_Convert(int *line_temp, string line, string delim)
+// {
+//     char *convert;
+//     string capture(line);
+//     convert = &capture[0];
+//     // cout<<convert;
 
-    char deliminator[delim.length() + 1];
-    strcpy(deliminator, delim.c_str());
+//     char deliminator[delim.length() + 1];
+//     strcpy(deliminator, delim.c_str());
 
-    char *split_data;
-    split_data = strtok(convert, deliminator);
-    int count = 0;
+//     char *split_data;
+//     split_data = strtok(convert, deliminator);
+//     int count = 0;
 
-    while (split_data != NULL)
-    {
-        // cout<<split_data<<endl;
-        string char2string;
-        char2string.append(split_data);
-        // cout << char2string << "\t";
-        // cout << char2string << endl;
-        // line_Data.push_back(char2string);
-        if (count >= 9)
-        {
-            // cout << "count : " << char2string << endl;
-            if (char2string.substr(0, 3) == "0|0")
-            {
-                // cout << "0|0" << count - 9 << endl;
-                line_temp[count - 9] = 0;
-            }
-            else if (char2string.substr(0, 3) == "0|1")
-            {
-                // cout << "0|1" << count - 9 << endl;
-                line_temp[count - 9] = 1;
-            }
-            else if (char2string.substr(0, 3) == "1|0")
-            {
-                line_temp[count - 9] = 2;
-            }
-            else if (char2string.substr(0, 3) == "1|1")
-            {
-                line_temp[count - 9] = 3;
-            }
-            // cout << "count : " << count - 9 << "\t" << line_temp[count - 9] << endl;
-        }
-        count++;
-        split_data = strtok(NULL, deliminator);
-    }
-    // cout << endl;
-    // delete convert;
-    // delete split_data;
-}
+//     while (split_data != NULL)
+//     {
+//         // cout<<split_data<<endl;
+//         string char2string;
+//         char2string.append(split_data);
+//         // cout << char2string << "\t";
+//         // cout << char2string << endl;
+//         // line_Data.push_back(char2string);
+//         if (count >= 9)
+//         {
+//             // cout << "count : " << char2string << endl;
+//             if (char2string.substr(0, 3) == "0|0")
+//             {
+//                 // cout << "0|0" << count - 9 << endl;
+//                 line_temp[count - 9] = 0;
+//             }
+//             else if (char2string.substr(0, 3) == "0|1")
+//             {
+//                 // cout << "0|1" << count - 9 << endl;
+//                 line_temp[count - 9] = 1;
+//             }
+//             else if (char2string.substr(0, 3) == "1|0")
+//             {
+//                 line_temp[count - 9] = 2;
+//             }
+//             else if (char2string.substr(0, 3) == "1|1")
+//             {
+//                 line_temp[count - 9] = 3;
+//             }
+//             // cout << "count : " << count - 9 << "\t" << line_temp[count - 9] << endl;
+//         }
+//         count++;
+//         split_data = strtok(NULL, deliminator);
+//     }
+//     // cout << endl;
+//     // delete convert;
+//     // delete split_data;
+// }

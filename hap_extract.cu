@@ -503,7 +503,7 @@ __global__ void cuda_hap_Forge_with_alleles(int total_Segs, char *sites, int *in
         int site_End = index[tid + 1];
 
         /**
-         * @param i is used to track the navigation through the SNP information. This is our skater.
+         * @param i is used to track the navigation through the SNP information. This is our skater, an increment variable.
          **/
 
         int i = site_Start;
@@ -680,6 +680,8 @@ __global__ void cuda_sequence_Generation(int sequence_Size, int num_of_Segs, int
 
         /**
          * If the allele is found in the search space we take the value from the VCF's SNP information.
+         * 0 = REFERENCE ALLELE
+         * 1 = ALTERNATE ALLELE
          * Else we take the value from the reference sequence.
          **/
         if (found == 'Y')
