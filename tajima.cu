@@ -4,6 +4,11 @@
 
 tajima::tajima(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
+    /**
+     * * Constructor Function
+     * NORMAL - GENE MODE constructor
+     **/
+
     cout << "Initiating CUDA powered Tajima's D calculator" << endl
          << endl;
 
@@ -37,6 +42,11 @@ tajima::tajima(string gene_List, string input_Folder, string ouput_Path, int cud
 
 tajima::tajima(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run)
 {
+    /**
+     * * Constructor Function
+     * PROMETHEUS - GENE MODE constructor
+     **/
+
     // PROMETHEUS Constructor gene file
     cout << "Initiating CUDA powered Tajima's D calculator on PROMETHEUS" << endl
          << endl;
@@ -71,6 +81,9 @@ tajima::tajima(string gene_List, string input_Folder, string ouput_Path, int cud
     this->prometheus_Activate = "YES";
     this->CPU_cores = CPU_cores;
     this->SNPs_per_Run = SNPs_per_Run;
+    /**
+     * Multi_read is converted to uppercase to create uniformity prevent any user error.
+     **/
     transform(Multi_read.begin(), Multi_read.end(), Multi_read.begin(), ::toupper);
     this->Multi_read = Multi_read;
     this->number_of_genes = number_of_genes;
@@ -78,6 +91,11 @@ tajima::tajima(string gene_List, string input_Folder, string ouput_Path, int cud
 
 tajima::tajima(string calc_Mode, int window_Size, int step_Size, string input_Folder, string ouput_Path, int cuda_ID, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run)
 {
+    /**
+     * * Constructor Function
+     * PROMETHEUS - WINDOW MODE constructor
+     **/
+
     // PROMETHEUS WINDOW MODE CONSTRUCTOR
 
     cout << "Initiating CUDA powered Tajima's D calculator on PROMETHEUS" << endl
@@ -87,11 +105,18 @@ tajima::tajima(string calc_Mode, int window_Size, int step_Size, string input_Fo
     this->window_Size = window_Size;
     this->step_Size = step_Size;
 
+    /**
+     * gene_List and intermediate_Path variables are kept blank.
+     * Because in WINDOW mode there is no requirement for a gene file and the resume function works off the indexed VCF files.
+     **/
     set_Values("", input_Folder, ouput_Path, cuda_ID, "", ploidy);
 
     this->prometheus_Activate = "YES";
     this->CPU_cores = CPU_cores;
     this->SNPs_per_Run = SNPs_per_Run;
+    /**
+     * Multi_read is converted to uppercase to create uniformity prevent any user error.
+     **/
     transform(Multi_read.begin(), Multi_read.end(), Multi_read.begin(), ::toupper);
     this->Multi_read = Multi_read;
     this->number_of_genes = number_of_genes;
@@ -99,6 +124,11 @@ tajima::tajima(string calc_Mode, int window_Size, int step_Size, string input_Fo
 
 tajima::tajima(string calc_Mode, int window_Size, int step_Size, string input_Folder, string ouput_Path, int cuda_ID, int ploidy)
 {
+    /**
+     * * Constructor Function
+     * NORMAL - WINDOW MODE constructor
+     **/
+
     // NORMAL WINDOW CONSTRUCTOR
 
     cout << "Initiating CUDA powered Tajima's D calculator" << endl
@@ -109,11 +139,22 @@ tajima::tajima(string calc_Mode, int window_Size, int step_Size, string input_Fo
     this->window_Size = window_Size;
     this->step_Size = step_Size;
 
+    /**
+     * gene_List and intermediate_Path variables are kept blank.
+     * Because in WINDOW mode there is no requirement for a gene file and the resume function works off the indexed VCF files.
+     **/
     set_Values("", input_Folder, ouput_Path, cuda_ID, "", ploidy);
 }
 
 void tajima::set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
+    /**
+     * This function is used in conjunction with the constructor to set the common private variables.
+     * Notifies the user if it is WINDOW mode or GENE (FILE) mode.
+     * If WINDOW user is also notified if it is sliding window or normal step wise window mode.
+     * Here the first call to the selected CUDA device occurs.
+     **/
+
     if (this->calc_Mode == "WINDOW")
     {
         cout << "Calculation mode: WINDOW" << endl;
@@ -161,7 +202,20 @@ void tajima::set_Values(string gene_List, string input_Folder, string ouput_Path
 
 void tajima::ingress()
 {
+    /**
+     * Execution function.
+     **/
+
+    /**
+     * Call the "functions" class. Bespoke functions commonly used by CATE.
+     **/
     functions function = functions();
+
+    /**
+     * CATE indexed VCF folder is analyzed to extract the available super populations.
+     * @param countries vector captures the available super populations.
+     * Each population is processed separately.
+     **/
     vector<string> countries = function.get_Countries(this->input_Folder);
     cout << countries.size() << " population(s) were found: ";
     for (int count = 0; count < countries.size(); count++)
@@ -177,8 +231,15 @@ void tajima::ingress()
          << endl;
     for (string country : countries)
     {
+        /**
+         * To reiterate each population is processed separately.
+         **/
         cout << "Processing country\t: " << country.substr(country.find_last_of("/") + 1, country.length()) << endl
              << endl;
+
+        /**
+         * @param folder_Index vector captures the sorted and indexed VCF file list from the query population folder.
+         **/
         // first: start_stop second: filename
         vector<pair<string, string>> folder_Index = function.index_Folder(country);
 
@@ -188,75 +249,165 @@ void tajima::ingress()
         // }
 
         cout << "Completed indexing folder\t: " << country << endl;
-        string check_AF_country = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF";
+        // string check_AF_country = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF";
         cout << endl;
 
+        /**
+         * The first VCF file is read to obtain information of the sample size.
+         * @param samples captures the sample size of the population under study.
+         **/
         int samples = function.getN_Split(folder_Index[0].second);
         cout << "Number of samples in " << country.substr(country.find_last_of("/") + 1, country.length()) << " population\t: " << samples << endl;
+
+        /**
+         * @param N defines number of total sequences being present per SNP.
+         **/
         int N = samples * ploidy;
         cout << "Number of sequences in " << country.substr(country.find_last_of("/") + 1, country.length()) << " population [ " << samples << " x " << ploidy << " ] (N)\t: " << N << endl;
+
+        /**
+         * @param combinations defines number of total pairwise combinations being present.
+         **/
         long int combinations = function.combos_N(N);
         cout << "Pairwise combinations\t: " << combinations << endl;
         cout << endl;
 
+        /**
+         * Pre-requisite values needed for determination of Tajima's D.
+         * @param a1 is a weight estimator.
+         * @param e1 is a weight estimator.
+         * @param e2 is a weight estimator.
+         * * reference: https://ocw.mit.edu/courses/hst-508-quantitative-genomics-fall-2005/0900020a633e85338e9510495c2e01a6_tajimad1.pdf
+         **/
         float a1, e1, e2;
         calc_Pre(N, a1, e1, e2);
+
+        /**
+         * @param test is used by Prometheus, to tell it which test is being processed.
+         * * T  = Tajima
+         * FU   = Fu and Li
+         * FA   = Fay and Wu
+         * N    = All 3 Neutrality tests
+         **/
         string test = "T";
 
+        /**
+         * Ensures which mode is being run. GENE (FILE) mode or WINDOW mode.
+         **/
         if (this->calc_Mode != "FILE")
         {
+            /**
+             * * WINDOW mode configuration:
+             **/
+
+            /**
+             * Output file is created for the population in the output folder for WINDOW mode.
+             * @param output_File stores the output file's location.
+             * The file name is a combination of the the country, window size and step size. Sliding window files will have a step size of 0.
+             **/
             string output_File = ouput_Path + "/" +
                                  country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
                                  to_string(window_Size) + "_" + to_string(step_Size) +
                                  ".td";
 
+            /**
+             * Ensures if PROMETHEUS is being activated.
+             **/
             if (prometheus_Activate == "YES")
             {
+                /**
+                 * If Prometheus is being ACTIVATED then it is initialised accordingly.
+                 **/
                 prometheus pro_Tajima_Window = prometheus(output_File, window_Size, step_Size, folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, combinations, a1, e1, e2, N, CPU_cores, SNPs_per_Run, number_of_genes);
+                /**
+                 * Ensures if it is NORMAL window or SLIDING window mode.
+                 * If step_Size is = 0 then it is sliding window mode.
+                 **/
                 if (step_Size != 0)
                 {
+                    /**
+                     * Initiates processing of Tajima on PROMETHEUS on step wise window mode.
+                     **/
                     pro_Tajima_Window.process_Window(test);
                 }
                 else
                 {
+                    /**
+                     * Initiates processing of Tajima on PROMETHEUS on sliding window mode.
+                     **/
                     pro_Tajima_Window.process_C_sliding_Window(test);
                 }
             }
             else
             {
+                /**
+                 * If Prometheus is NOT being activated the window calls be done accordingly.
+                 **/
                 // Prometheus OFF Window Mode
                 if (step_Size != 0)
                 {
+                    /**
+                     * Initiates processing of Tajima on step wise window mode.
+                     **/
                     window(output_File, a1, e1, e2, N, combinations, folder_Index);
                 }
                 else
                 {
+                    /**
+                     * Initiates processing of Tajima on sliding window mode.
+                     **/
                     window_Sliding(output_File, a1, e1, e2, N, combinations, folder_Index);
                 }
             }
         }
         else
         {
+            /**
+             * * GENE (FILE) mode configuration:
+             **/
+
+            /**
+             * Output file is created for the population in the output folder for FILE mode.
+             * @param output_File stores the output file's location.
+             * The file name is a combination of the the country, and gene file name.
+             **/
             string output_File = ouput_Path + "/" +
                                  country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
                                  filesystem::path(gene_List).stem().string() +
                                  ".td";
+            /**
+             * Log file created in the intermediate folder for the population.
+             * @param intermediate_File stores the log file's location.
+             * ! This helps with the resume function. Automatically resumes from the last completely processed gene in the event of a program crash.
+             **/
             string intermediate_File = intermediate_Path + "/" +
                                        country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
                                        filesystem::path(gene_List).stem().string() +
                                        ".log_td";
 
+            /**
+             * Initiate the reading of the gene file.
+             **/
             fstream gene_File;
             gene_File.open(gene_List, ios::in);
             cout << "Processing gene list:" << endl;
+
             cout << endl;
+
             cout << "Writing to file\t: " << output_File << endl;
             cout << endl;
 
             if (gene_File.is_open())
             {
+                /**
+                 * @param gene_Combo used to capture and extract info of each gene combination.
+                 **/
                 string gene_Combo;
 
+                /**
+                 * If the output file is absent this run will be considered as a brand new run of this query and,
+                 * the output file and the intermediate log file will be created.
+                 **/
                 if (filesystem::exists(output_File) == 0)
                 {
                     function.createFile(output_File, "Gene_name\tCoordinates\tPi\tS\tTajimas_D");
@@ -264,8 +415,18 @@ void tajima::ingress()
                 }
                 else
                 {
+                    /**
+                     * If the intermediate log file present then the resume process will initiated.
+                     * This is a unintelligent resume. Essentially it matches the each read line written with the lines read from the gene file.
+                     * The break will occur as soon as their is a mismatch.
+                     * To counter any errors it is advised to have a new gene file name or a new intermediate folder per new run.
+                     **/
                     fstream intermediate;
                     intermediate.open(intermediate_File, ios::in);
+
+                    /**
+                     * @param get_finished comparison variable. Used o compare the intermediate file data with that of the gene file.
+                     **/
                     string get_finished;
                     while (getline(intermediate, get_finished))
                     {
@@ -284,11 +445,15 @@ void tajima::ingress()
                 output.open(output_File, ios::app);
                 intermediate.open(intermediate_File, ios::app);
 
+                /**
+                 * Ensures if PROMETHEUS is being activated.
+                 **/
                 // ADD Prometheus HERE
                 if (prometheus_Activate == "YES")
                 {
                     cout << "Initializing Prometheus:" << endl
                          << endl;
+
                     // cout << "Processing on " << this->CPU_cores << " CPU cores" << endl;
                     // cout << "Processing " << this->number_of_genes << " genes at a time" << endl;
                     // cout << "Processing " << this->SNPs_per_Run << " SNPs at a time" << endl;
@@ -302,23 +467,40 @@ void tajima::ingress()
                     // }
                     // cout << endl;
 
+                    /**
+                     * If Prometheus is being ACTIVATED then it is initialised accordingly.
+                     **/
                     prometheus pro_Tajima = prometheus(folder_Index, Multi_read, this->tot_Blocks, this->tot_ThreadsperBlock, combinations, a1, e1, e2, N, CPU_cores, SNPs_per_Run, number_of_genes);
 
+                    /**
+                     * @param gene_Collect vector is used to collect the batch of query regions to be processed by Prometheus at once.
+                     **/
                     vector<string> gene_Collect;
 
                     while (getline(gene_File, gene_Combo))
                     {
                         gene_Collect.push_back(gene_Combo);
+                        /**
+                         * Ensures that the number of collected query regions match the user set limit to be processed at a time.
+                         **/
                         if (gene_Collect.size() == number_of_genes)
                         {
-                            cout << "Prometheus batch intialized" << endl;
+                            cout << "Prometheus batch initalized" << endl;
                             cout << "From: " << gene_Collect[0] << endl;
                             cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
                                  << endl;
+
+                            /**
+                             * LAUNCH Prometheus to process the collected query batch.
+                             * @param write_Lines vector collects the lines that should be written to the output file.
+                             */
                             // launch prometheus
                             vector<string> write_Lines = pro_Tajima.collection_Engine(gene_Collect, test);
                             // print
                             cout << "System is writing Tajima's D results" << endl;
+                            /**
+                             * Outputs are written and logs are made.
+                             **/
                             for (size_t i = 0; i < write_Lines.size(); i++)
                             {
                                 output << write_Lines[i] << "\n";
@@ -337,7 +519,7 @@ void tajima::ingress()
                     {
                         // RUN PROMETHEUS for remaining
                         // launch prometheus
-                        cout << "Prometheus batch intialized" << endl;
+                        cout << "Prometheus batch initalized" << endl;
                         cout << "From: " << gene_Collect[0] << endl;
                         cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
                              << endl;

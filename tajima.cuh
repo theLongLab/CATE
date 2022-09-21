@@ -109,7 +109,7 @@ public:
      **/
     tajima(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy);
     /**
-     *NORMAL - WINDOW MODE constructor
+     * NORMAL - WINDOW MODE constructor
      **/
     tajima(string calc_Mode, int window_Size, int step_Size, string input_Folder, string ouput_Path, int cuda_ID, int ploidy);
     /**
