@@ -815,7 +815,6 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
     cudaMallocManaged(&cuda_full_Char, (Seg_sites.size() + 1) * sizeof(char));
     int *cuda_site_Index;
     cudaMallocManaged(&cuda_site_Index, (num_segregrating_Sites + 1) * sizeof(int));
-
     /**
      * Transfer of data to the GPU.
      **/

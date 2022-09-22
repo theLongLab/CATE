@@ -514,9 +514,14 @@ void tajima::ingress()
                             cout << endl;
                         }
                     }
-
+                    /**
+                     * Ensures that there are no left over collected regions after finishing reading the gene file.
+                     **/
                     if (gene_Collect.size() != 0)
                     {
+                        /**
+                         * If so then Prometheus is executed to process these regions.
+                         **/
                         // RUN PROMETHEUS for remaining
                         // launch prometheus
                         cout << "Prometheus batch initalized" << endl;
@@ -524,9 +529,17 @@ void tajima::ingress()
                         cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
                              << endl;
 
+                        /**
+                         * LAUNCH Prometheus to process the collected query batch.
+                         * @param write_Lines vector collects the lines that should be written to the output file.
+                         */
                         vector<string> write_Lines = pro_Tajima.collection_Engine(gene_Collect, test);
                         // print
+
                         cout << "System is writing Tajima's D results" << endl;
+                        /**
+                         * Outputs are written and logs are made.
+                         **/
                         for (size_t i = 0; i < write_Lines.size(); i++)
                         {
                             if (write_Lines[i] != "")
@@ -547,24 +560,57 @@ void tajima::ingress()
                 }
                 else
                 {
+                    /**
+                     * If Prometheus is NOT activated each query gene region in the gene file is handled individually.
+                     * This will be suitable for low powered systems and normal users.
+                     * Because there will be no excessive use of resources nor any requirement to have extensive knowledge of your system.
+                     **/
                     while (getline(gene_File, gene_Combo))
                     {
 
                         // cout << gene_Combo << endl;
+                        /**
+                         * @param split_Data vector captures split function's outputs on the genes information.
+                         **/
                         vector<string> split_Data;
                         function.split(split_Data, gene_Combo, '\t');
+
+                        /**
+                         * @param gene_Name captures the gene's name.
+                         **/
                         string gene_Name = split_Data[0];
                         cout << "Gene name\t: " << gene_Name << endl;
+
+                        /**
+                         * @param coordinates vector captures split function's outputs on gene coordinates.
+                         * [0] = chromosome
+                         * [1] = start position
+                         * [2] = end position
+                         **/
                         vector<string> coordinates;
                         function.split(coordinates, split_Data[1], ':');
+
+                        /**
+                         * @param start_Co captures query gene's start position as an integer.
+                         **/
                         int start_Co = stoi(coordinates[1]);
+                        /**
+                         * @param end_Co captures query gene's end position as an integer.
+                         **/
                         int end_Co = stoi(coordinates[2]);
                         cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
 
+                        /**
+                         * @param tot_pairwise_Differences Tajima's D also requires the tot_pairwise_Differences in the query region to determine the average number of pairwise differences in the region.
+                         * @param segregating_Sites Tajima's D requires the total number of segregating sites/ SNPS in the query region.
+                         **/
                         float tot_pairwise_Differences = 0;
                         // int tot_pairwise_Differences_TEST = 0;
                         int segregating_Sites = 0;
 
+                        /**
+                         * @param file_List vector is used to store the list of VCF files (found via CATES CIS algorithm) that satisfy the query region.
+                         **/
                         vector<string> file_List;
                         cout << endl;
                         cout << "System is retrieving file(s)" << endl;
@@ -574,12 +620,23 @@ void tajima::ingress()
                         }
                         else
                         {
+                            /**
+                             * IF only one file is present in the index folder that file will be used as is.
+                             **/
                             file_List.push_back(folder_Index[0].second);
                         }
                         cout << "System has retrieved all file(s)" << endl;
 
-                        cout << "System is collecting segregrating site(s)" << endl;
+                        cout << "System is collecting segregating site(s)" << endl;
+                        /**
+                         * The SNPs (Segregating sites) that fall within the query region are collected from the VCF's.
+                         * @param collect_Segregrating_sites vector stores the collected SNPs.
+                         **/
                         vector<string> collect_Segregrating_sites;
+
+                        /**
+                         * Once the required files are found they are read sequentially to get the required SNP data for processing.
+                         **/
                         for (string files : file_List)
                         {
                             // cout << files << endl;
@@ -588,15 +645,28 @@ void tajima::ingress()
                             if (file.is_open())
                             {
                                 string line;
+                                /**
+                                 * The first line of each VCF is skipped as it is the header line.
+                                 **/
                                 getline(file, line); // skip first header line
                                 while (getline(file, line))
                                 {
+                                    /**
+                                     * @param positions vector is used to capture the SNP data upto the position column (Column 2 (non zero count)).
+                                     **/
                                     vector<string> positions;
                                     function.split_getPos_ONLY(positions, line, '\t');
                                     int pos = stoi(positions[1]);
 
+                                    /**
+                                     * Ensures that the query SNP's position satisfies the query region's range.
+                                     **/
                                     if (pos >= start_Co && pos <= end_Co)
                                     {
+                                        /**
+                                         * If the SNP is between the range of the query region, it is collected.
+                                         * Information from the SNP is extracted via the GPU.
+                                         **/
                                         collect_Segregrating_sites.push_back(line);
                                         //     //cout << pos << endl;
                                         //     string check_0 = country.substr(country.find_last_of("/") + 1, country.length()) + "_AF=0";
@@ -642,6 +712,10 @@ void tajima::ingress()
                                     }
                                     else if (pos > end_Co)
                                     {
+                                        /**
+                                         * If the read files query SNP exceeds the query regions range then the read loop is broken.
+                                         * This is because VCF's by nature, are sorted by position.
+                                         **/
                                         break;
                                     }
                                 }
@@ -649,15 +723,27 @@ void tajima::ingress()
                             }
                         }
 
+                        /**
+                         * CALLs the function to calculate the actual segregating sites in the region where (MAF != 0) and the total pairwise differences.
+                         **/
                         function.process_Seg_sites_tajima(collect_Segregrating_sites, N, segregating_Sites, tot_pairwise_Differences, this->tot_Blocks, this->tot_ThreadsperBlock);
 
                         cout << endl;
                         // cout << "totDif " << tot_pairwise_Differences << endl;
+
+                        /**
+                         * @param pi is used to store the average pairwise polymorphisms
+                         * @param D is used to store the Tajima's D value for the query region.
+                         **/
                         float pi = 0;
                         // float pi_Test = 0;
                         float D = 0;
                         string Tajima_D;
                         cout << "Total segregating sites (S)\t: " << segregating_Sites << endl;
+
+                        /**
+                         * Ensure that there are segregating sites in the query region.
+                         **/
                         if (segregating_Sites != 0)
                         {
                             // pi_Test = (float)tot_pairwise_Differences_TEST / combinations;
@@ -702,31 +788,72 @@ void tajima::ingress()
 
 void tajima::window_Sliding(string output_File, float a1, float e1, float e2, int N, long int combinations, vector<pair<string, string>> &folder_Index)
 {
+    /**
+     * NORMAL MODE SLIDING WINDOW FUNCTION
+     **/
+
+    /**
+     * Call the "functions" class. Bespoke functions commonly used by CATE.
+     **/
     functions function = functions();
 
     cout << "Writing to file\t: " << output_File << endl;
     cout << endl;
 
+    /**
+     * WINDOW functions have their own bespoke resume function that does not need an intermediate log file.
+     * @param file_Count_Start is used to keep track of the files that have already been processed.
+     * @param line_Num is used to keep track of the number of lines in that file that have already been processed.
+     * ! This helps with the resume function. Automatically resumes from the last completely processed gene in the event of a program crash.
+     **/
     int file_Count_Start = 0;
     int line_Num = 0;
 
+    /**
+     * If the output file is absent this run will be considered as a brand new run of this query and,
+     * the output file and the intermediate log file will be created.
+     **/
     if (filesystem::exists(output_File) == 0)
     {
+        /**
+         * Window outputs have NO gene name column.
+         **/
         function.createFile(output_File, "Coordinates\tPi\tS\tTajimas_D");
     }
     else
     {
+        /**
+         * If the output file is already present then the resume process will initiated.
+         * This is a unintelligent resume. Essentially it matches the each read line written with the lines read from the gene file.
+         * The break will occur as soon as their is a mismatch.
+         * To counter any errors it is advised to have a new gene file name or a new intermediate folder per new run.
+         * @param found acts as a boolean variable. found = 0 if the lines need to be skipped and will equal 1 when the resume position is found.
+         **/
         int found = 0;
 
+        /**
+         * Open the output file to be begin finding the resume point.
+         **/
         fstream output_Check;
         output_Check.open(output_File, ios::in);
         if (output_Check.is_open())
         {
+            /**
+             * @param line_Check is used to get the line from the output file to be compared.
+             * First line is skipped cause it is a header line containing column names.
+             **/
             string line_Check;
             getline(output_Check, line_Check); // skip first header line
 
+            /**
+             * We go through the files in the folder hierarchy one by one till we find the resume point.
+             **/
             for (int file_Count = 0; file_Count < folder_Index.size(); file_Count++)
             {
+                /**
+                 * @param file_Path gets the path of the query file being checked.
+                 * @param line_Current gets the line number currently being checked.
+                 **/
                 string file_Path = folder_Index[file_Count].second;
                 fstream file;
                 file.open(file_Path, ios::in);
@@ -736,10 +863,17 @@ void tajima::window_Sliding(string output_File, float a1, float e1, float e2, in
                 if (file.is_open())
                 {
                     string line;
+                    /**
+                     * The first line of each VCF is skipped as it is the header line.
+                     **/
                     getline(file, line); // skip first header line
                     while (getline(file, line))
                     {
                         line_Current++;
+                        /**
+                         * Checks if the line being queried is a valid seg site.
+                         * If so it is checked if it has been already processed.
+                         **/
                         int VALID = function.get_Valid(line);
                         if (VALID != -1)
                         {
@@ -750,8 +884,16 @@ void tajima::window_Sliding(string output_File, float a1, float e1, float e2, in
                             function.split_getPos_ONLY(positions, line, '\t');
                             string pos = positions[1] + ":" + to_string((stoi(positions[1]) + window_Size));
 
+                            /**
+                             * Ensures the query line does not match that of the output
+                             **/
                             if (pos != trim)
                             {
+                                /**
+                                 * If they do not match,
+                                 * found is set to 1 indicating the resume position has been found and,
+                                 * the loop is broken.
+                                 **/
                                 found = 1;
                                 file_Count_Start = file_Count;
                                 line_Num = line_Current;
@@ -761,6 +903,9 @@ void tajima::window_Sliding(string output_File, float a1, float e1, float e2, in
                     }
                     file.close();
                 }
+                /**
+                 * If found is 1 that means the resume location has been found and the loop is broken.
+                 **/
                 if (found == 1)
                 {
                     break;
@@ -773,10 +918,16 @@ void tajima::window_Sliding(string output_File, float a1, float e1, float e2, in
     fstream output;
     output.open(output_File, ios::app);
 
+    /**
+     * @param line_Current is used to skip over the lines that have already been processed.
+     **/
     int line_Current = 0;
 
     for (int file_Count = file_Count_Start; file_Count < folder_Index.size(); file_Count++)
     {
+        /**
+         * @param file_Path gets the path of the file being processed.
+         **/
         string file_Path = folder_Index[file_Count].second;
         fstream file_Main;
         file_Main.open(file_Path, ios::in);
@@ -784,28 +935,50 @@ void tajima::window_Sliding(string output_File, float a1, float e1, float e2, in
         if (file_Main.is_open())
         {
             string line_Main;
+            /**
+             * The first line of each VCF is skipped as it is the header line.
+             **/
             getline(file_Main, line_Main); // skip first header line
             while (getline(file_Main, line_Main))
             {
+                /**
+                 * Skips over lines that have already been processed.
+                 **/
                 if (line_Current < line_Num)
                 {
                     line_Current++;
                 }
                 else
                 {
+                    /**
+                     * Checks if the line being queried is a valid seg site.
+                     * If so it is processed.
+                     * @param VALID captures the position of the query site if it is valid, else it returns -1.
+                     **/
                     // check VALID
                     int VALID = function.get_Valid(line_Main);
                     // cout << line_Main << endl;
                     if (VALID != -1)
                     {
+                        /**
+                         * @param start_Co captures the start position as an integer.
+                         * @param end_Co captures the end position as an integer.
+                         **/
                         int start_Co = VALID;
                         int end_Co = start_Co + window_Size;
 
                         cout << "Coordinates\t: Start: " << start_Co << " End: " << end_Co << endl;
 
+                        /**
+                         * @param tot_pairwise_Differences Tajima's D also requires the tot_pairwise_Differences in the query region to determine the average number of pairwise differences in the region.
+                         * @param segregating_Sites Tajima's D requires the total number of segregating sites/ SNPS in the query region.
+                         **/
                         float tot_pairwise_Differences = 0;
                         int segregating_Sites = 0;
 
+                        /**
+                         * @param file_List vector is used to store the list of VCF files (found via CATES CIS algorithm) that satisfy the query region.
+                         **/
                         vector<string> file_List;
                         cout << endl;
                         cout << "System is retrieving file(s)" << endl;
@@ -815,13 +988,23 @@ void tajima::window_Sliding(string output_File, float a1, float e1, float e2, in
                         }
                         else
                         {
+                            /**
+                             * IF only one file is present in the index folder that file will be used as is.
+                             **/
                             file_List.push_back(folder_Index[0].second);
                         }
                         cout << "System has retrieved all file(s)" << endl;
 
-                        cout << "System is collecting segregrating site(s)" << endl;
+                        cout << "System is collecting segregating site(s)" << endl;
+                        /**
+                         * The SNPs (Segregating sites) that fall within the query region are collected from the VCF's.
+                         * @param collect_Segregrating_sites vector stores the collected SNPs.
+                         **/
                         vector<string> collect_Segregrating_sites;
 
+                        /**
+                         * Once the required files are found they are read sequentially to get the required SNP data for processing.
+                         **/
                         for (string files : file_List)
                         {
                             // cout << files << endl;
@@ -830,19 +1013,36 @@ void tajima::window_Sliding(string output_File, float a1, float e1, float e2, in
                             if (file.is_open())
                             {
                                 string line;
+                                /**
+                                 * The first line of each VCF is skipped as it is the header line.
+                                 **/
                                 getline(file, line); // skip first header line
                                 while (getline(file, line))
                                 {
+                                    /**
+                                     * @param positions vector is used to capture the SNP data upto the position column (Column 2 (non zero count)).
+                                     **/
                                     vector<string> positions;
                                     function.split_getPos_ONLY(positions, line, '\t');
                                     int pos = stoi(positions[1]);
 
+                                    /**
+                                     * Ensures that the query SNP's position satisfies the query region's range.
+                                     **/
                                     if (pos >= start_Co && pos <= end_Co)
                                     {
+                                        /**
+                                         * If the SNP is between the range of the query region, it is collected.
+                                         * Information from the SNP is extracted via the GPU.
+                                         **/
                                         collect_Segregrating_sites.push_back(line);
                                     }
                                     else if (pos > end_Co)
                                     {
+                                        /**
+                                         * If the read files query SNP exceeds the query regions range then the read loop is broken.
+                                         * This is because VCF's by nature, are sorted by position.
+                                         **/
                                         break;
                                     }
                                 }
@@ -850,16 +1050,26 @@ void tajima::window_Sliding(string output_File, float a1, float e1, float e2, in
                             }
                         }
 
+                        /**
+                         * CALLs the function to calculate the actual segregating sites in the region where (MAF != 0) and the total pairwise differences.
+                         **/
                         function.process_Seg_sites_tajima(collect_Segregrating_sites, N, segregating_Sites, tot_pairwise_Differences, this->tot_Blocks, this->tot_ThreadsperBlock);
 
                         cout << endl;
 
+                        /**
+                         * @param pi is used to store the average pairwise polymorphisms
+                         * @param D is used to store the Tajima's D value for the query region.
+                         **/
                         float pi = 0;
                         float D = 0;
 
                         string Tajima_D;
                         cout << "Total segregating sites (S)\t: " << segregating_Sites << endl;
 
+                        /**
+                         * Ensure that there are segregating sites in the query region.
+                         **/
                         if (segregating_Sites != 0)
                         {
                             pi = (float)tot_pairwise_Differences / combinations;
@@ -903,14 +1113,32 @@ void tajima::window_Sliding(string output_File, float a1, float e1, float e2, in
 
 void tajima::window(string output_File, float a1, float e1, float e2, int N, long int combinations, vector<pair<string, string>> &folder_Index)
 {
+    /**
+     * NORMAL MODE WINDOW FUNCTION
+     **/
+
+    /**
+     * Call the "functions" class. Bespoke functions commonly used by CATE.
+     **/
     functions function = functions();
 
+    /**
+     * @param start_Value is used to capture the lowest POSITION available in the VCF range.
+     * @param end_Value is used to capture the highest POSITION available in the VCF range.
+     **/
     int start_Value = stoi(folder_Index[0].first.substr(0, folder_Index[0].first.find('_')));
     int end_Value = stoi(folder_Index[folder_Index.size() - 1].first.substr(folder_Index[folder_Index.size() - 1].first.find('_') + 1));
 
+    /**
+     * @param start_Co captures the start position as an integer.
+     * @param end_Co captures the end position as an integer.
+     **/
     int start_Co = 0;
     int end_Co = start_Co + window_Size;
 
+    /**
+     * WE cycle through till we fall into the range of SNPs available in our VCFs.
+     **/
     while (start_Value > end_Co)
     {
         start_Co = start_Co + step_Size;
@@ -920,15 +1148,30 @@ void tajima::window(string output_File, float a1, float e1, float e2, int N, lon
     cout << "Writing to file\t: " << output_File << endl;
     cout << endl;
 
+    /**
+     * If the output file is absent this run will be considered as a brand new run of this query and,
+     * the output file and the intermediate log file will be created.
+     **/
     if (filesystem::exists(output_File) == 0)
     {
         function.createFile(output_File, "Coordinates\tPi\tS\tTajimas_D");
     }
     else
     {
+        /**
+         * If the output file is already present then the resume process will initiated.
+         * This is a unintelligent resume. Essentially it matches the each read line written with the lines read from the gene file.
+         * The break will occur as soon as their is a mismatch.
+         * To counter any errors it is advised to have a new gene file name or a new intermediate folder per new run.
+         * @param caught acts as a boolean variable. caught = 0 if the lines need to be skipped and will equal 1 when the resume position is found.
+         * ! This helps with the resume function. Automatically resumes from the last completely processed gene in the event of a program crash.
+         **/
         // RESUME FUNCTION
         int caught = 0;
 
+        /**
+         * Open the output file to be begin finding the resume point.
+         **/
         // skipper
         fstream output;
         output.open(output_File, ios::in);
@@ -939,19 +1182,32 @@ void tajima::window(string output_File, float a1, float e1, float e2, int N, lon
         {
 
             // skip header
+            /**
+             * First line is skipped cause it is a header line containing column names.
+             **/
             getline(output, output_Line);
 
             while (getline(output, output_Line))
             {
                 string trim = output_Line.substr(0, output_Line.find('\t'));
                 string check = to_string(start_Co) + ":" + to_string(end_Co);
+                /**
+                 * Ensures the query line does not match that of the output
+                 **/
                 if (trim != check)
                 {
+                    /**
+                     * If they do not match,
+                     * caught is set to 1 indicating the resume position has been found and,
+                     * the loop is broken.
+                     **/
                     caught = 1;
                     break;
                 }
             }
-
+            /**
+             * If caught is 1 that means the resume location has been found and the loop is broken.
+             **/
             if (caught == 1)
             {
                 break;
@@ -973,9 +1229,16 @@ void tajima::window(string output_File, float a1, float e1, float e2, int N, lon
     {
         cout << "Coordinates\t: Start: " << start_Co << " End: " << end_Co << endl;
 
+        /**
+         * @param tot_pairwise_Differences Tajima's D also requires the tot_pairwise_Differences in the query region to determine the average number of pairwise differences in the region.
+         * @param segregating_Sites Tajima's D requires the total number of segregating sites/ SNPS in the query region.
+         **/
         float tot_pairwise_Differences = 0;
         int segregating_Sites = 0;
 
+        /**
+         * @param file_List vector is used to store the list of VCF files (found via CATES CIS algorithm) that satisfy the query region.
+         **/
         vector<string> file_List;
         cout << endl;
         cout << "System is retrieving file(s)" << endl;
@@ -985,13 +1248,23 @@ void tajima::window(string output_File, float a1, float e1, float e2, int N, lon
         }
         else
         {
+            /**
+             * IF only one file is present in the index folder that file will be used as is.
+             **/
             file_List.push_back(folder_Index[0].second);
         }
         cout << "System has retrieved all file(s)" << endl;
 
-        cout << "System is collecting segregrating site(s)" << endl;
+        cout << "System is collecting segregating site(s)" << endl;
+        /**
+         * The SNPs (Segregating sites) that fall within the query region are collected from the VCF's.
+         * @param collect_Segregrating_sites vector stores the collected SNPs.
+         **/
         vector<string> collect_Segregrating_sites;
 
+        /**
+         * Once the required files are found they are read sequentially to get the required SNP data for processing.
+         **/
         for (string files : file_List)
         {
             // cout << files << endl;
@@ -1000,6 +1273,9 @@ void tajima::window(string output_File, float a1, float e1, float e2, int N, lon
             if (file.is_open())
             {
                 string line;
+                /**
+                 * The first line of each VCF is skipped as it is the header line.
+                 **/
                 getline(file, line); // skip first header line
                 while (getline(file, line))
                 {
@@ -1007,12 +1283,23 @@ void tajima::window(string output_File, float a1, float e1, float e2, int N, lon
                     function.split_getPos_ONLY(positions, line, '\t');
                     int pos = stoi(positions[1]);
 
+                    /**
+                     * Ensures that the query SNP's position satisfies the query region's range.
+                     **/
                     if (pos >= start_Co && pos <= end_Co)
                     {
+                        /**
+                         * If the SNP is between the range of the query region, it is collected.
+                         * Information from the SNP is extracted via the GPU.
+                         **/
                         collect_Segregrating_sites.push_back(line);
                     }
                     else if (pos > end_Co)
                     {
+                        /**
+                         * If the read files query SNP exceeds the query regions range then the read loop is broken.
+                         * This is because VCF's by nature, are sorted by position.
+                         **/
                         break;
                     }
                 }
@@ -1020,10 +1307,17 @@ void tajima::window(string output_File, float a1, float e1, float e2, int N, lon
             }
         }
 
+        /**
+         * CALLs the function to calculate the actual segregating sites in the region where (MAF != 0) and the total pairwise differences.
+         **/
         function.process_Seg_sites_tajima(collect_Segregrating_sites, N, segregating_Sites, tot_pairwise_Differences, this->tot_Blocks, this->tot_ThreadsperBlock);
 
         cout << endl;
 
+        /**
+         * @param pi is used to store the average pairwise polymorphisms
+         * @param D is used to store the Tajima's D value for the query region.
+         **/
         float pi = 0;
         float D = 0;
 
@@ -1339,6 +1633,10 @@ __global__ void a_Calculation(int N, float *a1_CUDA, float *a2_CUDA)
 
 __global__ void add_Cuda(const float *a, float *out, int arraySize)
 {
+    /**
+     * CUDA based reduction add function for large arrays
+     **/
+
     int idx = threadIdx.x;
     float sum = 0;
     for (int i = idx; i < arraySize; i += 1024)
@@ -1358,6 +1656,10 @@ __global__ void add_Cuda(const float *a, float *out, int arraySize)
 
 void tajima::calc_Pre(int &N_tot, float &a1, float &e1, float &e2)
 {
+    /**
+     * Calculates the prerequisite values required for Tajima's D
+     **/
+
     int N = N_tot - 1;
     float *a1_CUDA, *a2_CUDA;
     float *a1_partial, *a2_partial, a2;

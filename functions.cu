@@ -6,14 +6,45 @@ functions::functions()
 
 __global__ void cuda_process_Seg_tajima(char *sites, int *index, int tot_Segregrating_sites, int *VALID_or_NOT, int *MA_count)
 {
+    /**
+     * @param tid is used to get the unique thread ID. In this instance thread ID is used to keep track of the Seg/SNP sites.
+     **/
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
     while (tid < tot_Segregrating_sites)
     {
+        /**
+         * We like to think CATE strides or skates through the 1D SNP array based on the SEG site the individual thread is assigned.
+         * Each thread has a boundary wall within which it will stay. Similar to a skater's rink.
+         * This wall is defined by two variables, namely:
+         * @param site_Start is used to define the start of the Seg site assigned to the thread.
+         * @param site_End is used to define the end of the Seg site assigned to the thread.
+         * The thread will move across this region extracting information as needed.
+         **/
+
+        /**
+         * @param column is used to keep track of the columns being strided through.
+         * Since VCF's are tab eliminated we are abe to track the columns by keeping track of the '\t' we come across.
+         * VCF's by default have 9 columns. Beyond these 9 are information of the samples that have been sequenced.
+         * [0] = chromosome number or index
+         * [1] = position
+         * [2] = snp id
+         * [3] = reference allele
+         * [4] = alternate allele
+         * [5] = quality
+         * [6] = filter
+         * [7] = info
+         * [8] = format
+         * [9 ..] = sample information
+         **/
+
         int column = 0;
         int site_Start = index[tid];
         int site_End = index[tid + 1];
 
+        /**
+         * @param i is used to track the navigation through the SNP information. This is our skater, an increment variable.
+         **/
         int i = site_Start;
 
         while (column < 9)
@@ -27,6 +58,10 @@ __global__ void cuda_process_Seg_tajima(char *sites, int *index, int tot_Segregr
 
         // printf("Column 1: %c\n", sites[i]);
 
+        /**
+         * @param ALT_count is used capture number of instances the ALTERNATE allele is present.
+         *  @param REF_count is used capture number of instances the REFERENCE allele is present.
+         **/
         int ALT_count = 0;
         int REF_count = 0;
         while (i < site_End)
@@ -43,6 +78,9 @@ __global__ void cuda_process_Seg_tajima(char *sites, int *index, int tot_Segregr
             i++;
         }
 
+        /**
+         * If either allele has a count of zero this means that the site is not a SEG site for that population.
+         **/
         if (ALT_count == 0 || REF_count == 0)
         {
             VALID_or_NOT[tid] = 0;
@@ -68,39 +106,90 @@ __global__ void cuda_process_Seg_tajima(char *sites, int *index, int tot_Segregr
 
 void functions::process_Seg_sites_tajima(vector<string> &total_Segregrating_sites, int N, int &real_segregrating_Sites, float &tot_pairwise_Differences, int tot_Blocks, int tot_ThreadsperBlock)
 {
-    cout << "System is processing and filtering segregrating site(s)" << endl;
+    /**
+     * Administrative function responsible for haplotype reconstruction.
+     * 1. Conversion of SNP strings into char pointers for GPU accessability.
+     * 2. Call GPU for extracting MAs (Minor allele) and MAF's (Minor Allele Frequencies).
+     **/
+
+    cout << "System is processing and filtering segregating site(s)" << endl;
+    /**
+     * @param num_segregrating_Sites is used to track the number of SNPs collected for the query region.
+     * This track is vital for navigating through the data in the GPU. For the data is stored in the form of a 1D array.
+     **/
     int num_segregrating_Sites = total_Segregrating_sites.size();
+
+    /**
+     * @param Seg_sites is used to stitch the SNP data end to end, before converting it to a char array.
+     **/
     string Seg_sites = "";
+    /**
+     * @param site_Index is used to keep track of the start and ends of each SNP's data.
+     **/
     int site_Index[num_segregrating_Sites + 1];
     site_Index[0] = 0;
 
+    /**
+     * Conversion of vector SNP information into a 1D array by concatenating the vector data into a single string.
+     **/
     for (size_t i = 0; i < num_segregrating_Sites; i++)
     {
         Seg_sites.append(total_Segregrating_sites[i]);
         site_Index[i + 1] = site_Index[i] + total_Segregrating_sites[i].size();
     }
 
+    /**
+     * Final assignment of concatented string into a 1D char array.
+     **/
     char *full_Char;
     full_Char = (char *)malloc((Seg_sites.size() + 1) * sizeof(char));
     strcpy(full_Char, Seg_sites.c_str());
+
+    /**
+     * RAM is released to prevent redundancy.
+     **/
     total_Segregrating_sites.clear();
 
     // cuda_process_Seg(char *sites, int *index, int tot_Segregrating_sites, int *VALID_or_NOT, int *MA_count)
+    /**
+     * @param cuda_full_Char is used by the GPU. Is a COPY of full_Char.
+     * @param cuda_site_Index is used by the GPU. Is a COPY of site_Index.
+     *
+     * * These 4 variables work together in all instances.
+     **/
     char *cuda_full_Char;
     cudaMallocManaged(&cuda_full_Char, (Seg_sites.size() + 1) * sizeof(char));
     int *cuda_site_Index;
     cudaMallocManaged(&cuda_site_Index, (num_segregrating_Sites + 1) * sizeof(int));
+    /**
+     * Transfer of data to the GPU.
+     **/
     cudaMemcpy(cuda_full_Char, full_Char, (Seg_sites.size() + 1) * sizeof(char), cudaMemcpyHostToDevice);
     cudaMemcpy(cuda_site_Index, site_Index, (num_segregrating_Sites + 1) * sizeof(int), cudaMemcpyHostToDevice);
 
+    /**
+     * Certain collected SNP sites though present in the VCF, specially if the index was created without a filter,
+     * will have MAF of zero. Indicating that region is conserved for that super-pop and therfore not a seg site.
+     * These have to be filtered out. This is done using the variables below:
+     * @param cuda_VALID_or_NOT is used to determine if a site is seg site which is VALID or NOT.
+     * @param VALID_or_NOT is used by the CPU. Is a COPY of cuda_VALID_or_NOT.
+     **/
     int *cuda_VALID_or_NOT, *VALID_or_NOT;
     cudaMallocManaged(&cuda_VALID_or_NOT, num_segregrating_Sites * sizeof(int));
     VALID_or_NOT = (int *)malloc(num_segregrating_Sites * sizeof(int));
 
+    /**
+     * @param cuda_MA_Count is used to record the MA's count.
+     * @param MA_Count is used by the CPU. Is a COPY of cuda_MA_Count.
+     **/
     int *cuda_MA_Count, *MA_Count;
     cudaMallocManaged(&cuda_MA_Count, num_segregrating_Sites * sizeof(int));
     MA_Count = (int *)malloc(num_segregrating_Sites * sizeof(int));
 
+    /**
+     * CALL THE GPU.
+     * * GPU WILL PROCESS THE COLLECTED SEG SITES
+     **/
     cuda_process_Seg_tajima<<<tot_Blocks, tot_ThreadsperBlock>>>(cuda_full_Char, cuda_site_Index, num_segregrating_Sites, cuda_VALID_or_NOT, cuda_MA_Count);
     cudaDeviceSynchronize();
 
@@ -115,6 +204,10 @@ void functions::process_Seg_sites_tajima(vector<string> &total_Segregrating_site
     real_segregrating_Sites = 0;
     tot_pairwise_Differences = 0;
 
+    /**
+     * Processing of each site is done to validate them and extract the data required for the statistical test.
+     * Tajima's D required the number of actual segregating sites and the total number of pairwise differences.
+     **/
     for (size_t i = 0; i < num_segregrating_Sites; i++)
     {
         if (VALID_or_NOT[i] == 1)

@@ -23,7 +23,15 @@ public:
     int calc_Pairwise(string &line, int N, int tot_Blocks, int tot_ThreadsperBlock);
     void split_Convert(int *line_temp, string line, string delim);
 
+    /**
+     * Administrative function responsible for calculating the values needed for Tajima's D.
+     * Function directly calls upon the GPU function.
+     **/
     void process_Seg_sites_tajima(vector<string> &total_Segregrating_sites, int N, int &real_segregrating_Sites, float &tot_pairwise_Differences, int tot_Blocks, int tot_ThreadsperBlock);
+    /**
+     * Administrative function responsible for calculating the values needed for Fu and Li values.
+     * Function directly calls upon the GPU function.
+     **/
     void process_Seg_sites_fu_li(vector<string> &total_Segregrating_sites, float N, int &real_segregrating_Sites, float &tot_pairwise_Differences, int &singletons_ne, int &singletons_ns, int tot_Blocks, int tot_ThreadsperBlock);
 
     vector<string> get_Countries(string &input_Folder);
