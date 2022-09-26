@@ -819,10 +819,10 @@ void print_HELP()
           << "                            FASTA format reference genome must be specified." << endl
           << "                            All gene sequences will be generated into separate FASTA files." << endl
           << endl
-          << "--gff2gene or -g2g      : Creates the gene list file in a *.txt format from the input GFF3 file." << endl
+          << "-g2g or --gff2gene      : Creates the gene list file in a *.txt format from the input GFF3 file." << endl
           << "                          Note that only regions annotated as genes will be extracted." << endl
           << endl
-          << "--hapfromvcf or -hapext : Extracts haplotypes and their sequences for a predefined gene list from a (split) VCF (indexed) folder provided the reference sequence." << endl
+          << "-hapext or --hapfromvcf : Extracts haplotypes and their sequences for a predefined gene list from a (split) VCF (indexed) folder provided the reference sequence." << endl
           << "                          The reference genome must be provided in a FASTA file." << endl
           << "                          The system will automatically identify each haplotype present." << endl
           << "                          In addition to the summary output each haplotype present for each gene will be generated in a separate FASTA file." << endl

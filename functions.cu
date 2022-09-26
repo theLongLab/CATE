@@ -107,7 +107,7 @@ __global__ void cuda_process_Seg_tajima(char *sites, int *index, int tot_Segregr
 void functions::process_Seg_sites_tajima(vector<string> &total_Segregrating_sites, int N, int &real_segregrating_Sites, float &tot_pairwise_Differences, int tot_Blocks, int tot_ThreadsperBlock)
 {
     /**
-     * Administrative function responsible for haplotype reconstruction.
+     * Administrative function responsible for collection of data required for Tajima's D.
      * 1. Conversion of SNP strings into char pointers for GPU accessability.
      * 2. Call GPU for extracting MAs (Minor allele) and MAF's (Minor Allele Frequencies).
      **/
