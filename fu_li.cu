@@ -907,90 +907,90 @@ void fu_li::window(string output_File, float an, float vd, float ud, float vd_st
     output.close();
 }
 
-int fu_li::outgroup_Singleton(vector<string> &info, vector<string> &positions)
-{
-    functions function = functions();
-    string present = "false";
-    string MA;
-    string AA;
-    int return_Val = 0;
-    vector<string> line_partial;
+// int fu_li::outgroup_Singleton(vector<string> &info, vector<string> &positions)
+// {
+//     functions function = functions();
+//     string present = "false";
+//     string MA;
+//     string AA;
+//     int return_Val = 0;
+//     vector<string> line_partial;
 
-    for (string info_Data : info)
-    {
-        vector<string> AA_check;
-        function.split(AA_check, info_Data, '=');
-        if (AA_check[0] == "AA")
-        {
-            // cout << "AA: " << AA_check[1].at(0) << endl;
-            if ((toupper(AA_check[1].at(0)) == 'A') || (toupper(AA_check[1].at(0)) == 'T') || (toupper(AA_check[1].at(0)) == 'G') || (toupper(AA_check[1].at(0)) == 'C'))
-            {
-                // cout << "AA Caught: " << AA_check[1].at(0) << endl;
-                AA = AA_check[1].at(0);
-                present = "true";
-            }
-            break;
-        }
-    }
+//     for (string info_Data : info)
+//     {
+//         vector<string> AA_check;
+//         function.split(AA_check, info_Data, '=');
+//         if (AA_check[0] == "AA")
+//         {
+//             // cout << "AA: " << AA_check[1].at(0) << endl;
+//             if ((toupper(AA_check[1].at(0)) == 'A') || (toupper(AA_check[1].at(0)) == 'T') || (toupper(AA_check[1].at(0)) == 'G') || (toupper(AA_check[1].at(0)) == 'C'))
+//             {
+//                 // cout << "AA Caught: " << AA_check[1].at(0) << endl;
+//                 AA = AA_check[1].at(0);
+//                 present = "true";
+//             }
+//             break;
+//         }
+//     }
 
-    if (present == "false")
-    {
-        AA = positions[3];
-    }
+//     if (present == "false")
+//     {
+//         AA = positions[3];
+//     }
 
-    int REF_0 = 0;
-    int ALT_1 = 0;
+//     int REF_0 = 0;
+//     int ALT_1 = 0;
 
-    vector<string> sample_1;
-    vector<string> sample_2;
+//     vector<string> sample_1;
+//     vector<string> sample_2;
 
-    function.split(sample_1, positions[9], '|');
-    function.split(sample_2, positions[10], '|');
+//     function.split(sample_1, positions[9], '|');
+//     function.split(sample_2, positions[10], '|');
 
-    for (string check : sample_1)
-    {
-        if (check == "0")
-        {
-            REF_0 = REF_0 + 1;
-        }
-        else
-        {
-            ALT_1 = ALT_1 + 1;
-        }
-    }
+//     for (string check : sample_1)
+//     {
+//         if (check == "0")
+//         {
+//             REF_0 = REF_0 + 1;
+//         }
+//         else
+//         {
+//             ALT_1 = ALT_1 + 1;
+//         }
+//     }
 
-    for (string check : sample_2)
-    {
-        if (check == "0")
-        {
-            REF_0 = REF_0 + 1;
-        }
-        else
-        {
-            ALT_1 = ALT_1 + 1;
-        }
-    }
+//     for (string check : sample_2)
+//     {
+//         if (check == "0")
+//         {
+//             REF_0 = REF_0 + 1;
+//         }
+//         else
+//         {
+//             ALT_1 = ALT_1 + 1;
+//         }
+//     }
 
-    if (REF_0 > ALT_1)
-    {
-        MA = positions[4];
-    }
-    else
-    {
-        MA = positions[3];
-    }
+//     if (REF_0 > ALT_1)
+//     {
+//         MA = positions[4];
+//     }
+//     else
+//     {
+//         MA = positions[3];
+//     }
 
-    if (toupper(AA.at(0)) == toupper(MA.at(0)))
-    {
-        return_Val = 0;
-    }
-    else
-    {
-        return_Val = 1;
-    }
+//     if (toupper(AA.at(0)) == toupper(MA.at(0)))
+//     {
+//         return_Val = 0;
+//     }
+//     else
+//     {
+//         return_Val = 1;
+//     }
 
-    return return_Val;
-}
+//     return return_Val;
+// }
 
 __global__ void fuli_Calculation(int N, float *a1_CUDA, float *a2_CUDA)
 {
