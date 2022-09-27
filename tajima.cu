@@ -1621,6 +1621,9 @@ __global__ void pairwise_Cuda(int N, int *SNP, int *differences)
 
 __global__ void a_Calculation(int N, float *a1_CUDA, float *a2_CUDA)
 {
+    /**
+     * Generate each value in the sequence for both a1 and a2
+     **/
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
     while (tid < N)
@@ -1678,6 +1681,10 @@ void tajima::calc_Pre(int &N_tot, float &a1, float &e1, float &e2)
 
     cudaFree(a1_CUDA);
     cudaFree(a2_CUDA);
+
+    /**
+     * Summation of the harmonic means
+     **/
 
     a1 = 0;
     a2 = 0;
