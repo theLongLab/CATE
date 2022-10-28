@@ -60,7 +60,7 @@ __global__ void cuda_process_Seg_tajima(char *sites, int *index, int tot_Segregr
 
         /**
          * @param ALT_count is used capture number of instances the ALTERNATE allele is present.
-         *  @param REF_count is used capture number of instances the REFERENCE allele is present.
+         * @param REF_count is used capture number of instances the REFERENCE allele is present.
          **/
         int ALT_count = 0;
         int REF_count = 0;

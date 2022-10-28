@@ -4,6 +4,11 @@
 
 fay_wu::fay_wu(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
+     /**
+      * * Constructor Function
+      * NORMAL - GENE MODE constructor
+      **/
+
      cout << "Initiating CUDA powered Fay and Wu's normalized H and E calculator" << endl
           << endl;
 
@@ -36,6 +41,11 @@ fay_wu::fay_wu(string gene_List, string input_Folder, string ouput_Path, int cud
 
 fay_wu::fay_wu(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run)
 {
+     /**
+      * * Constructor Function
+      * PROMETHEUS - GENE MODE constructor
+      **/
+
      // PROMETHEUS CONSTRUCTOR
      cout << "Initiating CUDA powered Fay and Wu's normalized H and E calculator on PROMETHEUS" << endl
           << endl;
@@ -52,6 +62,11 @@ fay_wu::fay_wu(string gene_List, string input_Folder, string ouput_Path, int cud
 
 fay_wu::fay_wu(string calc_Mode, int window_Size, int step_Size, string input_Folder, string ouput_Path, int cuda_ID, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run)
 {
+     /**
+      * * Constructor Function
+      * PROMETHEUS - WINDOW MODE constructor
+      **/
+
      // PROMETHEUS WINDOW MODE
      cout << "Initiating CUDA powered Fay and Wu's normalized H and E calculator on PROMETHEUS" << endl
           << endl;
@@ -71,6 +86,11 @@ fay_wu::fay_wu(string calc_Mode, int window_Size, int step_Size, string input_Fo
 }
 fay_wu::fay_wu(string calc_Mode, int window_Size, int step_Size, string input_Folder, string ouput_Path, int cuda_ID, int ploidy)
 {
+     /**
+      * * Constructor Function
+      * NORMAL - WINDOW MODE constructor
+      **/
+
      // NORMAL WINDOW CONSTRUCTOR
 
      cout << "Initiating CUDA powered Fay and Wu's normalized H and E calculator" << endl
@@ -85,6 +105,13 @@ fay_wu::fay_wu(string calc_Mode, int window_Size, int step_Size, string input_Fo
 
 void fay_wu::set_Values(string gene_List, string input_Folder, string ouput_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
+     /**
+      * This function is used in conjunction with the constructor to set the common private variables.
+      * Notifies the user if it is WINDOW mode or GENE (FILE) mode.
+      * If WINDOW user is also notified if it is sliding window or normal step wise window mode.
+      * Here the first call to the selected CUDA device occurs.
+      **/
+
      if (this->calc_Mode != "WINDOW")
      {
           cout << "Calculation mode: FILE" << endl;
@@ -131,6 +158,13 @@ void fay_wu::set_Values(string gene_List, string input_Folder, string ouput_Path
 
 void fay_wu::ingress()
 {
+     /**
+      * Execution function.
+      **/
+
+     /**
+      * Call the "functions" class. Bespoke functions commonly used by CATE.
+      **/
      functions function = functions();
 
      vector<string> countries = function.get_Countries(this->input_Folder);

@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 
      print_Cate();
      cout << "CATE: CUDA Accelerated Testing of Evolution" << endl;
-     cout << "Evolutionary tests for large scale genome data" << endl
+     cout << "Evolutionary tests for large scale genomic data" << endl
           << "----------------------------------------------" << endl
           << endl;
 
