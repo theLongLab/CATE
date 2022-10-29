@@ -1137,7 +1137,7 @@ void tajima::window(string output_File, float a1, float e1, float e2, int N, lon
     int end_Co = start_Co + window_Size;
 
     /**
-     * WE cycle through till we fall into the range of SNPs available in our VCFs.
+     * We cycle through till we fall into the range of SNPs available in our VCFs.
      **/
     while (start_Value > end_Co)
     {
