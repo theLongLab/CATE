@@ -88,8 +88,8 @@ private:
 
 public:
     /**
-     *Fay and Wu's normalized H and E has 4 constructor Functions.
-     * They are for the 4 separate modal combinations that Tajima can be configured to. Namely:
+     * Fay and Wu's normalized H and E has 4 constructor Functions.
+     * They are for the 4 separate modal combinations that Fay and Wu can be configured to. Namely:
      * 1. NORMAL - GENE MODE
      * 2. NORMAL - WINDOW MODE
      * 3. PROMETHEUS - GENE MODE
@@ -135,7 +135,7 @@ public:
     void window_Sliding(string output_File, float an, float bn, float bn_plus1, float N_float, long int combinations, vector<pair<string, string>> &folder_Index);
 
     /**
-     * This function is used to calculate the prerequisites using the sample size required for calculating Tajima's D.
+     * This function is used to calculate the prerequisites using the sample size required for calculating Fay and Wu.
      **/
     void calc_Pre(float &an, float &bn, float &bn_plus1, int N_tot);
     /**

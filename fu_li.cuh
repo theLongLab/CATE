@@ -94,7 +94,7 @@ private:
 public:
     /**
      * Fu and Li's D, D*, F and F* has 4 constructor Functions.
-     * They are for the 4 separate modal combinations that Tajima can be configured to. Namely:
+     * They are for the 4 separate modal combinations that Fu and Li can be configured to. Namely:
      * 1. NORMAL - GENE MODE
      * 2. NORMAL - WINDOW MODE
      * 3. PROMETHEUS - GENE MODE
@@ -140,9 +140,9 @@ public:
     void window_Sliding(string output_File, float an, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float N_float, long int combinations, vector<pair<string, string>> &folder_Index);
 
     /**
-     * This function is used to calculate the prerequisites using the sample size required for calculating Tajima's D.
+     * This function is used to calculate the prerequisites using the sample size required for calculating Fu and Li.
      **/
     void calc_Pre(int N_tot, float &an, float &vd, float &ud, float &vd_star, float &ud_star, float &uf, float &vf, float &uf_star, float &vf_star);
-    
+
     // int outgroup_Singleton(vector<string> &info, vector<string> &positions);
 };
