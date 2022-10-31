@@ -498,7 +498,6 @@ void fu_li::ingress()
                         /**
                          * @param start_Co captures query gene's start position as an integer.
                          **/
-                        int start_Co = stoi(coordinates[1]);
                         /**
                          * @param end_Co captures query gene's end position as an integer.
                          **/
