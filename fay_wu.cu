@@ -274,14 +274,14 @@ void fay_wu::ingress()
                     if (step_Size != 0)
                     {
                          /**
-                          * Initiates processing of Tajima on PROMETHEUS on step wise window mode.
+                          * Initiates processing of Fay and Wu on PROMETHEUS on step wise window mode.
                           **/
                          pro_Fay_Wu_Window.process_Window(test);
                     }
                     else
                     {
                          /**
-                          * Initiates processing of Tajima on PROMETHEUS on sliding window mode.
+                          * Initiates processing of Fay and Wu on PROMETHEUS on sliding window mode.
                           **/
                          pro_Fay_Wu_Window.process_C_sliding_Window(test);
                     }
@@ -295,14 +295,14 @@ void fay_wu::ingress()
                     if (step_Size != 0)
                     {
                          /**
-                          * Initiates processing of Tajima on step wise window mode.
+                          * Initiates processing of Fay and Wu on step wise window mode.
                           **/
                          window(output_File, an, bn, bn_plus1, N_float, combinations, folder_Index);
                     }
                     else
                     {
                          /**
-                          * Initiates processing of Tajima on sliding window mode.
+                          * Initiates processing of Fay and Wu on sliding window mode.
                           **/
                          window_Sliding(output_File, an, bn, bn_plus1, N_float, combinations, folder_Index);
                     }
@@ -522,8 +522,7 @@ void fay_wu::ingress()
                               cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
 
                               /**
-                               * @param tot_pairwise_Differences Tajima's D also requires the tot_pairwise_Differences in the query region to determine the average number of pairwise differences in the region.
-                               * @param segregating_Sites Tajima's D requires the total number of segregating sites/ SNPS in the query region.
+                               * @param tot_pairwise_Differences Fay and Wu also requires the tot_pairwise_Differences in the query region to determine the average number of pairwise differences in the region.
                                **/
                               float tot_pairwise_Differences = 0;
 
@@ -635,7 +634,9 @@ void fay_wu::ingress()
                                         file.close();
                                    }
                               }
-
+                              /**
+                               * @param num_segregrating_Sites Fay and Wu requires the total number of segregating sites/ SNPS in the query region.
+                               **/
                               int num_segregrating_Sites;
                               string Fay_Wu_H, Fay_Wu_E;
                               float pi = 0.0;
@@ -1539,7 +1540,7 @@ __global__ void cuda_theta_L(char *sites, int *index, int num_Segregrating_sites
 float fay_wu::calc_theta_L(vector<string> &total_Segregrating_sites, float N_tot, int &real_segregrating_Sites, int &Total_iEi, float &tot_pairwise_Differences)
 {
      /**
-      * Administrative function responsible for collection of data required for Tajima's D.
+      * Administrative function responsible for collection of data required for Fay and Wu.
       * 1. Conversion of SNP strings into char pointers for GPU accessability.
       * 2. Call GPU for extracting MAs (Minor allele) and MAF's (Minor Allele Frequencies).
       * 3. Calculates the prerequisites required for determining Theta L by accounting for the alleles that are not equal to the AA.

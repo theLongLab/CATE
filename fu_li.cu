@@ -260,7 +260,7 @@ void fu_li::ingress()
                 else
                 {
                     /**
-                     * Initiates processing of Tajima on PROMETHEUS on sliding window mode.
+                     * Initiates processing of Fu and Li on PROMETHEUS on sliding window mode.
                      **/
                     pro_Fu_Li_Window.process_C_sliding_Window(test);
                 }
@@ -274,14 +274,14 @@ void fu_li::ingress()
                 if (step_Size != 0)
                 {
                     /**
-                     * Initiates processing of Tajima on step wise window mode.
+                     * Initiates processing of Fu and Li on step wise window mode.
                      **/
                     window(output_File, an, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, N_float, combinations, folder_Index);
                 }
                 else
                 {
                     /**
-                     * Initiates processing of Tajima on sliding window mode.
+                     * Initiates processing of Fu and Li on sliding window mode.
                      **/
                     window_Sliding(output_File, an, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, N_float, combinations, folder_Index);
                 }
@@ -506,8 +506,8 @@ void fu_li::ingress()
                         cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
 
                         /**
-                         * @param tot_pairwise_Differences Tajima's D also requires the tot_pairwise_Differences in the query region to determine the average number of pairwise differences in the region.
-                         * @param segregating_Sites Tajima's D requires the total number of segregating sites/ SNPS in the query region.
+                         * @param tot_pairwise_Differences Fu and Li also requires the tot_pairwise_Differences in the query region to determine the average number of pairwise differences in the region.
+                         * @param segregating_Sites Fu and Li requires the total number of segregating sites/ SNPS in the query region.
                          **/
                         float tot_pairwise_Differences = 0;
                         int segregating_Sites = 0;
@@ -1455,7 +1455,7 @@ __global__ void fuli_Calculation(int N, float *a1_CUDA, float *a2_CUDA)
 void fu_li::calc_Pre(int N_tot, float &an, float &vd, float &ud, float &vd_star, float &ud_star, float &uf, float &vf, float &uf_star, float &vf_star)
 {
     /**
-     * Calculates the prerequisite values required for Tajima's D
+     * Calculates the prerequisite values required for Fu and Li
      **/
 
     // functions function = functions();
