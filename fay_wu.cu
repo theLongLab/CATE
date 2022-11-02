@@ -232,9 +232,9 @@ void fay_wu::ingress()
 
           /**
            * @param test is used by Prometheus, to tell it which test is being processed.
-           * * T  = Tajima
+           * T    = Tajima
            * FU   = Fu and Li
-           * FA   = Fay and Wu
+           * * FA = Fay and Wu
            * N    = All 3 Neutrality tests
            **/
           string test = "FA";

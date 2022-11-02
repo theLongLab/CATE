@@ -214,8 +214,8 @@ void fu_li::ingress()
 
         /**
          * @param test is used by Prometheus, to tell it which test is being processed.
-         * * T  = Tajima
-         * FU   = Fu and Li
+         * T    = Tajima
+         * * FU = Fu and Li
          * FA   = Fay and Wu
          * N    = All 3 Neutrality tests
          **/
