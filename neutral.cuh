@@ -150,7 +150,7 @@ public:
 
     /**
      * These functions Calculate the three Neutrality tests values using the processed data from the segregating sites.
-     * The @param calculate_Neutrality is the administrative function. Calls the other three functions in parallel.
+     * The calculate_Neutrality is the administrative function. Calls the other three functions in parallel.
      **/
     void calculate_Neutrality(float N_float, float &pi, int &segregating_Sites, float &an, float &bn, float &e1, float &e2, int &singletons_ne, int &singletons_ns, float &vd, float &ud, float &vd_star, float &ud_star, float &vf, float &uf, float &vf_star, float &uf_star, float &theta_L, float &bn_plus1, string &Tajima_D, string &Fu_Li_D, string &Fu_Li_D_star, string &Fu_Li_F, string &Fu_Li_F_star, string &Fay_Wu_H, string &Fay_Wu_E);
     void Tajimas_D_thread(promise<string> &Tajimas_D_value, float pi, int segregating_Sites, float an, float e1, float e2);

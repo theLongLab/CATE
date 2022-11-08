@@ -643,7 +643,7 @@ void fay_wu::ingress()
                               int Total_iEi = 0;
 
                               /**
-                               * Calls the function to process the segregating sites and calculate theta L requried for calculating the Fay and Wu values.
+                               * Calls the function to process the segregating sites and calculate theta L required for calculating the Fay and Wu values.
                                **/
                               float theta_L = calc_theta_L(collect_Segregrating_sites, N_float, num_segregrating_Sites, Total_iEi, tot_pairwise_Differences);
 

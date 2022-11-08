@@ -4,6 +4,11 @@
 
 neutral::neutral(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
+     /**
+      * * Constructor Function
+      * NORMAL - GENE MODE constructor
+      **/
+
      cout << "Initiating CUDA powered complete neutrality test calculator" << endl
           << "The following 3 tests will be calculated: " << endl
           << "1. Tajima's D" << endl
@@ -16,6 +21,11 @@ neutral::neutral(string gene_List, string input_Folder, string output_Path, int 
 
 neutral::neutral(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run)
 {
+     /**
+      * * Constructor Function
+      * PROMETHEUS - GENE MODE constructor
+      **/
+
      // Prometheus Neutral
      cout << "Initiating CUDA powered complete neutrality test calculator on PROMETHEUS" << endl
           << "The following 3 tests will be calculated: " << endl
@@ -35,6 +45,11 @@ neutral::neutral(string gene_List, string input_Folder, string output_Path, int 
 
 neutral::neutral(string calc_Mode, int window_Size, int step_Size, string input_Folder, string output_Path, int cuda_ID, int ploidy, string prometheus_Activate, string Multi_read, int number_of_genes, int CPU_cores, int SNPs_per_Run)
 {
+     /**
+      * * Constructor Function
+      * PROMETHEUS - WINDOW MODE constructor
+      **/
+
      // PROMETHEUS WINDOW MODE
      cout << "Initiating CUDA powered complete neutrality test calculator on PROMETHEUS" << endl
           << "The following 3 tests will be calculated: " << endl
@@ -59,6 +74,11 @@ neutral::neutral(string calc_Mode, int window_Size, int step_Size, string input_
 
 neutral::neutral(string calc_Mode, int window_Size, int step_Size, string input_Folder, string output_Path, int cuda_ID, int ploidy)
 {
+     /**
+      * * Constructor Function
+      * NORMAL - WINDOW MODE constructor
+      **/
+
      cout << "Initiating CUDA powered complete neutrality test calculator" << endl
           << "The following 3 tests will be calculated: " << endl
           << "1. Tajima's D" << endl
@@ -75,6 +95,13 @@ neutral::neutral(string calc_Mode, int window_Size, int step_Size, string input_
 
 void neutral::set_Values(string gene_List, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy)
 {
+     /**
+      * This function is used in conjunction with the constructor to set the common private variables.
+      * Notifies the user if it is WINDOW mode or GENE (FILE) mode.
+      * If WINDOW user is also notified if it is sliding window or normal step wise window mode.
+      * Here the first call to the selected CUDA device occurs.
+      **/
+
      if (this->calc_Mode != "WINDOW")
      {
           cout << "Calculation mode: FILE" << endl;
@@ -121,8 +148,20 @@ void neutral::set_Values(string gene_List, string input_Folder, string output_Pa
 
 void neutral::ingress()
 {
+     /**
+      * Execution function.
+      **/
+
+     /**
+      * Call the "functions" class. Bespoke functions commonly used by CATE.
+      **/
      functions function = functions();
 
+     /**
+      * CATE indexed VCF folder is analyzed to extract the available super populations.
+      * @param countries vector captures the available super populations.
+      * Each population is processed separately.
+      **/
      vector<string> countries = function.get_Countries(this->input_Folder);
      cout << countries.size() << " populations were found: ";
      for (int count = 0; count < countries.size(); count++)
@@ -139,61 +178,127 @@ void neutral::ingress()
 
      for (string country : countries)
      {
+          /**
+           * To reiterate each population is processed separately.
+           **/
           cout << "Processing country\t: " << country.substr(country.find_last_of("/") + 1, country.length()) << endl
                << endl;
 
+          /**
+           * @param folder_Index vector captures the sorted and indexed VCF file list from the query population folder.
+           **/
           vector<pair<string, string>> folder_Index = function.index_Folder(country);
           cout << "Completed indexing folder\t: " << country << endl;
 
           cout << endl;
+          /**
+           * The first VCF file is read to obtain information of the sample size.
+           * @param samples captures the sample size of the population under study.
+           **/
           int samples = function.getN_Split(folder_Index[0].second);
           cout << "Number of samples in " << country.substr(country.find_last_of("/") + 1, country.length()) << " population\t: " << samples << endl;
 
+          /**
+           * @param N defines number of total sequences being present per SNP.
+           **/
           int N = samples * ploidy;
           float N_float = (float)N;
           cout << "Number of sequences in " << country.substr(country.find_last_of("/") + 1, country.length()) << " population [ " << samples << " x " << ploidy << " ] (N)\t: " << N << endl;
+
+          /**
+           * @param combinations defines number of total pairwise combinations being present.
+           **/
           long int combinations = function.combos_N(N);
           cout << "Pairwise combinations\t: " << combinations << endl;
           cout << endl;
 
+          /**
+           * Pre-requisite values needed for determination of all three neutrality tests' statistics.
+           **/
           float an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1 = 0;
           get_Prerequisites(N, an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1);
+
+          /**
+           * @param test is used by Prometheus, to tell it which test is being processed.
+           * T   = Tajima
+           * FU  = Fu and Li
+           * FA  = Fay and Wu
+           * * N = All 3 Neutrality tests
+           **/
           string test = "N";
 
+          /**
+           * Ensures which mode is being run. GENE (FILE) mode or WINDOW mode.
+           **/
           if (this->calc_Mode != "FILE")
           {
+               /**
+                * * WINDOW mode configuration:
+                **/
+
+               /**
+                * Output file is created for the population in the output folder for WINDOW mode.
+                * @param output_File stores the output file's location.
+                * The file name is a combination of the the country, window size and step size. Sliding window files will have a step size of 0.
+                **/
                string output_File = output_Path + "/" +
                                     country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
                                     to_string(window_Size) + "_" + to_string(step_Size) +
                                     ".nt";
 
+               /**
+                * Ensures if PROMETHEUS is being activated.
+                **/
                if (prometheus_Activate == "YES")
                {
+                    /**
+                     * If Prometheus is being ACTIVATED then it is initialised accordingly.
+                     **/
                     prometheus pro_Neutrality_Window = prometheus(output_File, window_Size, step_Size, folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1);
+                    /**
+                     * Ensures if it is NORMAL window or SLIDING window mode.
+                     * If step_Size is = 0 then it is sliding window mode.
+                     **/
                     if (step_Size != 0)
                     {
                          pro_Neutrality_Window.process_Window(test);
                     }
                     else
                     {
+                         /**
+                          * Initiates processing of neutrality tests on PROMETHEUS on sliding window mode.
+                          **/
                          pro_Neutrality_Window.process_C_sliding_Window(test);
                     }
                }
                else
                {
                     // PROMETHEUS OFF WINDOW MODE
+                    /**
+                     * If Prometheus is NOT being activated the window calls be done accordingly.
+                     **/
                     if (step_Size != 0)
                     {
+                         /**
+                          * Initiates processing of Fu and Li on step wise window mode.
+                          **/
                          window(output_File, an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1, N_float, combinations, folder_Index);
                     }
                     else
                     {
+                         /**
+                          * Initiates processing of Fu and Li on sliding window mode.
+                          **/
                          window_Sliding(output_File, an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1, N_float, combinations, folder_Index);
                     }
                }
           }
           else
           {
+
+               /**
+                * * GENE (FILE) mode configuration:
+                **/
 
                cout << "Prerequisites:" << endl
                     << endl;
@@ -231,10 +336,22 @@ void neutral::ingress()
                fstream gene_File;
                gene_File.open(gene_List, ios::in);
                cout << "Processing gene list:" << endl;
+
+               /**
+                * Output file is created for the population in the output folder for FILE mode.
+                * @param output_File stores the output file's location.
+                * The file name is a combination of the the country, and gene file name.
+                **/
                string output_File = output_Path + "/" +
                                     country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
                                     filesystem::path(gene_List).stem().string() +
                                     ".nt";
+
+               /**
+                * Log file created in the intermediate folder for the population.
+                * @param intermediate_File stores the log file's location.
+                * ! This helps with the resume function. Automatically resumes from the last completely processed gene in the event of a program crash.
+                **/
                string intermediate_File = intermediate_Path + "/" +
                                           country.substr(country.find_last_of("/") + 1, country.length()) + "_" +
                                           filesystem::path(gene_List).stem().string() +
@@ -243,10 +360,20 @@ void neutral::ingress()
                cout << "Writing to file\t: " << output_File << endl;
                cout << endl;
 
+               /**
+                * Initiate the reading of the gene file.
+                **/
                if (gene_File.is_open())
                {
+                    /**
+                     * @param gene_Combo used to capture and extract info of each gene combination.
+                     **/
                     string gene_Combo;
 
+                    /**
+                     * If the output file is absent this run will be considered as a brand new run of this query and,
+                     * the output file and the intermediate log file will be created.
+                     **/
                     if (filesystem::exists(output_File) == 0)
                     {
                          function.createFile(output_File, "Gene_name\tCoordinates\tPi\tS\tne\tns\tTotal_iEi\tTajimas_D\tD\tD_star\tF\tF_star\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E");
@@ -254,8 +381,18 @@ void neutral::ingress()
                     }
                     else
                     {
+                         /**
+                          * If the intermediate log file present then the resume process will initiated.
+                          * This is a unintelligent resume. Essentially it matches the each read line written with the lines read from the gene file.
+                          * The break will occur as soon as their is a mismatch.
+                          * To counter any errors it is advised to have a new gene file name or a new intermediate folder per new run.
+                          **/
                          fstream intermediate;
                          intermediate.open(intermediate_File, ios::in);
+
+                         /**
+                          * @param get_finished comparison variable. Used o compare the intermediate file data with that of the gene file.
+                          **/
                          string get_finished;
                          while (getline(intermediate, get_finished))
                          {
@@ -274,27 +411,48 @@ void neutral::ingress()
                     intermediate.open(intermediate_File, ios::app);
 
                     // PROMETHEUS HERE
+                    /**
+                     * Ensures if PROMETHEUS is being activated.
+                     **/
                     if (prometheus_Activate == "YES")
                     {
                          cout << "Initializing Prometheus:" << endl
                               << endl;
 
+                         /**
+                          * If Prometheus is being ACTIVATED then it is initialised accordingly.
+                          **/
                          prometheus pro_Neutrality = prometheus(folder_Index, Multi_read, tot_Blocks, tot_ThreadsperBlock, CPU_cores, SNPs_per_Run, number_of_genes, N, combinations, an, e1, e2, vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star, bn, bn_plus1);
+
+                         /**
+                          * @param gene_Collect vector is used to collect the batch of query regions to be processed by Prometheus at once.
+                          **/
                          vector<string> gene_Collect;
 
                          while (getline(gene_File, gene_Combo))
                          {
                               gene_Collect.push_back(gene_Combo);
+                              /**
+                               * Ensures that the number of collected query regions match the user set limit to be processed at a time.
+                               **/
                               if (gene_Collect.size() == number_of_genes)
                               {
                                    cout << "Prometheus batch intialized" << endl;
                                    cout << "From: " << gene_Collect[0] << endl;
                                    cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
                                         << endl;
+
+                                   /**
+                                    * LAUNCH Prometheus to process the collected query batch.
+                                    * @param write_Lines vector collects the lines that should be written to the output file.
+                                    */
                                    // launch prometheus
                                    vector<string> write_Lines = pro_Neutrality.collection_Engine(gene_Collect, test);
                                    // print
                                    cout << "System is writing Neutrality tests results" << endl;
+                                   /**
+                                    * Outputs are written and logs are made.
+                                    **/
                                    for (size_t i = 0; i < write_Lines.size(); i++)
                                    {
                                         output << write_Lines[i] << "\n";
@@ -310,6 +468,9 @@ void neutral::ingress()
                          }
                          if (gene_Collect.size() != 0)
                          {
+                              /**
+                               * If so then Prometheus is executed to process these regions.
+                               **/
                               // RUN PROMETHEUS for remaining
                               // launch prometheus
                               cout << "Prometheus batch intialized" << endl;
@@ -317,6 +478,10 @@ void neutral::ingress()
                               cout << "To  : " << gene_Collect[gene_Collect.size() - 1] << endl
                                    << endl;
 
+                              /**
+                               * LAUNCH Prometheus to process the collected query batch.
+                               * @param write_Lines vector collects the lines that should be written to the output file.
+                               */
                               vector<string> write_Lines = pro_Neutrality.collection_Engine(gene_Collect, test);
                               // print
                               cout << "System is writing Neutrality tests results" << endl;
@@ -338,18 +503,51 @@ void neutral::ingress()
                     }
                     else
                     {
+                         /**
+                          * If Prometheus is NOT activated each query gene region in the gene file is handled individually.
+                          * This will be suitable for low powered systems and normal users.
+                          * Because there will be no excessive use of resources nor any requirement to have extensive knowledge of your system.
+                          **/
                          while (getline(gene_File, gene_Combo))
                          {
+                              /**
+                               * @param split_Data vector captures split function's outputs on the genes information.
+                               **/
                               vector<string> split_Data;
                               function.split(split_Data, gene_Combo, '\t');
+
+                              /**
+                               * @param gene_Name captures the gene's name.
+                               **/
                               string gene_Name = split_Data[0];
                               cout << "Gene name\t: " << gene_Name << endl;
+
+                              /**
+                               * @param coordinates vector captures split function's outputs on gene coordinates.
+                               * [0] = chromosome
+                               * [1] = start position
+                               * [2] = end position
+                               **/
                               vector<string> coordinates;
                               function.split(coordinates, split_Data[1], ':');
+
+                              /**
+                               * @param start_Co captures query gene's start position as an integer.
+                               **/
+                              /**
+                               * @param end_Co captures query gene's end position as an integer.
+                               **/
                               int start_Co = stoi(coordinates[1]);
                               int end_Co = stoi(coordinates[2]);
                               cout << "Coordinates\t: Chromosome: " << coordinates[0] << " Start: " << start_Co << " End: " << end_Co << endl;
 
+                              /**
+                               * @param tot_pairwise_Differences Fu and Li also requires the tot_pairwise_Differences in the query region to determine the average number of pairwise differences in the region.
+                               * @param segregating_Sites  Fu and Li requires the total number of segregating sites/ SNPS in the query region.
+                               * @param singletons_ns accounts for all singleton mutations (mutations present only once in the population) in the region.
+                               * @param singletons_ne accounts for all singleton mutations that are different from the AA.
+                               * ! Theta comment and add it to fay and wu as well.
+                               **/
                               float tot_pairwise_Differences = 0;
                               float theta_L = 0.00;
                               int segregating_Sites = 0;
