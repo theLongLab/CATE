@@ -19,14 +19,17 @@ using namespace std;
 
 class prometheus
 {
-private:
     /**
      * * This is the administrative class for Prometheus.
      * Prometheus is CATE's high performance mode.
      * It is available at present for the first 3 neutrality tests only and therefore, the four neutrality test functions.
      * Namely: Tajima's D, Fay and Wu and Fu and Li statistics are equipped with Prometheus.
+     * ! Functions of Prometheus handling the mode will be passed the test type since they are universally coded to process all test types.
+     * ! The final modifications in processing the test statistic is determined using the test type that is passed.
+     * * Only the differences in Prometheus from CATE's normal mode are typically commented in this class.
      **/
 
+private:
     /**
      * ! We use the mutex form of multithreading for Prometheus.
      * ! It provided an ease of coding since Prometheus' multithreading is confined to within the class and functions.
@@ -66,7 +69,7 @@ private:
     /**
      * ! If the next batch of query regions match the previous, then the SNPs from the previous read will be used.
      * @param prev_file_List is used to track the segment files used to process a specific batch of query regions.
-     * @param pre_MA, @param pre_Theta_partials, @param pre_ne, @param pre_ns: GPU processed SNP values will be carried forward.
+     * @param pre_MA, @param pre_Theta_partials, @param pre_ne, @param pre_ns: GPU processed SNP values that will be carried forward.
      * @param same_Files acts as a Boolean variable and will indicate the GPU to process the new list of SNPs or whether to use the existing list.
      **/
     vector<string> prev_file_List;
@@ -91,11 +94,17 @@ private:
     long int combinations;
     int N;
     float N_float;
-    // TAJIMA
+    /**
+     * TAJIMA prerequisites
+     **/
     float an, e1, e2;
-    // FU LI
+    /**
+     * FU LI prerequisites
+     **/
     float vd, ud, vd_star, ud_star, uf, vf, uf_star, vf_star;
-    // FAY WU
+    /**
+     * FAY WU prerequisites
+     **/
     float bn, bn_plus1;
 
     /**
@@ -107,7 +116,7 @@ private:
 
     // clear these after every set
     /**
-     * @param gene_Size keeps track of the number of query regions collected.
+     * @param gene_Size keeps track of the number of query regions collected and currently being processed.
      **/
     int gene_Size = 0;
 

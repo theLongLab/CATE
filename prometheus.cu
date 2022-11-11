@@ -235,26 +235,77 @@ void prometheus::set_Values_Window(string output_File, int window_Size, int step
 
 void prometheus::process_C_sliding_Window(string test)
 {
+    /**
+     * Execution function for Sliding Window.
+     * * Triggered when step size is set to 0.
+     **/
+
+    /**
+     * @param test is used to pass the neutrality test function being processed by Prometheus.
+     **/
+
+    /**
+     * Call the "functions" class. Bespoke functions commonly used by CATE.
+     **/
+
     functions function = functions();
+
+    /**
+     * Conveys to the test statistic calculating functions that it is a sliding window calculation.
+     **/
     this->sliding_Mode = "YES";
 
+    /**
+     * @param pre_Lock acts as a boolean variable. Prevents unnecessarily freeing pointers and causing memory crashes.
+     * Specially in the event two non equal file segment sets are used concurrently.
+     **/
     int pre_Lock = 1;
+
+    /**
+     * ! Used in the resume feature.
+     * @param file_Count_Start track the number of segment files to skip.
+     * @param line_Num track the number of lines to skip.
+     **/
     int file_Count_Start = 0;
     int line_Num = 0;
 
+    /**
+     * ! Resume function is triggered if the output file already exists.
+     **/
     if (filesystem::exists(output_File) != 0)
     {
+        /**
+         * If the output file is already present then the resume process will initiated.
+         * This is a unintelligent resume. Essentially it matches the each read line written with the lines read from the gene file.
+         * The break will occur as soon as their is a mismatch.
+         * To counter any errors it is advised to have a new gene file name or a new intermediate folder per new run.
+         * @param found acts as a boolean variable. found = 0 if the lines need to be skipped and will equal 1 when the resume position is found.
+         **/
         int found = 0;
 
+        /**
+         * Open the output file to be begin finding the resume point.
+         **/
         fstream output_Check;
         output_Check.open(output_File, ios::in);
         if (output_Check.is_open())
         {
+            /**
+             * @param line_Check is used to get the line from the output file to be compared.
+             * First line is skipped cause it is a header line containing column names.
+             **/
             string line_Check;
             getline(output_Check, line_Check); // skip first header line
 
+            /**
+             * We go through the files in the folder hierarchy one by one till we find the resume point.
+             **/
             for (int file_Count = 0; file_Count < folder_Index.size(); file_Count++)
             {
+                /**
+                 * @param file_Path gets the path of the query file being checked.
+                 * @param line_Current gets the line number currently being checked.
+                 **/
                 string file_Path = folder_Index[file_Count].second;
                 fstream file;
                 file.open(file_Path, ios::in);
@@ -263,10 +314,17 @@ void prometheus::process_C_sliding_Window(string test)
                 if (file.is_open())
                 {
                     string line;
+                    /**
+                     * The first line of each VCF is skipped as it is the header line.
+                     **/
                     getline(file, line); // skip first header line
                     while (getline(file, line))
                     {
                         line_Current++;
+                        /**
+                         * Checks if the line being queried is a valid seg site.
+                         * If so it is checked if it has been already processed.
+                         **/
                         int VALID = function.get_Valid(line);
                         if (VALID != -1)
                         {
@@ -277,8 +335,16 @@ void prometheus::process_C_sliding_Window(string test)
                             function.split_getPos_ONLY(positions, line, '\t');
                             string pos = positions[1] + ":" + to_string((stoi(positions[1]) + window_Size));
 
+                            /**
+                             * Ensures the query line does not match that of the output
+                             **/
                             if (pos != trim)
                             {
+                                /**
+                                 * If they do not match,
+                                 * found is set to 1 indicating the resume position has been found and,
+                                 * the loop is broken.
+                                 **/
                                 found = 1;
                                 file_Count_Start = file_Count;
                                 line_Num = line_Current;
@@ -288,6 +354,9 @@ void prometheus::process_C_sliding_Window(string test)
                     }
                     file.close();
                 }
+                /**
+                 * If found is 1 that means the resume location has been found and the loop is broken.
+                 **/
                 if (found == 1)
                 {
                     break;
@@ -298,6 +367,9 @@ void prometheus::process_C_sliding_Window(string test)
     }
     else
     {
+        /**
+         * If output file is not present then it will be created with the respective header based on the neutrality test being executed.
+         **/
         if (test == "T")
         {
             function.createFile(output_File, "Coordinates\tPi\tS\tTajimas_D");
@@ -316,6 +388,9 @@ void prometheus::process_C_sliding_Window(string test)
         }
     }
 
+    /**
+     * @param row_vec blank vector variable used to initiate the global vector<vector> variables.
+     **/
     vector<int> row_vec;
 
     fstream output;
@@ -326,6 +401,12 @@ void prometheus::process_C_sliding_Window(string test)
 
     int line_Current = 0;
 
+    /**
+     * FOR LOOP will iterate through the file segments in the file structure.
+     * Going from one SNP to the next as is required by the Sliding window mode.
+     * @param file_Count_Start will state from which file to start.
+     * If it is resuming it will start from the last processed file, if not it will start from the beginning (FILE INDEX 0).
+     **/
     for (int file_Count = file_Count_Start; file_Count < folder_Index.size(); file_Count++)
     {
         string file_Path = folder_Index[file_Count].second;
@@ -350,6 +431,9 @@ void prometheus::process_C_sliding_Window(string test)
                     int end_Co = start_Co + window_Size;
 
                     // vector<string> file_List = function.forward_Search_Only(file_Count, this->folder_Index, start_Co, end_Co);
+                    /**
+                     * Initialization of all global variables required for multithreading.
+                     **/
                     all_start_Co.push_back(start_Co);
                     all_end_Co.push_back(end_Co);
 
@@ -363,10 +447,20 @@ void prometheus::process_C_sliding_Window(string test)
 
                     catch_Point.push_back(1);
 
+                    /**
+                     * Processing of query regions will begin once if the maximum number allowed be handled at a time is reached.
+                     **/
                     if (write_Lines.size() == number_of_genes_Window)
                     {
                         // Process
                         // intialize(coordinates);
+                        /**
+                         * Since sliding window essentially processes a range of SNPS, from one location to the next,
+                         * we can simply take the first SNP position and the last SNP position incremented by the window size,
+                         * and form the query range that will satisfy the current batch being processed.
+                         * @param folder_Start defines the start of the range.
+                         * @param folder_End defines the end of the range.
+                         **/
                         int folder_Start = all_start_Co[0];
                         int folder_End = all_end_Co[all_end_Co.size() - 1];
                         this->gene_Size = write_Lines.size();
@@ -384,14 +478,25 @@ void prometheus::process_C_sliding_Window(string test)
                             file_List.push_back(folder_Index[0].second);
                         }
 
+                        /**
+                         * If the previous batches and the new batches collection of file segments then the new data will be processed.
+                         * If they are similar the data SNP processing is skipped, since both batches require the same processed SNP data.
+                         **/
                         if (this->prev_file_List != file_List)
                         {
+                            /**
+                             * @param pre_Lock ensures that a memory free has not been run before.
+                             * If it has not then the current memory is purged to free the SNP information.
+                             **/
                             if (pre_Lock == 1)
                             {
                                 pre_Lock = 0;
                             }
                             else
                             {
+                                /**
+                                 * Memory is purged based on test type.
+                                 **/
                                 if (test == "T")
                                 {
                                     free(pre_MA);
@@ -434,10 +539,18 @@ void prometheus::process_C_sliding_Window(string test)
 
                             if (Multi_read == "YES")
                             {
-                                cout << "Intitating multi read based segregating site search" << endl;
+                                /**
+                                 * User has cleared for Multi-read.
+                                 * All segment files will be read concurrently.
+                                 * And the SNP data will be stored in the global variable @param all_Lines.
+                                 **/
+                                cout << "Initiating multi read based segregating site search" << endl;
 
                                 vector<thread> threads_Multi_read;
 
+                                /**
+                                 * Separate threads will be spawned per file segment.
+                                 **/
                                 for (string files : file_List)
                                 {
                                     // cout << files << endl;
@@ -456,7 +569,12 @@ void prometheus::process_C_sliding_Window(string test)
                             }
                             else
                             {
-                                cout << "Intitating single read based segregating site search" << endl;
+                                /**
+                                 * User has NOT cleared for Multi-read.
+                                 * All segment files will be read one after the other.
+                                 * Similarly the SNP data will be stored in the global variable @param all_Lines.
+                                 **/
+                                cout << "Initiating single read based segregating site search" << endl;
                                 for (string files : file_List)
                                 {
                                     fstream file;
@@ -480,6 +598,17 @@ void prometheus::process_C_sliding_Window(string test)
                             cout << "System is processing and filtering " << tot_Segs << " segregating site(s)" << endl;
                             // all_Files_index.clear();
 
+                            /**
+                             * The GPU is permitted to handle only a certain max number of SNPs at a time.
+                             * Therefore the number of rounds of GPU processing and,
+                             * the range of SNPs that will be processed in each round will have to be determined.
+                             *
+                             * @param GPU_rounds_full rounds requiring the max set of SNPs to be processed.
+                             * @param GPU_rounds_partial rounds requiring the remaining set of SNPs to be processed.
+                             *
+                             * The start and stop range of each round is stored.
+                             **/
+
                             int GPU_rounds_full = tot_Segs / SNPs_per_Run;
                             int GPU_rounds_partial = tot_Segs % SNPs_per_Run;
 
@@ -499,6 +628,11 @@ void prometheus::process_C_sliding_Window(string test)
                             }
 
                             vector<thread> threads_vec;
+
+                            /**
+                             * Concatenation of SNPs for GPU processing is also done in parallel,
+                             * Number of threads needed is based on the number of rounds needed.
+                             **/
 
                             for (int rounds = 0; rounds < start_stop.size(); rounds++)
                             {
@@ -523,14 +657,26 @@ void prometheus::process_C_sliding_Window(string test)
                             threads_vec.clear();
 
                             prev_file_List.clear();
+
+                            /**
+                             * The current batches segment file list is stored to be compared with the next batch.
+                             **/
                             this->prev_file_List = file_List;
                         }
                         else
                         {
+                            /**
+                             * Used to indicate that no GPU based processing needs to be done.
+                             * As the previous file list is the same as the current.
+                             **/
                             same_Files = "YES";
                         }
 
                         // Process test
+
+                        /**
+                         * Relevant administrative function is called to process the user required test statistic.
+                         **/
                         if (test == "T")
                         {
                             process_Tajima();
@@ -552,6 +698,9 @@ void prometheus::process_C_sliding_Window(string test)
                             cout << "System has completed Neutrality tests for the gene(s)" << endl;
                         }
 
+                        /**
+                         * Results will be written to the relevant output file.
+                         **/
                         for (int gene_Count = 0; gene_Count < write_Lines.size(); gene_Count++)
                         {
                             if (seg_catch_points_ALL[gene_Count] != -1)
@@ -593,6 +742,10 @@ void prometheus::process_C_sliding_Window(string test)
         // break;
     }
 
+    /**
+     * Processing of query regions remaining.
+     * Same as above without any looop.
+     **/
     if (write_Lines.size() != 0)
     {
         // Process
