@@ -3,7 +3,9 @@
 
 prometheus::prometheus(vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, long int combinations, float an, float e1, float e2, int N, int CPU_cores, int SNPs_per_Run, int number_of_genes)
 {
-    // TAJIMA CONSTRUCTOR
+    /**
+     * TAJIMA GENE MODE CONSTRUCTOR
+     **/
 
     set_Values(folder_Index, tot_Blocks, tot_ThreadsperBlock, Multi_read, CPU_cores, SNPs_per_Run, number_of_genes);
 
@@ -18,8 +20,9 @@ prometheus::prometheus(vector<pair<string, string>> folder_Index, string Multi_r
 
 prometheus::prometheus(string output_File, int window_Size, int step_Size, vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, long int combinations, float an, float e1, float e2, int N, int CPU_cores, int SNPs_per_Run, int number_of_genes)
 {
-    // TAJIMA WINDOW CONSTRUCTOR
-
+    /**
+     * TAJIMA WINDOW MODE CONSTRUCTOR
+     **/
     set_Values(folder_Index, tot_Blocks, tot_ThreadsperBlock, Multi_read, CPU_cores, SNPs_per_Run, number_of_genes);
     set_Values_Window(output_File, window_Size, step_Size, number_of_genes);
 
@@ -32,7 +35,9 @@ prometheus::prometheus(string output_File, int window_Size, int step_Size, vecto
 
 prometheus::prometheus(vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, int CPU_cores, int SNPs_per_Run, int number_of_genes, int N, long int combinations, float an, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star)
 {
-    // FU LI Constructor
+    /**
+     * FU LI GENE MODE CONSTRUCTOR
+     **/
 
     set_Values(folder_Index, tot_Blocks, tot_ThreadsperBlock, Multi_read, CPU_cores, SNPs_per_Run, number_of_genes);
 
@@ -53,7 +58,9 @@ prometheus::prometheus(vector<pair<string, string>> folder_Index, string Multi_r
 
 prometheus::prometheus(string output_File, int window_Size, int step_Size, vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, int CPU_cores, int SNPs_per_Run, int number_of_genes, int N, long int combinations, float an, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star)
 {
-    // FU LI CONSTRUCTOR WINDOW
+    /**
+     * FU LI WINDOW MODE CONSTRUCTOR
+     **/
 
     set_Values(folder_Index, tot_Blocks, tot_ThreadsperBlock, Multi_read, CPU_cores, SNPs_per_Run, number_of_genes);
     set_Values_Window(output_File, window_Size, step_Size, number_of_genes);
@@ -75,7 +82,9 @@ prometheus::prometheus(string output_File, int window_Size, int step_Size, vecto
 
 prometheus::prometheus(vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, int CPU_cores, int SNPs_per_Run, int number_of_genes, int N, long int combinations, float an, float bn, float bn_plus1)
 {
-    // FAY WU Constructor
+    /**
+     * FAY WU GENE MODE CONSTRUCTOR
+     **/
 
     set_Values(folder_Index, tot_Blocks, tot_ThreadsperBlock, Multi_read, CPU_cores, SNPs_per_Run, number_of_genes);
 
@@ -90,7 +99,9 @@ prometheus::prometheus(vector<pair<string, string>> folder_Index, string Multi_r
 
 prometheus::prometheus(string output_File, int window_Size, int step_Size, vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, int CPU_cores, int SNPs_per_Run, int number_of_genes, int N, long int combinations, float an, float bn, float bn_plus1)
 {
-    // FAY WU Constructor WINDOW
+    /**
+     * FAY WU WINDOW MODE CONSTRUCTOR
+     **/
 
     set_Values(folder_Index, tot_Blocks, tot_ThreadsperBlock, Multi_read, CPU_cores, SNPs_per_Run, number_of_genes);
     set_Values_Window(output_File, window_Size, step_Size, number_of_genes);
@@ -106,7 +117,10 @@ prometheus::prometheus(string output_File, int window_Size, int step_Size, vecto
 
 prometheus::prometheus(vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, int CPU_cores, int SNPs_per_Run, int number_of_genes, int N, long int combinations, float an, float e1, float e2, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float bn, float bn_plus1)
 {
-    // NEUTRALITY
+    /**
+     * NEUTRALITY GENE MODE CONSTRUCTOR
+     **/
+
     set_Values(folder_Index, tot_Blocks, tot_ThreadsperBlock, Multi_read, CPU_cores, SNPs_per_Run, number_of_genes);
 
     this->N = N;
@@ -133,7 +147,9 @@ prometheus::prometheus(vector<pair<string, string>> folder_Index, string Multi_r
 
 prometheus::prometheus(string output_File, int window_Size, int step_Size, vector<pair<string, string>> folder_Index, string Multi_read, int tot_Blocks, int tot_ThreadsperBlock, int CPU_cores, int SNPs_per_Run, int number_of_genes, int N, long int combinations, float an, float e1, float e2, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float bn, float bn_plus1)
 {
-    // NEUTRALITY CONSTRUCTOR WINDOW
+    /**
+     * NEUTRALITY WINDOW MODE CONSTRUCTOR
+     **/
 
     set_Values(folder_Index, tot_Blocks, tot_ThreadsperBlock, Multi_read, CPU_cores, SNPs_per_Run, number_of_genes);
     set_Values_Window(output_File, window_Size, step_Size, number_of_genes);
@@ -162,6 +178,11 @@ prometheus::prometheus(string output_File, int window_Size, int step_Size, vecto
 
 void prometheus::set_Values(vector<pair<string, string>> folder_Index, int tot_Blocks, int tot_ThreadsperBlock, string Multi_read, int CPU_cores, int SNPs_per_Run, int number_of_genes)
 {
+    /**
+     * This function is used in conjunction with the constructor to set the common private variables.
+     * Configures the Prometheus parameters.
+     **/
+
     this->folder_Index = folder_Index;
 
     this->tot_Blocks = tot_Blocks;
@@ -187,6 +208,11 @@ void prometheus::set_Values(vector<pair<string, string>> folder_Index, int tot_B
 
 void prometheus::set_Values_Window(string output_File, int window_Size, int step_Size, int number_of_genes)
 {
+    /**
+     * This function is used in conjunction with the WINDOW constructors to set the common private variables.
+     * Configures the WINDOW parameters.
+     **/
+
     this->output_File = output_File;
 
     this->window_Size = window_Size;

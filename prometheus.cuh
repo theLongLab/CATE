@@ -23,7 +23,7 @@ private:
     /**
      * * This is the administrative class for Prometheus.
      * Prometheus is CATE's high performance mode.
-     * It is available at present for the first 3 neutrality tests and four functions.
+     * It is available at present for the first 3 neutrality tests only and therefore, the four neutrality test functions.
      * Namely: Tajima's D, Fay and Wu and Fu and Li statistics are equipped with Prometheus.
      **/
 
