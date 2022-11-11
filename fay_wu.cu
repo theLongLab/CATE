@@ -1236,7 +1236,8 @@ void fay_wu::window(string output_File, float an, float bn, float bn_plus1, floa
           int Total_iEi = 0;
 
           /**
-           * Calls the function to process the segregating sites and calculate theta L requried for calculating the Fay and Wu values.
+           * Calls the function to process the segregating sites and calculate theta L required for calculating the Fay and Wu values.
+           * @param theta_L  The mean number of mutations accumulated in each gene since the most recent common ancestor.
            **/
           float theta_L = calc_theta_L(collect_Segregrating_sites, N_float, num_segregrating_Sites, Total_iEi, tot_pairwise_Differences);
 

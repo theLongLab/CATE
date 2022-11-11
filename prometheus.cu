@@ -1915,7 +1915,7 @@ void prometheus::process_Neutrality()
         memcpy(ns, pre_ns, tot_Segs * sizeof(int));
     }
 
-    cout << "Filteration and selection of segregating site(s)" << endl;
+    cout << "Filtration and selection of segregating site(s)" << endl;
 
     if (this->sliding_Mode == "YES")
     {
@@ -2418,7 +2418,7 @@ void prometheus::process_Fay_Wu()
         memcpy(Theta_partials, pre_Theta_partials, tot_Segs * sizeof(int));
     }
 
-    cout << "Filteration and selection of segregating site(s)" << endl;
+    cout << "Filtration and selection of segregating site(s)" << endl;
 
     if (this->sliding_Mode == "YES")
     {
@@ -2908,7 +2908,7 @@ void prometheus::process_Fu_Li()
         memcpy(ns, pre_ns, tot_Segs * sizeof(int));
     }
 
-    cout << "Filteration and selection of segregating site(s)" << endl;
+    cout << "Filtration and selection of segregating site(s)" << endl;
 
     if (this->sliding_Mode == "YES")
     {
@@ -3584,7 +3584,7 @@ void prometheus::process_Tajima()
         // MA_Count = pre_MA;
     }
 
-    cout << "Filteration and selection of segregating site(s)" << endl;
+    cout << "Filtration and selection of segregating site(s)" << endl;
 
     if (this->sliding_Mode == "YES")
     {

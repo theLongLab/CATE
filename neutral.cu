@@ -546,7 +546,7 @@ void neutral::ingress()
                                * @param segregating_Sites  Fu and Li requires the total number of segregating sites/ SNPS in the query region.
                                * @param singletons_ns accounts for all singleton mutations (mutations present only once in the population) in the region.
                                * @param singletons_ne accounts for all singleton mutations that are different from the AA.
-                               * ! Theta comment and add it to fay and wu as well.
+                               * @param theta_L  The mean number of mutations accumulated in each gene since the most recent common ancestor.
                                **/
                               float tot_pairwise_Differences = 0;
                               float theta_L = 0.00;
@@ -567,7 +567,7 @@ void neutral::ingress()
                                    file_List.push_back(folder_Index[0].second);
                               }
                               cout << "System has retrieved all file(s)" << endl;
-                              cout << "System is collecting segregrating site(s)" << endl;
+                              cout << "System is collecting segregating site(s)" << endl;
                               vector<string> collect_Segregrating_sites;
 
                               for (string files : file_List)
@@ -598,6 +598,9 @@ void neutral::ingress()
                               }
 
                               // CUDA combined function
+                              /**
+                               * Calls the function to process the Segregating sites and obtain the necessary values to process all three neutrality tests.
+                               */
                               process_Segs(collect_Segregrating_sites, N_float, segregating_Sites, tot_pairwise_Differences, singletons_ne, singletons_ns, Total_iEi, theta_L, tot_Blocks, tot_ThreadsperBlock);
 
                               cout << endl;
@@ -699,30 +702,71 @@ void neutral::ingress()
 
 void neutral::window_Sliding(string output_File, float an, float e1, float e2, float vd, float ud, float vd_star, float ud_star, float uf, float vf, float uf_star, float vf_star, float bn, float bn_plus1, float N_float, long int combinations, vector<pair<string, string>> &folder_Index)
 {
+     /**
+      * NORMAL MODE SLIDING WINDOW FUNCTION
+      **/
+
+     /**
+      * Call the "functions" class. Bespoke functions commonly used by CATE.
+      **/
      functions function = functions();
      cout << "Writing to file\t: " << output_File << endl;
      cout << endl;
 
+     /**
+      * WINDOW functions have their own bespoke resume function that does not need an intermediate log file.
+      * @param file_Count_Start is used to keep track of the files that have already been processed.
+      * @param line_Num is used to keep track of the number of lines in that file that have already been processed.
+      * ! This helps with the resume function. Automatically resumes from the last completely processed gene in the event of a program crash.
+      **/
      int file_Count_Start = 0;
      int line_Num = 0;
 
+     /**
+      * If the output file is absent this run will be considered as a brand new run of this query and,
+      * the output file and the intermediate log file will be created.
+      **/
      if (filesystem::exists(output_File) == 0)
      {
+          /**
+           * Window outputs have NO gene name column.
+           **/
           function.createFile(output_File, "Coordinates\tPi\tS\tne\tns\tTotal_iEi\tTajimas_D\tD\tD_star\tF\tF_star\tFay_Wu_Normalized_H\tFay_Wu_Normalized_E");
      }
      else
      {
+          /**
+           * If the output file is already present then the resume process will initiated.
+           * This is a unintelligent resume. Essentially it matches the each read line written with the lines read from the gene file.
+           * The break will occur as soon as their is a mismatch.
+           * To counter any errors it is advised to have a new gene file name or a new intermediate folder per new run.
+           * @param found acts as a boolean variable. found = 0 if the lines need to be skipped and will equal 1 when the resume position is found.
+           **/
           int found = 0;
 
+          /**
+           * Open the output file to be begin finding the resume point.
+           **/
           fstream output_Check;
           output_Check.open(output_File, ios::in);
           if (output_Check.is_open())
           {
+               /**
+                * @param line_Check is used to get the line from the output file to be compared.
+                * First line is skipped cause it is a header line containing column names.
+                **/
                string line_Check;
                getline(output_Check, line_Check); // skip first header line
 
+               /**
+                * We go through the files in the folder hierarchy one by one till we find the resume point.
+                **/
                for (int file_Count = 0; file_Count < folder_Index.size(); file_Count++)
                {
+                    /**
+                     * @param file_Path gets the path of the query file being checked.
+                     * @param line_Current gets the line number currently being checked.
+                     **/
                     string file_Path = folder_Index[file_Count].second;
                     fstream file;
                     file.open(file_Path, ios::in);
@@ -731,10 +775,17 @@ void neutral::window_Sliding(string output_File, float an, float e1, float e2, f
                     if (file.is_open())
                     {
                          string line;
+                         /**
+                          * The first line of each VCF is skipped as it is the header line.
+                          **/
                          getline(file, line); // skip first header line
                          while (getline(file, line))
                          {
                               line_Current++;
+                              /**
+                               * Checks if the line being queried is a valid seg site.
+                               * If so it is checked if it has been already processed.
+                               **/
                               int VALID = function.get_Valid(line);
                               if (VALID != -1)
                               {
@@ -745,6 +796,9 @@ void neutral::window_Sliding(string output_File, float an, float e1, float e2, f
                                    function.split_getPos_ONLY(positions, line, '\t');
                                    string pos = positions[1] + ":" + to_string((stoi(positions[1]) + window_Size));
 
+                                   /**
+                                    * Ensures the query line does not match that of the output
+                                    **/
                                    if (pos != trim)
                                    {
                                         found = 1;
@@ -756,6 +810,9 @@ void neutral::window_Sliding(string output_File, float an, float e1, float e2, f
                          }
                          file.close();
                     }
+                    /**
+                     * If found is 1 that means the resume location has been found and the loop is broken.
+                     **/
                     if (found == 1)
                     {
                          break;
@@ -768,10 +825,16 @@ void neutral::window_Sliding(string output_File, float an, float e1, float e2, f
      fstream output;
      output.open(output_File, ios::app);
 
+     /**
+      * @param line_Current is used to skip over the lines that have already been processed.
+      **/
      int line_Current = 0;
 
      for (int file_Count = file_Count_Start; file_Count < folder_Index.size(); file_Count++)
      {
+          /**
+           * @param file_Path gets the path of the file being processed.
+           **/
           string file_Path = folder_Index[file_Count].second;
           fstream file_Main;
           file_Main.open(file_Path, ios::in);
@@ -779,9 +842,15 @@ void neutral::window_Sliding(string output_File, float an, float e1, float e2, f
           if (file_Main.is_open())
           {
                string line_Main;
+               /**
+                * The first line of each VCF is skipped as it is the header line.
+                **/
                getline(file_Main, line_Main); // skip first header line
                while (getline(file_Main, line_Main))
                {
+                    /**
+                     * Skips over lines that have already been processed.
+                     **/
                     if (line_Current < line_Num)
                     {
                          line_Current++;
@@ -789,10 +858,19 @@ void neutral::window_Sliding(string output_File, float an, float e1, float e2, f
                     else
                     {
                          // check VALID
+                         /**
+                          * Checks if the line being queried is a valid seg site.
+                          * If so it is processed.
+                          * @param VALID captures the position of the query site if it is valid, else it returns -1.
+                          **/
                          int VALID = function.get_Valid(line_Main);
                          // cout << line_Main << endl;
                          if (VALID != -1)
                          {
+                              /**
+                               * @param start_Co captures the start position as an integer.
+                               * @param end_Co captures the end position as an integer.
+                               **/
                               int start_Co = VALID;
                               int end_Co = start_Co + window_Size;
 
@@ -805,11 +883,17 @@ void neutral::window_Sliding(string output_File, float an, float e1, float e2, f
                               int singletons_ne = 0;
                               int Total_iEi = 0;
 
+                              /**
+                               * @param file_List vector is used to store the list of VCF files (found via CATES CIS algorithm) that satisfy the query region.
+                               **/
                               vector<string> file_List;
                               cout << endl;
                               cout << "System is retrieving file(s)" << endl;
                               if (folder_Index.size() > 1)
                               {
+                                   /**
+                                    * IF only one file is present in the index folder that file will be used as is.
+                                    **/
                                    file_List = function.compound_interpolationSearch(folder_Index, start_Co, end_Co);
                               }
                               else
@@ -817,9 +901,16 @@ void neutral::window_Sliding(string output_File, float an, float e1, float e2, f
                                    file_List.push_back(folder_Index[0].second);
                               }
                               cout << "System has retrieved all file(s)" << endl;
-                              cout << "System is collecting segregrating site(s)" << endl;
+                              cout << "System is collecting segregating site(s)" << endl;
+                              /**
+                               * The SNPs (Segregating sites) that fall within the query region are collected from the VCF's.
+                               * @param collect_Segregrating_sites vector stores the collected SNPs.
+                               **/
                               vector<string> collect_Segregrating_sites;
 
+                              /**
+                               * Once the required files are found they are read sequentially to get the required SNP data for processing.
+                               **/
                               for (string files : file_List)
                               {
                                    fstream file;
@@ -827,19 +918,35 @@ void neutral::window_Sliding(string output_File, float an, float e1, float e2, f
                                    if (file.is_open())
                                    {
                                         string line;
+                                        /**
+                                         * The first line of each VCF is skipped as it is the header line.
+                                         **/
                                         getline(file, line);
                                         while (getline(file, line))
                                         {
                                              vector<string> positions;
+                                             /**
+                                              * @param positions vector is used to capture the SNP data upto the position column (Column 2 (non zero count)).
+                                              **/
                                              function.split_getPos_ONLY(positions, line, '\t');
                                              int pos = stoi(positions[1]);
-
+                                             /**
+                                              * Ensures that the query SNP's position satisfies the query region's range.
+                                              **/
                                              if (pos >= start_Co && pos <= end_Co)
                                              {
+                                                  /**
+                                                   * If the SNP is between the range of the query region, it is collected.
+                                                   * Information from the SNP is extracted via the GPU.
+                                                   **/
                                                   collect_Segregrating_sites.push_back(line);
                                              }
                                              else if (pos > end_Co)
                                              {
+                                                  /**
+                                                   * If the read files query SNP exceeds the query regions range then the read loop is broken.
+                                                   * This is because VCF's by nature, are sorted by position.
+                                                   **/
                                                   break;
                                              }
                                         }
@@ -848,6 +955,9 @@ void neutral::window_Sliding(string output_File, float an, float e1, float e2, f
                               }
 
                               // CUDA combined function
+                              /**
+                               * Calls the function to process the Segregating sites and obtain the necessary values to process all three neutrality tests.
+                               */
                               process_Segs(collect_Segregrating_sites, N_float, segregating_Sites, tot_pairwise_Differences, singletons_ne, singletons_ns, Total_iEi, theta_L, tot_Blocks, tot_ThreadsperBlock);
 
                               cout << endl;
