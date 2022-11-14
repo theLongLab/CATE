@@ -744,7 +744,7 @@ void prometheus::process_C_sliding_Window(string test)
 
     /**
      * Processing of query regions remaining.
-     * Same as above without any looop.
+     * Same as above without any loop.
      **/
     if (write_Lines.size() != 0)
     {
@@ -817,7 +817,7 @@ void prometheus::process_C_sliding_Window(string test)
 
             if (Multi_read == "YES")
             {
-                cout << "Intitating multi read based segregating site search" << endl;
+                cout << "Initiating multi read based segregating site search" << endl;
 
                 vector<thread> threads_Multi_read;
 
@@ -839,7 +839,7 @@ void prometheus::process_C_sliding_Window(string test)
             }
             else
             {
-                cout << "Intitating single read based segregating site search" << endl;
+                cout << "Initiating single read based segregating site search" << endl;
                 for (string files : file_List)
                 {
                     fstream file;
@@ -973,18 +973,46 @@ void prometheus::process_C_sliding_Window(string test)
 
 void prometheus::process_Window(string test)
 {
+    /**
+     * Execution function for Window mode.
+     **/
+
+    /**
+     * @param test is used to pass the neutrality test function being processed by Prometheus.
+     **/
+
+    /**
+     * Call the "functions" class. Bespoke functions commonly used by CATE.
+     **/
     functions function = functions();
 
     // CREATE the output files
     // OUTPUT FILE columns changes based on test type
 
+    /**
+     * @param pre_Lock acts as a boolean variable. Prevents unnecessarily freeing pointers and causing memory crashes.
+     * Specially in the event two non equal file segment sets are used concurrently.
+     **/
+
     int pre_Lock = 1;
+
+    /**
+     * Window analysis requires CATE to know the span of the genomic region to be analyzed.
+     * So it can know where to start and stop when conducting the window analysis.
+     * @param start_Value get the first SNP's position.
+     * @param end_Value get the last SNP's position.
+     * CATE is able to do this instantly because of its file structure and organization.
+     **/
 
     int start_Value = stoi(folder_Index[0].first.substr(0, folder_Index[0].first.find('_')));
     int end_Value = stoi(folder_Index[folder_Index.size() - 1].first.substr(folder_Index[folder_Index.size() - 1].first.find('_') + 1));
 
     // cout << start_Value << endl;
     // cout << end_Value << endl;
+
+    /**
+     * First we look through the query regions starting from 0 till we get the first calculable range based on the dataset available.
+     **/
 
     int start_Co = 0;
     int end_Co = start_Co + window_Size;
@@ -998,8 +1026,16 @@ void prometheus::process_Window(string test)
     // vector<pair<int, int>> coordinates;
 
     // RESUME FUNCTION
+    /**
+     * Used in the resume function
+     * @param caught acts as a boolean variable to get the unprocessed query region.
+     * Once the unprocessed query region is found its parameters will be collected.
+     **/
     int caught = 0;
 
+    /**
+     * ! Resume function is triggered if the output file already exists.
+     **/
     if (filesystem::exists(output_File) != 0)
     {
         // skip
@@ -1037,6 +1073,9 @@ void prometheus::process_Window(string test)
     }
     else
     {
+        /**
+         * If output file is not present then it will be created with the respective header based on the neutrality test being executed.
+         **/
         if (test == "T")
         {
             function.createFile(output_File, "Coordinates\tPi\tS\tTajimas_D");
@@ -1055,6 +1094,9 @@ void prometheus::process_Window(string test)
         }
     }
 
+    /**
+     * @param row_vec blank vector variable used to initiate the global vector<vector> variables.
+     **/
     vector<int> row_vec;
 
     fstream output;
@@ -1066,6 +1108,9 @@ void prometheus::process_Window(string test)
     while (start_Co <= end_Value)
     {
         // coordinates.push_back(make_pair(start_Co, end_Co));
+        /**
+         * Initialization of all global variables required for multithreading.
+         **/
         all_start_Co.push_back(start_Co);
         all_end_Co.push_back(end_Co);
 
@@ -1080,11 +1125,20 @@ void prometheus::process_Window(string test)
         catch_Point.push_back(1);
 
         // cout << end_Co << endl;
-
+        /**
+         * Processing of query regions will begin once if the maximum number allowed be handled at a time is reached.
+         **/
         if (write_Lines.size() == number_of_genes_Window)
         {
             // Process
             // intialize(coordinates);
+            /**
+             * Since sliding window essentially processes a range of SNPS, from one location to the next,
+             * we can simply take the first SNP position and the last SNP position incremented by the window size,
+             * and form the query range that will satisfy the current batch being processed.
+             * @param folder_Start defines the start of the range.
+             * @param folder_End defines the end of the range.
+             **/
             int folder_Start = all_start_Co[0];
             int folder_End = all_end_Co[all_end_Co.size() - 1];
             this->gene_Size = write_Lines.size();
@@ -1102,14 +1156,25 @@ void prometheus::process_Window(string test)
                 file_List.push_back(folder_Index[0].second);
             }
 
+            /**
+             * If the previous batches and the new batches collection of file segments then the new data will be processed.
+             * If they are similar the data SNP processing is skipped, since both batches require the same processed SNP data.
+             **/
             if (this->prev_file_List != file_List)
             {
+                /**
+                 * @param pre_Lock ensures that a memory free has not been run before.
+                 * If it has not then the current memory is purged to free the SNP information.
+                 **/
                 if (pre_Lock == 1)
                 {
                     pre_Lock = 0;
                 }
                 else
                 {
+                    /**
+                     * Memory is purged based on test type.
+                     **/
                     if (test == "T")
                     {
                         free(pre_MA);
@@ -1152,10 +1217,18 @@ void prometheus::process_Window(string test)
 
                 if (Multi_read == "YES")
                 {
-                    cout << "Intitating multi read based segregating site search" << endl;
+                    /**
+                     * User has cleared for Multi-read.
+                     * All segment files will be read concurrently.
+                     * And the SNP data will be stored in the global variable @param all_Lines.
+                     **/
+                    cout << "Initiating multi read based segregating site search" << endl;
 
                     vector<thread> threads_Multi_read;
 
+                    /**
+                     * Separate threads will be spawned per file segment.
+                     **/
                     for (string files : file_List)
                     {
                         // cout << files << endl;
@@ -1174,7 +1247,12 @@ void prometheus::process_Window(string test)
                 }
                 else
                 {
-                    cout << "Intitating single read based segregating site search" << endl;
+                    /**
+                     * User has NOT cleared for Multi-read.
+                     * All segment files will be read one after the other.
+                     * Similarly the SNP data will be stored in the global variable @param all_Lines.
+                     **/
+                    cout << "Initiating single read based segregating site search" << endl;
                     for (string files : file_List)
                     {
                         fstream file;
@@ -1198,6 +1276,16 @@ void prometheus::process_Window(string test)
                 cout << "System is processing and filtering " << tot_Segs << " segregating site(s)" << endl;
                 // all_Files_index.clear();
 
+                /**
+                 * The GPU is permitted to handle only a certain max number of SNPs at a time.
+                 * Therefore the number of rounds of GPU processing and,
+                 * the range of SNPs that will be processed in each round will have to be determined.
+                 *
+                 * @param GPU_rounds_full rounds requiring the max set of SNPs to be processed.
+                 * @param GPU_rounds_partial rounds requiring the remaining set of SNPs to be processed.
+                 *
+                 * The start and stop range of each round is stored.
+                 **/
                 int GPU_rounds_full = tot_Segs / SNPs_per_Run;
                 int GPU_rounds_partial = tot_Segs % SNPs_per_Run;
 
@@ -1217,6 +1305,11 @@ void prometheus::process_Window(string test)
                 }
 
                 vector<thread> threads_vec;
+
+                /**
+                 * Concatenation of SNPs for GPU processing is also done in parallel,
+                 * Number of threads needed is based on the number of rounds needed.
+                 **/
 
                 for (int rounds = 0; rounds < start_stop.size(); rounds++)
                 {
@@ -1241,14 +1334,26 @@ void prometheus::process_Window(string test)
                 threads_vec.clear();
 
                 prev_file_List.clear();
+
+                /**
+                 * The current batches segment file list is stored to be compared with the next batch.
+                 **/
                 this->prev_file_List = file_List;
             }
             else
             {
+                /**
+                 * Used to indicate that no GPU based processing needs to be done.
+                 * As the previous file list is the same as the current.
+                 **/
                 same_Files = "YES";
             }
 
             // Process test
+
+            /**
+             * Relevant administrative function is called to process the user required test statistic.
+             **/
             if (test == "T")
             {
                 process_Tajima();
@@ -1270,6 +1375,9 @@ void prometheus::process_Window(string test)
                 cout << "System has completed Neutrality tests for the gene(s)" << endl;
             }
 
+            /**
+             * Results will be written to the relevant output file.
+             **/
             for (string line : write_Lines)
             {
                 output << line << "\n";
@@ -1301,6 +1409,10 @@ void prometheus::process_Window(string test)
     }
 
     // check if any remains
+    /**
+     * Processing of query regions remaining.
+     * Same as above without any loop.
+     **/
     if (write_Lines.size() != 0)
     {
         // intialize(coordinates);
@@ -1533,10 +1645,20 @@ vector<string> prometheus::collection_Engine(vector<string> &gene_Collect, strin
 {
     // FIX all_lines
 
+    /**
+     * This is the administrative function that processed gene mode processing of th neutrality tests.
+     * @param gene_Collect will contain the list of query regions that need to be processed.
+     * @param test_Type indicates the neutrality test function to be carried out.
+     **/
+
     this->gene_Size = gene_Collect.size();
     // MAKE HDD version : DONE
     for (size_t i = 0; i < gene_Size; i++)
     {
+        /**
+         * Initialization of all global variables required for multithreading.
+         **/
+
         // multithread
         // vector<string> row;
         vector<int> row;
@@ -1558,12 +1680,30 @@ vector<string> prometheus::collection_Engine(vector<string> &gene_Collect, strin
         seg_forward_index_ALL.push_back(row);
     }
 
-    cout << "Intitating file index collection" << endl;
+    cout << "Initiating file index collection" << endl;
+
+    /**
+     * Gene mode uses a different strategy to collect the relevant segment files.
+     *
+     * ! This is a multithreaded approach to our CIS algorithm.
+     *
+     * First the query regions start and stop regions will be extracted in separate threads.
+     * Each thread per query region.
+     * Followed by the search for their latch points.
+     *
+     * Then separate threads will be used to do froward and backward searches in the file space.
+     * To collect all the relevant files.
+     * These file segments will be stored in a set variable @param all_Files_index. This ensures no redundancy in file segments.
+     **/
+
     if (folder_Index.size() > 1)
     {
         vector<thread> threads_vec;
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
+            /**
+             * Extract query region coordinates and find latch points.
+             **/
             threads_vec.push_back(thread{&prometheus::get_Gene_info_and_catch, this, gene_Collect[gene_ID], gene_ID});
         }
 
@@ -1581,6 +1721,9 @@ vector<string> prometheus::collection_Engine(vector<string> &gene_Collect, strin
             // int pos, int start_Co, int end_Co, int gene_ID
             if (catch_Point[gene_ID] != -1)
             {
+                /**
+                 * If the query region has a latch point forward and backward searches will be spawned.
+                 **/
                 threads_vec.push_back(thread{&prometheus::forward_Search, this, catch_Point[gene_ID], all_start_Co[gene_ID], all_end_Co[gene_ID], gene_ID});
                 threads_vec.push_back(thread{&prometheus::backward_Search, this, catch_Point[gene_ID], all_start_Co[gene_ID], all_end_Co[gene_ID], gene_ID});
             }
@@ -1600,6 +1743,9 @@ vector<string> prometheus::collection_Engine(vector<string> &gene_Collect, strin
         {
             if (catch_Point[gene_ID] != -1)
             {
+                /**
+                 * Pool all the segment files into the set vector variable.
+                 **/
                 threads_vec.push_back(thread{&prometheus::compile, this, gene_ID});
             }
         }
@@ -1630,7 +1776,13 @@ vector<string> prometheus::collection_Engine(vector<string> &gene_Collect, strin
 
     if (Multi_read == "YES")
     {
-        cout << "Intitating multi read based segregating site search" << endl;
+        /**
+         * User has cleared for Multi-read.
+         * All segment files will be read concurrently.
+         * And the SNP data will be stored in the global variable @param all_Lines.
+         **/
+
+        cout << "Initiating multi read based segregating site search" << endl;
 
         vector<thread> threads_Multi_read;
         // vector<int> files_READ;
@@ -1663,13 +1815,29 @@ vector<string> prometheus::collection_Engine(vector<string> &gene_Collect, strin
     }
     else
     {
-        cout << "Intitating single read based segregating site search" << endl;
+        /**
+         * User has NOT cleared for Multi-read.
+         * All segment files will be read one after the other.
+         * Similarly the SNP data will be stored in the global variable @param all_Lines.
+         **/
+        cout << "Initiating single read based segregating site search" << endl;
         file_Reader_single();
     }
 
     tot_Segs = all_Lines.size();
     cout << "System is processing and filtering " << tot_Segs << " segregating site(s)" << endl;
     all_Files_index.clear();
+
+    /**
+     * The GPU is permitted to handle only a certain max number of SNPs at a time.
+     * Therefore the number of rounds of GPU processing and,
+     * the range of SNPs that will be processed in each round will have to be determined.
+     *
+     * @param GPU_rounds_full rounds requiring the max set of SNPs to be processed.
+     * @param GPU_rounds_partial rounds requiring the remaining set of SNPs to be processed.
+     *
+     * The start and stop range of each round is stored.
+     **/
 
     int GPU_rounds_full = tot_Segs / SNPs_per_Run;
     int GPU_rounds_partial = tot_Segs % SNPs_per_Run;
@@ -1690,6 +1858,11 @@ vector<string> prometheus::collection_Engine(vector<string> &gene_Collect, strin
     }
 
     vector<thread> threads_vec;
+
+    /**
+     * Concatenation of SNPs for GPU processing is also done in parallel,
+     * Number of threads needed is based on the number of rounds needed.
+     **/
 
     for (int rounds = 0; rounds < start_stop.size(); rounds++)
     {
@@ -1717,6 +1890,10 @@ vector<string> prometheus::collection_Engine(vector<string> &gene_Collect, strin
     }
 
     threads_vec.clear();
+
+    /**
+     * Relevant administrative function is called to process the user required test statistic.
+     **/
 
     if (test_Type == "T")
     {
@@ -3252,6 +3429,12 @@ void prometheus::calc_Fu_Li_Segs(int gene_ID, int *MA_Count, int *ne, int *ns)
 
 void prometheus::compile(int gene_ID)
 {
+    /**
+     * ! This is a multithreaded function.
+     * Stores all the file segments in a set variable.
+     * Ensures no redundancy in files.
+     **/
+
     unique_lock<shared_mutex> ul(g_mutex);
 
     for (int file_index : catch_back_index[gene_ID])
@@ -3269,6 +3452,13 @@ void prometheus::compile(int gene_ID)
 
 void prometheus::file_Reader_multi(string files)
 {
+    /**
+     * ! This is a multithreaded function.
+     * Each thread reads the entire content of the file segment it is assigned.
+     * NO positional filtering is done.
+     * Requires an SSD to function properly.
+     * Will cause bottlenecks if executed on an HDD resulting in slower results than single reads.
+     */
     vector<string> lines_Collected;
 
     fstream file;
@@ -3293,6 +3483,11 @@ void prometheus::file_Reader_multi(string files)
 
 void prometheus::file_Reader_single()
 {
+    /**
+     * Reads the entire segment file list one file segment at a time.
+     * NO positional filtering is done.
+     **/
+
     // vector<int> files_READ;
 
     // for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
@@ -3488,6 +3683,12 @@ __global__ void cuda_tajima_Prometheus(char *sites, int *index, int tot_Segregra
 
 void prometheus::seg_Concat(int round_ID, int start_Seg, int stop_Seg)
 {
+    /**
+     * ! This is a multithreaded function.
+     * Will spawn threads based on the umber of GPU rounds needed.
+     * Will concat the segments for GPU processing per GPU rounds.
+     **/
+
     int *site_Index;
     string Seg_sites = "";
 
@@ -3514,6 +3715,13 @@ void prometheus::seg_Concat(int round_ID, int start_Seg, int stop_Seg)
 
 void prometheus::process_Tajima()
 {
+    /**
+     * ! This is 1 of 4 administrative function for neutrality test processing.
+     * ! This is for Tajima's D.
+     * It will be responsible for processing the collected SNP data to extract information related to Tajimas'D calculations.
+     * It will then spawn relevant threads to perform the test statistic.
+     **/
+
     vector<thread> threads_vec;
 
     int *MA_Count = (int *)malloc(tot_Segs * sizeof(int));
@@ -4162,6 +4370,14 @@ void prometheus::seg_Search_catch_point(int gene_ID)
 
 void prometheus::get_Gene_info_and_catch(string gene_Combo, int gene_ID)
 {
+    /**
+     * ! This is a multithreaded function.
+     * Used to extract the coordinates of the query region and,
+     * find the latch points, which is the first step of the CIS algorithm.
+     * All coordinate information and latch points are stored in global variables.
+     * Each query region is tracked in the thread space via the @param gene_ID variable.
+     **/
+
     // functions function = functions();
     vector<string> collect_Segregrating_sites;
 
@@ -4363,6 +4579,11 @@ void prometheus::get_Gene_info_and_catch(string gene_Combo, int gene_ID)
 
 void prometheus::backward_Search(int pos, int start_Co, int end_Co, int gene_ID)
 {
+    /**
+     * ! This is a multithreaded function.
+     * Used to collect the files backward in search space in the CIS algorithm
+     **/
+
     // shared_lock<shared_mutex> sl(g_mutex);
     // functions function = functions();
     vector<int> backward_get;
@@ -4408,6 +4629,11 @@ void prometheus::backward_Search(int pos, int start_Co, int end_Co, int gene_ID)
 
 void prometheus::forward_Search(int pos, int start_Co, int end_Co, int gene_ID)
 {
+    /**
+     * ! This is a multithreaded function.
+     * Used to collect the files forward in search space in the CIS algorithm
+     **/
+
     // shared_lock<shared_mutex> sl(g_mutex);
     vector<int> forward_get;
     // functions function = functions();

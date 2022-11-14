@@ -34,6 +34,7 @@ private:
      * ! We use the mutex form of multithreading for Prometheus.
      * ! It provided an ease of coding since Prometheus' multithreading is confined to within the class and functions.
      * Most variables used in Prometheus are global variables for the class.
+     * Mutex will help make the variables thread safe.
      **/
     shared_mutex g_mutex;
     mutex gi_mutex;
@@ -132,7 +133,7 @@ private:
      * @param catch_Point records all catch point file segments for each query regions.
      * @param catch_forward_index records all file segments forward in space for each query regions.
      * @param catch_back_index records all file segments backward in space for each query regions.
-     * @param all_Files_index records all file segments required for all query regions, ensuring no redundancy in file segments.
+     * @param all_Files_index records all file segments required for all query regions, ensuring no redundancy in file segments as it is a set variable.
      **/
     vector<int> catch_Point;
     // vector<string> catch_files_index;
