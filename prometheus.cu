@@ -3724,13 +3724,29 @@ void prometheus::process_Tajima()
 
     vector<thread> threads_vec;
 
+    /**
+     * @param MA_Count Tajima's D requires only MA count information.
+     **/
+
     int *MA_Count = (int *)malloc(tot_Segs * sizeof(int));
+
+    /**
+     * If the previous file segment list and the current one are the same no GPU processing will be conducted.
+     * The MA count information from the previous list will be carried forward.
+     * ! This is a feature for Window mode only.
+     * ! In Gene mode same_Files remain as NO.
+     **/
 
     if (same_Files == "NO")
     {
         int *cuda_MA_Count;
         cudaMallocManaged(&cuda_MA_Count, tot_Segs * sizeof(int));
         // MA_Count = (int *)malloc(tot_Segs * sizeof(int));
+
+        /**
+         * To prevent GPU overloading the SNPs are processed in batches.
+         * The number of rounds and the range of SNPs to be processed in each round is stored in the @param start_Stop vector.
+         **/
 
         for (int rounds = 0; rounds < start_stop.size(); rounds++)
         {
@@ -3789,6 +3805,14 @@ void prometheus::process_Tajima()
             cout << "Round " << rounds + 1 << ": System is indexing " << total_Segs << " processed segregating site(s)" << endl;
             // cout << Seg_sites.size() << endl;
 
+            /**
+             * ! After each GPU round positions are extracted from the SNP's and they are indexed.
+             * This is done via CPU parallel processing.
+             * @param segs_per_Thread calculates the number of Segs sites (SNPs) that will be processed by each CPU core.
+             * @param remainder determines the number of remaining SNPs that will be processed in the last core.
+             * The output of this indexing will be a paired vector @param position_index_Segs containing the POSITION and Index/ Location of that SNP in the overall repository.
+             **/
+
             int segs_per_Thread = total_Segs / CPU_cores;
             int remainder = total_Segs % CPU_cores;
 
@@ -3841,6 +3865,9 @@ void prometheus::process_Tajima()
         cudaMemcpy(MA_Count, cuda_MA_Count, tot_Segs * sizeof(int), cudaMemcpyDeviceToHost);
 
         // USED in WINDOW MODE
+        /**
+         * If it is Window mode file list data is stored to be compared for the next session.
+         **/
         if (calc_Mode != "FILE")
         {
             pre_MA = (int *)malloc(tot_Segs * sizeof(int));
@@ -3954,6 +3981,11 @@ void prometheus::process_Tajima()
 
         // free(site_Index);
 
+        /**
+         * The vector will be sorted by position enabling the use of quick search algorithms for sorted list.
+         * This enables us to use a variation of CIS.
+         * Where the Interpolated search is replaced by a Binary Search.
+         **/
         sort(position_index_Segs.begin(), position_index_Segs.end());
 
         // TESTING purposes
@@ -3967,6 +3999,9 @@ void prometheus::process_Tajima()
     }
     else
     {
+        /**
+         * If it is the same file list as the previous query region range we just bring the previous dataset forward.
+         **/
         memcpy(MA_Count, pre_MA, tot_Segs * sizeof(int));
         // MA_Count = pre_MA;
     }
@@ -3975,6 +4010,12 @@ void prometheus::process_Tajima()
 
     if (this->sliding_Mode == "YES")
     {
+        /**
+         * In Sliding window mode, if we can find the position of the start SNP for the query region,
+         * we only need to go down from ths SNP to collect the necessary data.
+         * This is done in parallel.
+         **/
+
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
             threads_vec.push_back(thread{&prometheus::get_POS_VALID, this, all_start_Co[gene_ID], gene_ID});
@@ -3992,6 +4033,10 @@ void prometheus::process_Tajima()
 
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
+            /**
+             * Given the start coordinate is found in the processed SNPs, then the rest will be searched for.
+             * In sliding window given the latch point for the start coordinate is found only the forward search space will be used.
+             **/
             if (seg_catch_points_ALL[gene_ID] != -1)
             {
                 threads_vec.push_back(thread{&prometheus::seg_Search_forward, this, gene_ID});
@@ -4015,6 +4060,11 @@ void prometheus::process_Tajima()
     }
     else
     {
+        /**
+         * If it is not a sliding window,
+         * we will have to use the CBS search (Compound Binary Search).
+         * Latch points will be found and from there we will search the surrounding space using the forward and backward sequential searches.
+         **/
 
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
@@ -4073,6 +4123,10 @@ void prometheus::process_Tajima()
 
     for (size_t gene_ID = 0; gene_ID < gene_Size; gene_ID++)
     {
+        /**
+         * The test statistic will be calculated in parallel for each query region.
+         **/
+
         if ((catch_Point[gene_ID] != -1) && (seg_catch_points_ALL[gene_ID] != -1))
         {
             threads_vec.push_back(thread{&prometheus::calc_Tajima_Segs, this, gene_ID, MA_Count});
@@ -4093,6 +4147,15 @@ void prometheus::process_Tajima()
 
 void prometheus::get_POS_VALID(int start_Co, int gene_ID)
 {
+    /**
+     * ! This is a multithreaded function.
+     * Used by SLiding window.
+     * Because in sliding window the start coordinate SNP position ise definitely present.
+     * Therefore finding its location and incrementing from there is the fastest solution to gathering the required data.
+     * This is pretty much a latch point like that of the CIS search.
+     * Uses a binary search.
+     **/
+
     int top = 0;
     int bottom = position_index_Segs.size() - 1;
     int middle = top + ((bottom - top) / 2);
@@ -4119,6 +4182,9 @@ void prometheus::get_POS_VALID(int start_Co, int gene_ID)
     }
 
     unique_lock<shared_mutex> ul(g_mutex);
+    /**
+     * Stores all the found latch points in the global variable.
+     */
     seg_catch_points_ALL[gene_ID] = seg_catch_point;
     if (seg_catch_point != -1)
     {
@@ -4128,6 +4194,11 @@ void prometheus::get_POS_VALID(int start_Co, int gene_ID)
 
 void prometheus::calc_Tajima_Segs(int gene_ID, int *MA_Count)
 {
+    /**
+     * ! This is a multithreaded function.
+     * It is used to calculate the Tajimas'D statistic for each query region. 
+    **/
+   
     float tot_pairwise_Differences = 0;
 
     for (int index : seg_backward_index_ALL[gene_ID])
@@ -4196,6 +4267,11 @@ void prometheus::calc_Tajima_Segs(int gene_ID, int *MA_Count)
 
 void prometheus::seg_Indexer(int start_Seg, int stop_Seg, char *full_Char, int *VALID_or_NOT, int *pos_start_Index, int *pos_end_Index, int start)
 {
+    /**
+     * ! This is a multithreaded function.
+     * Responsible for extracting the positions from the GPU processed SNP data and,
+     * indexing them based on their location in the overall data store.
+     **/
 
     // int start = core_ID * segs_per_Thread;
     // int stop = start + segs_per_Thread;
@@ -4210,6 +4286,9 @@ void prometheus::seg_Indexer(int start_Seg, int stop_Seg, char *full_Char, int *
 
             for (int i = pos_start_Index[seg_No]; i < pos_end_Index[seg_No]; i++)
             {
+                /**
+                 * Extracting the position through concatenation of the data in the Position column of the SNP data.
+                 **/
                 POS_string = POS_string + full_Char[i];
             }
 
@@ -4219,6 +4298,9 @@ void prometheus::seg_Indexer(int start_Seg, int stop_Seg, char *full_Char, int *
     }
 
     unique_lock<shared_mutex> ul(g_mutex);
+    /**
+     * Storing the position and index information in the overall global vector.
+     */
     for (int i = 0; i < position_index_Segs_partial.size(); i++)
     {
         position_index_Segs.push_back(position_index_Segs_partial[i]);
@@ -4227,6 +4309,12 @@ void prometheus::seg_Indexer(int start_Seg, int stop_Seg, char *full_Char, int *
 
 void prometheus::seg_Search_backward(int gene_ID)
 {
+    /**
+     * ! This is a multithreaded function.
+     * Used to find SNPs backward in space from the latch point for each query region.
+     * Part of the CIS search.
+     **/
+
     int pos = seg_catch_points_ALL[gene_ID] - 1;
 
     int start_Co = all_start_Co[gene_ID];
@@ -4257,6 +4345,12 @@ void prometheus::seg_Search_backward(int gene_ID)
 
 void prometheus::seg_Search_forward(int gene_ID)
 {
+    /**
+     * ! This is a multithreaded function.
+     * Used to find SNPs forward in space from the latch point for each query region.
+     * Part of the CIS search.
+     **/
+
     int pos = seg_catch_points_ALL[gene_ID] + 1;
 
     int start_Co = all_start_Co[gene_ID];
@@ -4289,6 +4383,12 @@ void prometheus::seg_Search_catch_point(int gene_ID)
 {
     // binary search
     // SAVES time from interpolation since we cannot guarantee even distribution
+
+    /**
+     * ! This is a multithreaded function.
+     * Used to find the latch point for each query region.
+     * Part of the CIS search.
+     **/
 
     int top = 0;
     int bottom = position_index_Segs.size() - 1;
