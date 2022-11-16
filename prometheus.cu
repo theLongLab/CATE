@@ -1921,6 +1921,14 @@ vector<string> prometheus::collection_Engine(vector<string> &gene_Collect, strin
 
 __global__ void cuda_neutrality_Prometheus(char *sites, int *index, int num_Segregrating_sites, int *theta_Partials, int *VALID_or_NOT, int *MA_count, int *ne, int *ns, int *cuda_pos_start_Index, int *cuda_pos_end_Index, int start)
 {
+    /**
+     * ! All GPU processing is similar to their normal mode counterparts except for the extraction of the POS data in the POS column.
+     * This is done using two variables recording the start and stop coordinates of the pos data in the char array.
+     * They are:
+     * @param cuda_pos_start_Index stores the start position in the array.
+     * @param cuda_pos_end_Index stores the stop position in the array.
+     * The position data of the SNP will be between these two positions in the char array.
+     **/
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
     while (tid < num_Segregrating_sites)
@@ -2515,6 +2523,15 @@ void prometheus::calc_Neutrality_Segs(int gene_ID, int *MA_Count, int *ne, int *
 
 __global__ void cuda_fay_wu_Prometheus(char *sites, int *index, int num_Segregrating_sites, int *theta_Partials, int *VALID_or_NOT, int *MA_count, int *cuda_pos_start_Index, int *cuda_pos_end_Index, int start)
 {
+    /**
+     * ! All GPU processing is similar to their normal mode counterparts except for the extraction of the POS data in the POS column.
+     * This is done using two variables recording the start and stop coordinates of the pos data in the char array.
+     * They are:
+     * @param cuda_pos_start_Index stores the start position in the array.
+     * @param cuda_pos_end_Index stores the stop position in the array.
+     * The position data of the SNP will be between these two positions in the char array.
+     **/
+
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
     while (tid < num_Segregrating_sites)
@@ -3049,6 +3066,15 @@ void prometheus::calc_Fay_Wu_Segs(int gene_ID, int *MA_Count, int *Theta_partial
 
 __global__ void cuda_fu_li_Prometheus(char *sites, int *index, int tot_Segregrating_sites, int *VALID_or_NOT, int *MA_count, int *ne, int *ns, int *cuda_pos_start_Index, int *cuda_pos_end_Index, int start)
 {
+    /**
+     * ! All GPU processing is similar to their normal mode counterparts except for the extraction of the POS data in the POS column.
+     * This is done using two variables recording the start and stop coordinates of the pos data in the char array.
+     * They are:
+     * @param cuda_pos_start_Index stores the start position in the array.
+     * @param cuda_pos_end_Index stores the stop position in the array.
+     * The position data of the SNP will be between these two positions in the char array.
+     **/
+
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
     while (tid < tot_Segregrating_sites)
@@ -3734,6 +3760,15 @@ void prometheus::erase()
 
 __global__ void cuda_tajima_Prometheus(char *sites, int *index, int tot_Segregrating_sites, int *VALID_or_NOT, int *MA_count, int *cuda_pos_start_Index, int *cuda_pos_end_Index, int start)
 {
+    /**
+     * ! All GPU processing is similar to their normal mode counterparts except for the extraction of the POS data in the POS column.
+     * This is done using two variables recording the start and stop coordinates of the pos data in the char array.
+     * They are:
+     * @param cuda_pos_start_Index stores the start position in the array.
+     * @param cuda_pos_end_Index stores the stop position in the array.
+     * The position data of the SNP will be between these two positions in the char array.
+     **/
+
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
     while (tid < tot_Segregrating_sites)
