@@ -2143,6 +2143,11 @@ void prometheus::process_Neutrality()
         int *cuda_Theta_partials;
         cudaMallocManaged(&cuda_Theta_partials, tot_Segs * sizeof(int));
 
+        /**
+         * To prevent GPU overloading the SNPs are processed in batches.
+         * The number of rounds and the range of SNPs to be processed in each round is stored in the @param start_Stop vector.
+         **/
+
         for (int rounds = 0; rounds < start_stop.size(); rounds++)
         {
             string Seg_sites = concat_Segs[rounds];
@@ -2197,6 +2202,14 @@ void prometheus::process_Neutrality()
 
             cout << "Round " << rounds + 1 << ": System is indexing " << total_Segs << " processed segregating site(s)" << endl;
 
+            /**
+             * ! After each GPU round positions are extracted from the SNP's and they are indexed.
+             * This is done via CPU parallel processing.
+             * @param segs_per_Thread calculates the number of Segs sites (SNPs) that will be processed by each CPU core.
+             * @param remainder determines the number of remaining SNPs that will be processed in the last core.
+             * The output of this indexing will be a paired vector @param position_index_Segs containing the POSITION and Index/ Location of that SNP in the overall repository.
+             **/
+
             int segs_per_Thread = total_Segs / CPU_cores;
             int remainder = total_Segs % CPU_cores;
 
@@ -2240,6 +2253,9 @@ void prometheus::process_Neutrality()
 
         cudaMemcpy(Theta_partials, cuda_Theta_partials, tot_Segs * sizeof(int), cudaMemcpyDeviceToHost);
 
+        /**
+         * If it is Window mode file list data is stored to be compared for the next session.
+         **/
         if (calc_Mode != "FILE")
         {
             pre_MA = (int *)malloc(tot_Segs * sizeof(int));
@@ -2259,10 +2275,18 @@ void prometheus::process_Neutrality()
         cudaFree(ns_CUDA);
         cudaFree(cuda_Theta_partials);
 
+        /**
+         * The vector will be sorted by position enabling the use of quick search algorithms for sorted list.
+         * This enables us to use a variation of CIS.
+         * Where the Interpolated search is replaced by a Binary Search.
+         **/
         sort(position_index_Segs.begin(), position_index_Segs.end());
     }
     else
     {
+        /**
+         * If it is the same file list as the previous query region range we just bring the previous dataset forward.
+         **/
         memcpy(MA_Count, pre_MA, tot_Segs * sizeof(int));
 
         memcpy(Theta_partials, pre_Theta_partials, tot_Segs * sizeof(int));
@@ -2275,6 +2299,11 @@ void prometheus::process_Neutrality()
 
     if (this->sliding_Mode == "YES")
     {
+        /**
+         * In Sliding window mode, if we can find the position of the start SNP for the query region,
+         * we only need to go down from ths SNP to collect the necessary data.
+         * This is done in parallel.
+         **/
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
             threads_vec.push_back(thread{&prometheus::get_POS_VALID, this, all_start_Co[gene_ID], gene_ID});
@@ -2292,6 +2321,10 @@ void prometheus::process_Neutrality()
 
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
+            /**
+             * Given the start coordinate is found in the processed SNPs, then the rest will be searched for.
+             * In sliding window given the latch point for the start coordinate is found only the forward search space will be used.
+             **/
             if (seg_catch_points_ALL[gene_ID] != -1)
             {
                 threads_vec.push_back(thread{&prometheus::seg_Search_forward, this, gene_ID});
@@ -2310,6 +2343,11 @@ void prometheus::process_Neutrality()
     }
     else
     {
+        /**
+         * If it is not a sliding window,
+         * we will have to use the CBS search (Compound Binary Search).
+         * Latch points will be found and from there we will search the surrounding space using the forward and backward sequential searches.
+         **/
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
             if (catch_Point[gene_ID] != -1)
@@ -2367,6 +2405,9 @@ void prometheus::process_Neutrality()
     // PROCESS NEUTRALITY ALL
     for (size_t gene_ID = 0; gene_ID < gene_Size; gene_ID++)
     {
+        /**
+         * The test statistic will be calculated in parallel for each query region.
+         **/
         if ((catch_Point[gene_ID] != -1) && (seg_catch_index_ALL[gene_ID] != -1))
         {
             threads_vec.push_back(thread{&prometheus::calc_Neutrality_Segs, this, gene_ID, MA_Count, ne, ns, Theta_partials});
@@ -2391,6 +2432,11 @@ void prometheus::process_Neutrality()
 
 void prometheus::calc_Neutrality_Segs(int gene_ID, int *MA_Count, int *ne, int *ns, int *Theta_partials)
 {
+    /**
+     * ! This is a multithreaded function.
+     * It is used to calculate the statistics for all 3 neutrality tests for each query region.
+     **/
+
     int real_segregrating_Sites = seg_backward_index_ALL[gene_ID].size() + 1 + seg_forward_index_ALL[gene_ID].size();
     float tot_pairwise_Differences = 0;
 
@@ -2646,13 +2692,31 @@ __global__ void cuda_fay_wu_Prometheus(char *sites, int *index, int num_Segregra
 
 void prometheus::process_Fay_Wu()
 {
+    /**
+     * ! This is 1 of 4 administrative function for neutrality test processing.
+     * ! This is for Fay and Wu.
+     * It will be responsible for processing the collected SNP data to extract information related to Fay and Wu calculations.
+     * It will then spawn relevant threads to perform the test statistic.
+     **/
+
     vector<thread> threads_vec;
+
+    /**
+     * @param MA_Count and @param Theta_partials are required for Fay and Wu.
+     **/
 
     int *MA_Count;
     MA_Count = (int *)malloc(tot_Segs * sizeof(int));
 
     int *Theta_partials;
     Theta_partials = (int *)malloc(tot_Segs * sizeof(int));
+
+    /**
+     * If the previous file segment list and the current one are the same no GPU processing will be conducted.
+     * The MA count information from the previous list will be carried forward.
+     * ! This is a feature for Window mode only.
+     * ! In Gene mode same_Files remain as NO.
+     **/
 
     if (same_Files == "NO")
     {
@@ -2661,6 +2725,11 @@ void prometheus::process_Fay_Wu()
 
         int *cuda_Theta_partials;
         cudaMallocManaged(&cuda_Theta_partials, tot_Segs * sizeof(int));
+
+        /**
+         * To prevent GPU overloading the SNPs are processed in batches.
+         * The number of rounds and the range of SNPs to be processed in each round is stored in the @param start_Stop vector.
+         **/
 
         for (int rounds = 0; rounds < start_stop.size(); rounds++)
         {
@@ -2716,6 +2785,14 @@ void prometheus::process_Fay_Wu()
 
             cout << "Round " << rounds + 1 << ": System is indexing " << total_Segs << " processed segregating site(s)" << endl;
 
+            /**
+             * ! After each GPU round positions are extracted from the SNP's and they are indexed.
+             * This is done via CPU parallel processing.
+             * @param segs_per_Thread calculates the number of Segs sites (SNPs) that will be processed by each CPU core.
+             * @param remainder determines the number of remaining SNPs that will be processed in the last core.
+             * The output of this indexing will be a paired vector @param position_index_Segs containing the POSITION and Index/ Location of that SNP in the overall repository.
+             **/
+
             int segs_per_Thread = total_Segs / CPU_cores;
             int remainder = total_Segs % CPU_cores;
 
@@ -2755,6 +2832,9 @@ void prometheus::process_Fay_Wu()
         cudaMemcpy(MA_Count, cuda_MA_Count, tot_Segs * sizeof(int), cudaMemcpyDeviceToHost);
         cudaMemcpy(Theta_partials, cuda_Theta_partials, tot_Segs * sizeof(int), cudaMemcpyDeviceToHost);
 
+        /**
+         * If it is Window mode file list data is stored to be compared for the next session.
+         **/
         if (calc_Mode != "FILE")
         {
             pre_MA = (int *)malloc(tot_Segs * sizeof(int));
@@ -2766,10 +2846,18 @@ void prometheus::process_Fay_Wu()
         cudaFree(cuda_MA_Count);
         cudaFree(cuda_Theta_partials);
 
+        /**
+         * The vector will be sorted by position enabling the use of quick search algorithms for sorted list.
+         * This enables us to use a variation of CIS.
+         * Where the Interpolated search is replaced by a Binary Search.
+         **/
         sort(position_index_Segs.begin(), position_index_Segs.end());
     }
     else
     {
+        /**
+         * If it is the same file list as the previous query region range we just bring the previous dataset forward.
+         **/
         memcpy(MA_Count, pre_MA, tot_Segs * sizeof(int));
         memcpy(Theta_partials, pre_Theta_partials, tot_Segs * sizeof(int));
     }
@@ -2778,6 +2866,12 @@ void prometheus::process_Fay_Wu()
 
     if (this->sliding_Mode == "YES")
     {
+        /**
+         * In Sliding window mode, if we can find the position of the start SNP for the query region,
+         * we only need to go down from ths SNP to collect the necessary data.
+         * This is done in parallel.
+         **/
+
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
             threads_vec.push_back(thread{&prometheus::get_POS_VALID, this, all_start_Co[gene_ID], gene_ID});
@@ -2795,6 +2889,10 @@ void prometheus::process_Fay_Wu()
 
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
+            /**
+             * Given the start coordinate is found in the processed SNPs, then the rest will be searched for.
+             * In sliding window given the latch point for the start coordinate is found only the forward search space will be used.
+             **/
             if (seg_catch_points_ALL[gene_ID] != -1)
             {
                 threads_vec.push_back(thread{&prometheus::seg_Search_forward, this, gene_ID});
@@ -2813,6 +2911,11 @@ void prometheus::process_Fay_Wu()
     }
     else
     {
+        /**
+         * If it is not a sliding window,
+         * we will have to use the CBS search (Compound Binary Search).
+         * Latch points will be found and from there we will search the surrounding space using the forward and backward sequential searches.
+         **/
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
             if (catch_Point[gene_ID] != -1)
@@ -2870,6 +2973,9 @@ void prometheus::process_Fay_Wu()
     // Process Fay Wu
     for (size_t gene_ID = 0; gene_ID < gene_Size; gene_ID++)
     {
+        /**
+         * The test statistic will be calculated in parallel for each query region.
+         **/
         if ((catch_Point[gene_ID] != -1) && (seg_catch_index_ALL[gene_ID] != -1))
         {
             threads_vec.push_back(thread{&prometheus::calc_Fay_Wu_Segs, this, gene_ID, MA_Count, Theta_partials});
@@ -2892,6 +2998,11 @@ void prometheus::process_Fay_Wu()
 
 void prometheus::calc_Fay_Wu_Segs(int gene_ID, int *MA_Count, int *Theta_partials)
 {
+    /**
+     * ! This is a multithreaded function.
+     * It is used to calculate the Fay and Wu statistics for each query region.
+     **/
+
     int real_segregrating_Sites = seg_backward_index_ALL[gene_ID].size() + 1 + seg_forward_index_ALL[gene_ID].size();
     float tot_pairwise_Differences = 0;
     int total_iTheta = 0;
@@ -3128,7 +3239,18 @@ __global__ void cuda_fu_li_Prometheus(char *sites, int *index, int tot_Segregrat
 
 void prometheus::process_Fu_Li()
 {
+    /**
+     * ! This is 1 of 4 administrative function for neutrality test processing.
+     * ! This is for Fu and Li.
+     * It will be responsible for processing the collected SNP data to extract information related to Fu and Li calculations.
+     * It will then spawn relevant threads to perform the test statistic.
+     **/
+
     vector<thread> threads_vec;
+
+    /**
+     * @param MA_Count @param ne and @param ns are required for Fu and Li calculations.
+     **/
 
     int *MA_Count;
     MA_Count = (int *)malloc(tot_Segs * sizeof(int));
@@ -3136,6 +3258,13 @@ void prometheus::process_Fu_Li()
     int *ne, *ns;
     ne = (int *)malloc(tot_Segs * sizeof(int));
     ns = (int *)malloc(tot_Segs * sizeof(int));
+
+    /**
+     * If the previous file segment list and the current one are the same no GPU processing will be conducted.
+     * The MA count information from the previous list will be carried forward.
+     * ! This is a feature for Window mode only.
+     * ! In Gene mode same_Files remain as NO.
+     **/
 
     if (same_Files == "NO")
     {
@@ -3145,6 +3274,11 @@ void prometheus::process_Fu_Li()
         int *ne_CUDA, *ns_CUDA;
         cudaMallocManaged(&ne_CUDA, tot_Segs * sizeof(int));
         cudaMallocManaged(&ns_CUDA, tot_Segs * sizeof(int));
+
+        /**
+         * To prevent GPU overloading the SNPs are processed in batches.
+         * The number of rounds and the range of SNPs to be processed in each round is stored in the @param start_Stop vector.
+         **/
 
         for (int rounds = 0; rounds < start_stop.size(); rounds++)
         {
@@ -3201,6 +3335,14 @@ void prometheus::process_Fu_Li()
 
             cout << "Round " << rounds + 1 << ": System is indexing " << total_Segs << " processed segregating site(s)" << endl;
 
+            /**
+             * ! After each GPU round positions are extracted from the SNP's and they are indexed.
+             * This is done via CPU parallel processing.
+             * @param segs_per_Thread calculates the number of Segs sites (SNPs) that will be processed by each CPU core.
+             * @param remainder determines the number of remaining SNPs that will be processed in the last core.
+             * The output of this indexing will be a paired vector @param position_index_Segs containing the POSITION and Index/ Location of that SNP in the overall repository.
+             **/
+
             int segs_per_Thread = total_Segs / CPU_cores;
             int remainder = total_Segs % CPU_cores;
 
@@ -3241,6 +3383,9 @@ void prometheus::process_Fu_Li()
         cudaMemcpy(ne, ne_CUDA, tot_Segs * sizeof(int), cudaMemcpyDeviceToHost);
         cudaMemcpy(ns, ns_CUDA, tot_Segs * sizeof(int), cudaMemcpyDeviceToHost);
 
+        /**
+         * If it is Window mode file list data is stored to be compared for the next session.
+         **/
         if (calc_Mode != "FILE")
         {
             pre_MA = (int *)malloc(tot_Segs * sizeof(int));
@@ -3255,10 +3400,19 @@ void prometheus::process_Fu_Li()
         cudaFree(ne_CUDA);
         cudaFree(ns_CUDA);
 
+        /**
+         * The vector will be sorted by position enabling the use of quick search algorithms for sorted list.
+         * This enables us to use a variation of CIS.
+         * Where the Interpolated search is replaced by a Binary Search.
+         **/
+
         sort(position_index_Segs.begin(), position_index_Segs.end());
     }
     else
     {
+        /**
+         * If it is the same file list as the previous query region range we just bring the previous dataset forward.
+         **/
         memcpy(MA_Count, pre_MA, tot_Segs * sizeof(int));
         memcpy(ne, pre_ne, tot_Segs * sizeof(int));
         memcpy(ns, pre_ns, tot_Segs * sizeof(int));
@@ -3268,6 +3422,12 @@ void prometheus::process_Fu_Li()
 
     if (this->sliding_Mode == "YES")
     {
+        /**
+         * In Sliding window mode, if we can find the position of the start SNP for the query region,
+         * we only need to go down from ths SNP to collect the necessary data.
+         * This is done in parallel.
+         **/
+
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
             threads_vec.push_back(thread{&prometheus::get_POS_VALID, this, all_start_Co[gene_ID], gene_ID});
@@ -3285,6 +3445,10 @@ void prometheus::process_Fu_Li()
 
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
+            /**
+             * Given the start coordinate is found in the processed SNPs, then the rest will be searched for.
+             * In sliding window given the latch point for the start coordinate is found only the forward search space will be used.
+             **/
             if (seg_catch_points_ALL[gene_ID] != -1)
             {
                 threads_vec.push_back(thread{&prometheus::seg_Search_forward, this, gene_ID});
@@ -3303,7 +3467,11 @@ void prometheus::process_Fu_Li()
     }
     else
     {
-
+        /**
+         * If it is not a sliding window,
+         * we will have to use the CBS search (Compound Binary Search).
+         * Latch points will be found and from there we will search the surrounding space using the forward and backward sequential searches.
+         **/
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
             if (catch_Point[gene_ID] != -1)
@@ -3360,6 +3528,9 @@ void prometheus::process_Fu_Li()
     // Process Fu Li
     for (size_t gene_ID = 0; gene_ID < gene_Size; gene_ID++)
     {
+        /**
+         * The test statistic will be calculated in parallel for each query region.
+         **/
         if ((catch_Point[gene_ID] != -1) && (seg_catch_index_ALL[gene_ID] != -1))
         {
             threads_vec.push_back(thread{&prometheus::calc_Fu_Li_Segs, this, gene_ID, MA_Count, ne, ns});
@@ -3383,6 +3554,11 @@ void prometheus::process_Fu_Li()
 
 void prometheus::calc_Fu_Li_Segs(int gene_ID, int *MA_Count, int *ne, int *ns)
 {
+    /**
+     * ! This is a multithreaded function.
+     * It is used to calculate the Fu and Li statistics for each query region.
+     **/
+
     // int real_segregrating_Sites = 0;
     float tot_pairwise_Differences = 0;
     int singletons_ne = 0;
@@ -4065,7 +4241,6 @@ void prometheus::process_Tajima()
          * we will have to use the CBS search (Compound Binary Search).
          * Latch points will be found and from there we will search the surrounding space using the forward and backward sequential searches.
          **/
-
         for (int gene_ID = 0; gene_ID < gene_Size; gene_ID++)
         {
             if (catch_Point[gene_ID] != -1)
@@ -4196,9 +4371,9 @@ void prometheus::calc_Tajima_Segs(int gene_ID, int *MA_Count)
 {
     /**
      * ! This is a multithreaded function.
-     * It is used to calculate the Tajimas'D statistic for each query region. 
-    **/
-   
+     * It is used to calculate the Tajimas'D statistic for each query region.
+     **/
+
     float tot_pairwise_Differences = 0;
 
     for (int index : seg_backward_index_ALL[gene_ID])
