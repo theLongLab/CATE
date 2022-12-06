@@ -1,5 +1,4 @@
-
-![alt text](https://github.com/theLongLab/CATE/blob/main/logo.png)
+![logo](https://user-images.githubusercontent.com/55466094/205796867-c55de996-aa97-415b-963c-9bcdb68a8e20.png)
 
 # CATE (CUDA Accelerated Testing of Evolution)
 
