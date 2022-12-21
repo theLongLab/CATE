@@ -4,9 +4,9 @@
 
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPARATE PARAMATER FILES WITH SEPARATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
-    "Input path":"test_VCF",
-    "Output path":"extract_5",
-    "Intermediate path":"intermediate_3",
+    "Input path":"split_VCF",
+    "Output path":"test_snps",
+    "Intermediate path":"intermediate_snps",
 
     # Prometheus settings
     # Prometheus is a high performance mode in CATE. It is greedy on hardware resources but has extremely fast processing speeds.
@@ -108,15 +108,18 @@
     "McDonald–Kreitman gene list":"universal",
 
     # Fst or Fixation Index
-    # Indexed population file should be a THREE column tab deliminated *.txt file with headings: Sample_name	population_ID	Super_population
-    # Ensure population_ID values are unique to each super population and do not overlap
+    # Indexed population file should be a THREE column tab deliminated *.txt file with headings: Sample_name	population_ID	Super_population.
+    # Ensure population_ID values are unique to each super population and do not overlap.
     "Population index file path":"fst_pop/population.txt",
     "Fst gene list":"universal",
     "Population ID":"AFR,XKY,ZXY",
 
     # EHH or Extended Haplotype Homozygosity
-    # Define the extended haplotype region specification mode by either using a separate gene list file (FILE mode) or state the standard displacement value (FIXED mode) in bases
-    "Range mode":"FILE",
-    "EHH FILE path":"genelist_3.txt",
-    "FIXED mode":"+1000"
+    # Define the extended haplotype region specification mode by either using a separate gene list file (FILE mode) or state the standard displacement value (FIXED mode) in bases.
+    # Degradation of EHH around a SNP can be calculated by SNP mode.
+    "Range mode":"SNP",
+    "EHH FILE path":"genelist_ehh.txt",
+    "FIXED mode":"+1000",
+    "SNP default count":100,
+    "EHH CPU cores":10
 }

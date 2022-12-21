@@ -746,6 +746,68 @@ void functions::forward_Search(int pos, vector<pair<string, string>> folder_Inde
     // return forward_get;
 }
 
+int functions::single_segment_retrieval(int SNP_position, vector<pair<string, string>> &folder_Index)
+{
+    int segment_Position = -1;
+
+    vector<string> line_Data;
+    split(line_Data, folder_Index[0].first, '_');
+    int low_Value = stoi(line_Data[0]);
+    split(line_Data, folder_Index[folder_Index.size() - 1].first, '_');
+    int high_Value = stoi(line_Data[1]);
+
+    int start = 0;
+    int end = folder_Index.size() - 1;
+
+    while (start <= end && SNP_position <= high_Value)
+    {
+        vector<string> line_Data_get;
+
+        int pos = start + ((((double)(end - start) / (high_Value - low_Value)) * (SNP_position - low_Value)));
+
+        split(line_Data_get, folder_Index[pos].first, '_');
+        int low_Value_atpos = stoi(line_Data_get[0]);
+        int high_Value_atpos = stoi(line_Data_get[1]);
+
+        if ((SNP_position >= low_Value_atpos) && (SNP_position <= high_Value_atpos))
+        {
+            segment_Position = pos;
+            break;
+        }
+        else if (SNP_position > low_Value_atpos)
+        {
+            // cout << pos << "\t";
+            int new_pos = pos;
+
+            do
+            {
+                new_pos = new_pos + 1;
+            } while (new_pos <= start);
+
+            start = new_pos;
+        }
+        else
+        {
+            int new_pos = pos;
+
+            do
+            {
+                new_pos = new_pos - 1;
+            } while (new_pos >= end);
+
+            end = new_pos;
+        }
+
+        split(line_Data_get, folder_Index[start].first, '_');
+        low_Value = stoi(line_Data_get[0]);
+
+        split(line_Data_get, folder_Index[end].first, '_');
+        high_Value = stoi(line_Data_get[1]);
+    }
+
+    return segment_Position;
+}
+
 vector<string> functions::compound_interpolationSearch(vector<pair<string, string>> &folder_Index, int &start_Co, int &end_Co)
 {
     vector<string> file_List;

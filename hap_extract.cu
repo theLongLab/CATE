@@ -907,6 +907,11 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
      * @param found vector is used to track all found haplotype. The position of the haplotype in the Haplotypes_All vector is recorded.
      **/
     vector<int> found;
+    int found_Count = 0;
+    for (size_t i = 0; i < Haplotypes_All.size(); i++)
+    {
+        found.push_back(-1);
+    }
 
     // cudaMallocManaged(&cuda_pos, (num_segregrating_Sites * sizeof(int)));
     // cudaMemcpy(cuda_pos, pos, num_segregrating_Sites * sizeof(int), cudaMemcpyHostToDevice);
@@ -937,7 +942,8 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
          * If the query haplotype is NOT present in the found vector it is considered as a new unique haplotype.
          * This will trigger the haplotype processing algorithm.
          **/
-        if (binary_search(found.begin(), found.end(), query) == false)
+        if (found[query] == -1)
+        // if (binary_search(found.begin(), found.end(), query) == false)
         {
             /**
              * HAP_ID is incremented by 1.
@@ -954,7 +960,9 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
             /**
              * The newly discovered UNIQUE haplotype is recorded.
              **/
-            found.push_back(query);
+            found[query] = query;
+            found_Count++;
+            // found.push_back(query);
 
             /**
              * @param query_Hap is used to capture the query haplotype.
@@ -968,7 +976,8 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
                  * Comparison of the query haplotype in the haplotype search space.
                  * We skip over previously accounted for haplotypes to prevent redundancy and improve speed.
                  **/
-                if (binary_search(found.begin(), found.end(), subject) == false)
+                if (found[subject] == -1)
+                // if (binary_search(found.begin(), found.end(), subject) == false)
                 {
                     /**
                      * @param subject_Hap is used to get the subject haplotype to be compared to the query haplotype (query_Hap).
@@ -981,11 +990,9 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
                         /**
                          * The newly discovered haplotype is recorded.
                          **/
-                        found.push_back(subject);
-                        /**
-                         * The modified vector is now sorted to enable binary search.
-                         **/
-                        sort(found.begin(), found.end());
+                        found[subject] = subject;
+                        found_Count++;
+                        // found.push_back(subject);
                     }
                 }
             }
@@ -1092,16 +1099,9 @@ void hap_extract::hap_extraction(vector<string> &write_Lines, vector<string> &wr
         /**
          * If ALL haplotypes under study are processed then the loop is broken.
          **/
-        if (found.size() == Haplotypes_All.size())
+        if (found_Count == Haplotypes_All.size())
         {
             break;
-        }
-        else
-        {
-            /**
-             * The modified vector is now sorted to enable binary search.
-             **/
-            sort(found.begin(), found.end());
         }
     }
 

@@ -37,6 +37,8 @@ public:
     vector<string> get_Countries(string &input_Folder);
     vector<pair<string, string>> index_Folder(string &country);
 
+    int single_segment_retrieval(int SNP_position, vector<pair<string, string>> &folder_Index);
+
     vector<string> compound_interpolationSearch(vector<pair<string, string>> &folder_Index, int &start_Co, int &end_Co);
     void forward_Search(int pos, vector<pair<string, string>> folder_Index, int start_Co, int end_Co, promise<vector<int>> &forward_Found);
     void backward_Search(int pos, vector<pair<string, string>> folder_Index, int start_Co, int end_Co, promise<vector<int>> &backward_Found);

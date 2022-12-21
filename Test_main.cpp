@@ -651,9 +651,12 @@ int main(int argc, char *argv[])
                               string file_mode_Path = "NA";
                               string fixed_mode_Value = "NA";
 
+                              int default_SNP_count = 100;
+                              int EHH_CPU_cores = 1;
+
                               string GO = "NO";
 
-                              if (mode == "FILE")
+                              if (mode == "FILE" || mode == "SNP")
                               {
                                    /**
                                     * Get the gene file.
@@ -663,6 +666,14 @@ int main(int argc, char *argv[])
                                    {
                                         file_mode_Path = properties.where("Universal gene list");
                                    }
+
+                                   if (mode == "SNP")
+                                   {
+                                        default_SNP_count = properties.where_Int("SNP default count");
+                                        EHH_CPU_cores = properties.where_Int("EHH CPU cores");
+                                        //EHH_cutoff = stod(EHH_cutoff_value);
+                                   }
+
                                    GO = "YES";
                               }
                               else if (mode == "FIXED")
@@ -678,14 +689,14 @@ int main(int argc, char *argv[])
 
                               if (GO == "YES")
                               {
-                                   ehh ehh_ = ehh(mode, file_mode_Path, fixed_mode_Value, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"));
+                                   ehh ehh_ = ehh(mode, file_mode_Path, fixed_mode_Value, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), default_SNP_count, EHH_CPU_cores);
                                    ehh_.ingress();
 
                                    cout << "CUDA powered Extended Haplotype Homozygosity (EHH) calculator has been completed." << endl;
                               }
                               else
                               {
-                                   cout << "RANGE MODE HAS AN INCORRECT VALUE. Should be either \"FILE\" or \"FIXED\"" << endl;
+                                   cout << "RANGE MODE HAS AN INCORRECT VALUE. Should be either \"FILE\" or \"FIXED\" or \"SNP\"" << endl;
                               }
                          }
                          else

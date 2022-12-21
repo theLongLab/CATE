@@ -6,7 +6,7 @@ fst_test_pop::fst_test_pop() {}
 fst_test_pop::fst_test_pop(string Pop_ID, vector<string> super_Pops, vector<string> sample_IDs, vector<string> countries_Folder, int ploidy)
 {
     this->Pop_ID = Pop_ID;
-    cout << "Intializing: " << this->Pop_ID << endl
+    cout << "Initializing: " << this->Pop_ID << endl
          << endl;
     this->super_Pops = super_Pops;
     this->sample_IDs = sample_IDs;
