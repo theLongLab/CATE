@@ -695,7 +695,7 @@ int main(int argc, char *argv[])
 
                               if (GO == "YES")
                               {
-                                   ehh ehh_ = ehh(mode, file_mode_Path, fixed_mode_Value, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), default_SNP_count, EHH_CPU_cores,default_SNP_BP_count);
+                                   ehh ehh_ = ehh(mode, file_mode_Path, fixed_mode_Value, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), default_SNP_count, EHH_CPU_cores, default_SNP_BP_count);
                                    ehh_.ingress();
 
                                    cout << "CUDA powered Extended Haplotype Homozygosity (EHH) calculator has been completed." << endl;
@@ -894,12 +894,18 @@ void print_HELP()
           << "              \t  File format is *.fst (a tab deliminated text file)." << endl
           << endl
           << "-e or --ehh   \t: Calculates the Extended Haplotype Homozygosity (EHH) (2002) for a predefined gene list using a (split) vcf (indexed) folder." << endl
-          << "              \t  The \"MODE\" used to generate the extended haplotype region must be specified. Either \"FILE\" or \"FIXED\" mode." << endl
+          << "              \t  The \"MODE\" used to generate the extended haplotype region must be specified." << endl
+          << "              \t  Either \"FILE\" or \"FIXED\" mode can be used where the core haplotype spans over a single SNP." << endl
           << "              \t  FILE mode: In the tab deliminated gene list file a tertiary column containing the extended regions dimension's will be present." << endl
           << "              \t             Formats include \"START_position:END_position\" or +VALUE or -VALUE." << endl
           << "              \t             \"+\" Causes the START_position of the gene region to be incremented by the user specified value." << endl
           << "              \t             \"-\" Causes the START_position of the gene region to be reduced by the user specified value." << endl
           << "              \t  FIXED mode: In the parameters file's \"FIXED mode\" section specify the +VALUE or -VALUE. It will be applied to all gene regions." << endl
+          << "              \t  \"SNP\" or \"BP\" mode can be used where the core haplotype spans only a single SNP." << endl
+          << "              \t  In the tab deliminated gene list file the single SNP will be specified in the second column." << endl
+          << "              \t  Format include \"CHROMOSOME_NUMBER:GENOMIC_POSITION\"." << endl
+          << "              \t  SNP mode: \"SNP default count\" is used to specify the number of SNPs that will be displaced on either side of the core SNP." << endl
+          << "              \t  BP mode: \"SNP BP displacement\" is used to specify the number of base pairs that will be displaced on either side of the core SNP." << endl
           << "              \t  Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "              \t  File format is *.ehh (a tab deliminated text file)." << endl
           << endl
