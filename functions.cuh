@@ -40,6 +40,7 @@ public:
     int single_segment_retrieval(int SNP_position, vector<pair<string, string>> &folder_Index);
 
     vector<string> compound_interpolationSearch(vector<pair<string, string>> &folder_Index, int &start_Co, int &end_Co);
+    vector<string> compound_interpolationSearch_ordered(vector<pair<string, string>> &folder_Index, int &start_Co, int &end_Co);
     void forward_Search(int pos, vector<pair<string, string>> folder_Index, int start_Co, int end_Co, promise<vector<int>> &forward_Found);
     void backward_Search(int pos, vector<pair<string, string>> folder_Index, int start_Co, int end_Co, promise<vector<int>> &backward_Found);
     // vector<string> forward_Search_Only(int pos, vector<pair<string, string>> &folder_Index, int start_Co, int end_Co);

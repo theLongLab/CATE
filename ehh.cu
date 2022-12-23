@@ -1,7 +1,7 @@
 #include "functions.cuh"
 #include "ehh.cuh"
 
-ehh::ehh(string range_Mode, string file_Mode_path, string fixed_Mode_value, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy, int default_SNP_count, int EHH_CPU_cores)
+ehh::ehh(string range_Mode, string file_Mode_path, string fixed_Mode_value, string input_Folder, string output_Path, int cuda_ID, string intermediate_Path, int ploidy, int default_SNP_count, int EHH_CPU_cores, int default_SNP_BP_count)
 {
     cout << "Initiating CUDA powered Extended Haplotype Homozygosity (EHH) calculator" << endl
          << endl;
@@ -25,6 +25,14 @@ ehh::ehh(string range_Mode, string file_Mode_path, string fixed_Mode_value, stri
     {
         this->default_SNP_count = default_SNP_count;
         // this->EHH_cutoff = EHH_cutoff;
+        this->CPU_cores = EHH_CPU_cores;
+
+        cout << "CPU cores: " << this->CPU_cores << endl
+             << endl;
+    }
+    else if (range_Mode == "BP")
+    {
+        this->default_SNP_BP_count = default_SNP_BP_count;
         this->CPU_cores = EHH_CPU_cores;
 
         cout << "CPU cores: " << this->CPU_cores << endl
@@ -67,6 +75,10 @@ void ehh::ingress()
     else if (this->range_Mode == "SNP")
     {
         cout << "Default number of SNPs collected: " << this->default_SNP_count << endl;
+    }
+    else if (this->range_Mode == "BP")
+    {
+        cout << "Default displacement from core SNP (bp): " << this->default_SNP_BP_count << endl;
     }
     cout << endl;
 
@@ -184,7 +196,7 @@ void ehh::ingress()
                 vector<string> Core_coordinates;
                 function.split(Core_coordinates, split_Data[1], ':');
 
-                if (range_Mode == "SNP")
+                if (range_Mode == "SNP" || range_Mode == "BP")
                 {
                     cout << "SNP ID\t: " << gene_Name << endl;
                     int position_SNP = stoi(Core_coordinates[1]);
@@ -196,91 +208,271 @@ void ehh::ingress()
 
                     int segment_Position = function.single_segment_retrieval(position_SNP, folder_Index);
 
-                    string SNP_file_Name = folder_Index[segment_Position].second;
-                    // cout << file_Name << endl;
-
-                    fstream SNP_file;
-                    SNP_file.open(SNP_file_Name, ios::in);
-
-                    int SNP_Index_in_file = -1;
-                    vector<string> collect_Segregrating_sites;
-
-                    int bottom_count = 0;
-                    int top_count = 0;
-
-                    if (SNP_file.is_open())
+                    if (segment_Position != -1)
                     {
-                        string line;
-                        getline(SNP_file, line); // skip first header line
-                        while (getline(SNP_file, line))
+
+                        string SNP_file_Name = folder_Index[segment_Position].second;
+                        // cout << file_Name << endl;
+
+                        fstream SNP_file;
+                        SNP_file.open(SNP_file_Name, ios::in);
+
+                        int SNP_Index_in_file = -1;
+
+                        if (range_Mode == "SNP")
                         {
-                            collect_Segregrating_sites.push_back(line);
+                            vector<string> collect_Segregrating_sites;
 
-                            if (SNP_Index_in_file == -1)
+                            int bottom_count = 0;
+                            int top_count = 0;
+
+                            if (SNP_file.is_open())
                             {
-                                vector<string> positions;
-                                function.split_getPos_ONLY(positions, line, '\t');
-                                int pos = stoi(positions[1]);
-
-                                if (pos == position_SNP)
+                                string line;
+                                getline(SNP_file, line); // skip first header line
+                                while (getline(SNP_file, line))
                                 {
-                                    cout << "SNP found in repository: " << SNP_file_Name << endl;
-                                    SNP_Index_in_file = collect_Segregrating_sites.size() - 1;
-                                    top_count = SNP_Index_in_file;
-                                    // cout << SNP_Position_in_file << endl;
+                                    collect_Segregrating_sites.push_back(line);
+
+                                    if (SNP_Index_in_file == -1)
+                                    {
+                                        vector<string> positions;
+                                        function.split_getPos_ONLY(positions, line, '\t');
+                                        int pos = stoi(positions[1]);
+
+                                        if (pos == position_SNP)
+                                        {
+                                            cout << "SNP found in repository: " << SNP_file_Name << endl;
+                                            SNP_Index_in_file = collect_Segregrating_sites.size() - 1;
+                                            top_count = SNP_Index_in_file;
+                                            // cout << SNP_Position_in_file << endl;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        bottom_count = bottom_count + 1;
+                                        if (bottom_count == this->default_SNP_count)
+                                        {
+                                            break;
+                                        }
+                                    }
                                 }
+
+                                SNP_file.close();
+                            }
+
+                            // cout << top_count << endl
+                            //      << bottom_count << endl;
+
+                            if (SNP_Index_in_file != -1)
+                            {
+                                process_SNP_EHH(position_SNP, folder_Index, segment_Position, SNP_Index_in_file, collect_Segregrating_sites, N_float, top_count, bottom_count);
+
+                                // Write to file
+                                string results_File = output_File + "/" +
+                                                      gene_Name + "_" + Core_coordinates[0] + "_" + Core_coordinates[1] + "_" + to_string(this->default_SNP_count) + ".ehh";
+                                function.createFile(results_File, "Displacement\tSNP_position\tEHH_0\tEHH_1");
+
+                                cout << "Writing results to file: " << results_File << endl
+                                     << endl;
+
+                                output.open(results_File, ios::app);
+
+                                for (int line = 0; line < positions_Collect.size(); line++)
+                                {
+                                    output << positions_Collect[line] << "\t";
+                                    if (line < EHH_0_up.size())
+                                    {
+                                        output << EHH_0_up[EHH_0_up.size() - 1 - line] << "\t" << EHH_1_up[EHH_1_up.size() - 1 - line] << "\n";
+                                    }
+                                    else
+                                    {
+                                        output << EHH_0_down[line - EHH_0_up.size()] << "\t" << EHH_1_down[line - EHH_0_up.size()] << "\n";
+                                    }
+                                }
+
+                                output.close();
+
+                                // clear global vectors
+                                positions_Collect.clear();
+                                EHH_0_up.clear();
+                                EHH_1_up.clear();
+                                EHH_0_down.clear();
+                                EHH_1_down.clear();
                             }
                             else
                             {
-                                bottom_count = bottom_count + 1;
-                                if (bottom_count == this->default_SNP_count)
-                                {
-                                    break;
-                                }
+                                cout << "ERROR SNP NOT FOUND. PLEASE CHECK THE REPOSITORY" << endl;
                             }
                         }
-
-                        SNP_file.close();
-                    }
-
-                    // cout << top_count << endl
-                    //      << bottom_count << endl;
-
-                    if ((segment_Position != -1) && (SNP_Index_in_file != -1))
-                    {
-                        process_SNP_EHH(position_SNP, folder_Index, segment_Position, SNP_Index_in_file, collect_Segregrating_sites, N_float, top_count, bottom_count);
-
-                        // Write to file
-                        string results_File = output_File + "/" +
-                                              gene_Name + "_" + Core_coordinates[0] + "_" + Core_coordinates[1] + ".ehh";
-                        function.createFile(results_File, "Displacement\tSNP_position\tEHH_0\tEHH_1");
-
-                        cout << "Writing results to file: " << results_File << endl
-                             << endl;
-
-                        output.open(results_File, ios::app);
-
-                        for (int line = 0; line < positions_Collect.size(); line++)
+                        else
                         {
-                            output << positions_Collect[line] << "\t";
-                            if (line < EHH_0_up.size())
+                            vector<string> folder_index_Positions;
+
+                            function.split(folder_index_Positions, folder_Index[0].first, '_');
+                            int low_Value = stoi(folder_index_Positions[0]);
+
+                            int min_Limit = position_SNP - this->default_SNP_BP_count;
+
+                            if (min_Limit < low_Value)
                             {
-                                output << EHH_0_up[EHH_0_up.size() - 1 - line] << "\t" << EHH_1_up[EHH_1_up.size() - 1 - line] << "\n";
+                                min_Limit = low_Value;
+                            }
+
+                            function.split(folder_index_Positions, folder_Index[folder_Index.size() - 1].first, '_');
+                            int high_Value = stoi(folder_index_Positions[1]);
+
+                            int max_Limit = position_SNP + this->default_SNP_BP_count;
+
+                            if (max_Limit > high_Value)
+                            {
+                                max_Limit = high_Value;
+                            }
+
+                            vector<string> collect_SNP_file;
+                            vector<string> SNP_positions;
+
+                            if (SNP_file.is_open())
+                            {
+                                string line;
+                                getline(SNP_file, line); // skip first header line
+                                while (getline(SNP_file, line))
+                                {
+                                    vector<string> positions;
+                                    function.split_getPos_ONLY(positions, line, '\t');
+                                    int pos = stoi(positions[1]);
+
+                                    if (pos >= min_Limit && pos <= max_Limit)
+                                    {
+                                        collect_SNP_file.push_back(line);
+                                        int displacement = pos - position_SNP;
+                                        SNP_positions.push_back(to_string(displacement) + "\t" + to_string(pos));
+
+                                        if (pos == position_SNP)
+                                        {
+                                            cout << "SNP found in repository: " << SNP_file_Name << endl;
+                                            SNP_Index_in_file = collect_SNP_file.size() - 1;
+                                        }
+                                    }
+                                    else if (pos > max_Limit)
+                                    {
+                                        break;
+                                    }
+                                }
+                                SNP_file.close();
+                            }
+
+                            if (SNP_Index_in_file != -1)
+                            {
+                                // Collet remaining files
+                                vector<string> file_List;
+
+                                cout << "System is retrieving file(s)" << endl;
+                                if (folder_Index.size() > 1)
+                                {
+                                    file_List = function.compound_interpolationSearch_ordered(folder_Index, min_Limit, max_Limit);
+                                }
+                                else
+                                {
+                                    file_List.push_back(folder_Index[0].second);
+                                }
+                                cout << "System has retrieved all file(s)" << endl;
+
+                                vector<string> seg_Sites_ALL;
+                                vector<string> seg_Sites_ALL_Positions;
+                                int SNP_Index_in_FULL = -1;
+
+                                for (string files : file_List)
+                                {
+                                    if (files == SNP_file_Name)
+                                    {
+                                        // Fill the SNP file data from what was collected
+                                        // get where position is NOW
+                                        SNP_Index_in_FULL = SNP_Index_in_file + seg_Sites_ALL.size();
+
+                                        for (int lines = 0; lines < collect_SNP_file.size(); lines++)
+                                        {
+                                            seg_Sites_ALL.push_back(collect_SNP_file[lines]);
+                                            seg_Sites_ALL_Positions.push_back(SNP_positions[lines]);
+                                        }
+
+                                        collect_SNP_file.clear();
+                                        SNP_positions.clear();
+                                    }
+                                    else
+                                    {
+                                        fstream file;
+                                        file.open(files, ios::in);
+                                        if (file.is_open())
+                                        {
+                                            string line;
+                                            getline(file, line); // skip header
+                                            while (getline(file, line))
+                                            {
+                                                vector<string> positions;
+                                                function.split_getPos_ONLY(positions, line, '\t');
+                                                int pos = stoi(positions[1]);
+
+                                                if (pos >= min_Limit && pos <= max_Limit)
+                                                {
+                                                    seg_Sites_ALL.push_back(line);
+                                                    int displacement = pos - position_SNP;
+                                                    seg_Sites_ALL_Positions.push_back(to_string(displacement) + "\t" + to_string(pos));
+                                                }
+                                                else if (pos > max_Limit)
+                                                {
+                                                    break;
+                                                }
+                                            }
+                                            file.close();
+                                        }
+                                    }
+                                }
+                                // PROCESS EHH_SNP_Distance
+                                // cout << seg_Sites_ALL_Positions[SNP_Index_in_FULL] << endl;
+                                // cout << SNP_Index_in_FULL << "\t" << seg_Sites_ALL_Positions.size();
+                                process_SNP_EHH_BP(seg_Sites_ALL, SNP_Index_in_FULL, N, SNP_Index_in_FULL, (seg_Sites_ALL.size() - SNP_Index_in_FULL - 1));
+
+                                // print the results
+                                string results_File = output_File + "/" +
+                                                      gene_Name + "_" + Core_coordinates[0] + "_" + Core_coordinates[1] + "_" + to_string(this->default_SNP_BP_count) + ".ehh";
+                                function.createFile(results_File, "Displacement\tSNP_position\tEHH_0\tEHH_1");
+
+                                cout << "\nWriting results to file: " << results_File << endl
+                                     << endl;
+
+                                output.open(results_File, ios::app);
+
+                                for (int line = 0; line < seg_Sites_ALL_Positions.size(); line++)
+                                {
+                                    output << seg_Sites_ALL_Positions[line] << "\t";
+                                    if (line < EHH_0_up.size())
+                                    {
+                                        output << EHH_0_up[EHH_0_up.size() - 1 - line] << "\t" << EHH_1_up[EHH_1_up.size() - 1 - line] << "\n";
+                                    }
+                                    else
+                                    {
+                                        output << EHH_0_down[line - EHH_0_up.size()] << "\t" << EHH_1_down[line - EHH_0_up.size()] << "\n";
+                                    }
+                                }
+
+                                output.close();
+
+                                // clear global vectors
+                                // positions_Collect.clear();
+
+                                EHH_0_up.clear();
+                                EHH_1_up.clear();
+                                EHH_0_down.clear();
+                                EHH_1_down.clear();
+
+                                // clear global arrays
                             }
                             else
                             {
-                                output << EHH_0_down[line - EHH_0_up.size()] << "\t" << EHH_1_down[line - EHH_0_up.size()] << "\n";
+                                cout << "ERROR SNP NOT FOUND. PLEASE CHECK THE REPOSITORY" << endl;
                             }
                         }
-
-                        output.close();
-
-                        // clear global vectors
-                        positions_Collect.clear();
-                        EHH_0_up.clear();
-                        EHH_1_up.clear();
-                        EHH_0_down.clear();
-                        EHH_1_down.clear();
                     }
                     else
                     {
@@ -488,6 +680,81 @@ void ehh::ingress()
     }
 }
 
+__global__ void cuda_SNP_grid_0_1_BP(int total_Segs, char *sites, int *index, char *Hap_array, int core_SNP_index, int *core_SNP_alleles, int *SNP_counts)
+{
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    while (tid < total_Segs)
+    {
+        int column = 0;
+        int site_Start = index[tid];
+        int site_End = index[tid + 1];
+
+        int i = site_Start;
+
+        while (column < 9)
+        {
+            if (sites[i] == '\t')
+            {
+                column++;
+            }
+            // if (core_SNP_index == tid)
+            // {
+            //     printf("%c\n", sites[i]);
+            // }
+            i++;
+        }
+
+        int start_Hap = tid;
+        int stride = 0;
+
+        // int grid_Row = tid;
+        int grid_Column = 0;
+
+        if (core_SNP_index == tid)
+        {
+            int Hap_0 = 0;
+            int Hap_1 = 0;
+            while (i < site_End)
+            {
+                if (sites[i] == '0' || sites[i] == '1')
+                {
+                    char value = sites[i];
+                    Hap_array[start_Hap + stride] = value;
+                    stride = stride + total_Segs;
+                    if (sites[i] == '0')
+                    {
+                        core_SNP_alleles[grid_Column] = 0;
+                        Hap_0 = Hap_0 + 1;
+                    }
+                    else
+                    {
+                        core_SNP_alleles[grid_Column] = 1;
+                        Hap_1 = Hap_1 + 1;
+                    }
+                    grid_Column++;
+                }
+                i++;
+            }
+            SNP_counts[0] = Hap_0;
+            SNP_counts[1] = Hap_1;
+        }
+        else
+        {
+            while (i < site_End)
+            {
+                if (sites[i] == '0' || sites[i] == '1')
+                {
+                    char value = sites[i];
+                    Hap_array[start_Hap + stride] = value;
+                    stride = stride + total_Segs;
+                }
+                i++;
+            }
+        }
+        tid += blockDim.x * gridDim.x;
+    }
+}
+
 __global__ void cuda_SNP_grid_0_1(int total_Segs, char *sites, int *index, char *Hap_array, int core_SNP_index, int *core_SNP_alleles, int *SNP_counts, int *cuda_pos_start_Index, int *cuda_pos_end_Index)
 {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
@@ -588,7 +855,7 @@ __global__ void cuda_SNP_grid_0_1(int total_Segs, char *sites, int *index, char 
 
 __global__ void cuda_EHH_up_0(int total_Segs_UP, char **grid, int core_SNP_index, int *core_SNP_alleles, int N, int **Indexes_found_Zero, int zero_Count, float *EHH_Zero, int combo_Zero)
 {
-    // ! TEST CODE NOT USED IN THE ACTUAL PROGRAMME
+    // ! TEST CODE, NOT USED IN THE ACTUAL PROGRAMME
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     while (tid < total_Segs_UP)
     {
@@ -677,11 +944,280 @@ __global__ void cuda_EHH_up_0(int total_Segs_UP, char **grid, int core_SNP_index
     }
 }
 
+void ehh::process_SNP_EHH_BP(vector<string> &total_Segregrating_sites, int SNP_Index_in_FULL, int N, int SNPs_above, int SNPs_below)
+{
+    functions function = functions();
+
+    cout << "\nSystem is calculating EHH: \n"
+         << endl;
+
+    cout << "STEP 1 of 4: Organizing SNPs for GPU" << endl;
+
+    int num_segregrating_Sites = total_Segregrating_sites.size();
+    string Seg_sites = "";
+    int site_Index[num_segregrating_Sites + 1];
+    site_Index[0] = 0;
+
+    for (size_t i = 0; i < num_segregrating_Sites; i++)
+    {
+        Seg_sites.append(total_Segregrating_sites[i]);
+        site_Index[i + 1] = site_Index[i] + total_Segregrating_sites[i].size();
+    }
+
+    char *full_Char;
+    full_Char = (char *)malloc((Seg_sites.size() + 1) * sizeof(char));
+    strcpy(full_Char, Seg_sites.c_str());
+
+    total_Segregrating_sites.clear();
+
+    char *cuda_full_Char;
+    cudaMallocManaged(&cuda_full_Char, (Seg_sites.size() + 1) * sizeof(char));
+    int *cuda_site_Index;
+    cudaMallocManaged(&cuda_site_Index, (num_segregrating_Sites + 1) * sizeof(int));
+
+    int *core_SNP_alleles;
+    int *cuda_core_SNP_alleles;
+    int *SNP_counts, *cuda_SNP_counts;
+    core_SNP_alleles = (int *)malloc(N * sizeof(int));
+    SNP_counts = (int *)malloc(2 * sizeof(int));
+    cudaMallocManaged(&cuda_SNP_counts, 2 * sizeof(int));
+    cudaMallocManaged(&cuda_core_SNP_alleles, N * sizeof(int));
+
+    cudaMemcpy(cuda_full_Char, full_Char, (Seg_sites.size() + 1) * sizeof(char), cudaMemcpyHostToDevice);
+    cudaMemcpy(cuda_site_Index, site_Index, (num_segregrating_Sites + 1) * sizeof(int), cudaMemcpyHostToDevice);
+
+    /**
+     * @param cuda_Hap_array stores the forged Haplotypes for the region under study.
+     * @param Hap_array is used by the CPU. Is a COPY of cuda_Hap_array.
+     **/
+    char *Hap_array, *cuda_Hap_array;
+    cudaMallocManaged(&cuda_Hap_array, ((N * num_segregrating_Sites) + 1) * sizeof(char));
+
+    cout << "STEP 2 OF 4: Haplotype forging from segregrating sites" << endl;
+    // cuda_SNP_grid_0_1_BP(int total_Segs, char *sites, int *index, char *Hap_array, int core_SNP_index, int *core_SNP_alleles, int *SNP_counts)
+    cuda_SNP_grid_0_1_BP<<<tot_Blocks, tot_ThreadsperBlock>>>(num_segregrating_Sites, cuda_full_Char, cuda_site_Index, cuda_Hap_array, SNP_Index_in_FULL, cuda_core_SNP_alleles, cuda_SNP_counts);
+
+    cudaError_t err = cudaGetLastError();
+
+    if (err != cudaSuccess)
+    {
+        printf("CUDA Error: %s\n", cudaGetErrorString(err));
+
+        // Possibly: exit(-1) if program cannot continue....
+    }
+    cudaDeviceSynchronize();
+
+    cudaMemcpy(core_SNP_alleles, cuda_core_SNP_alleles, N * sizeof(int), cudaMemcpyDeviceToHost);
+
+    Hap_array = (char *)malloc(((N * num_segregrating_Sites) + 1) * sizeof(char));
+    cudaMemcpy(Hap_array, cuda_Hap_array, ((N * num_segregrating_Sites) + 1) * sizeof(char), cudaMemcpyDeviceToHost);
+
+    cudaMemcpy(SNP_counts, cuda_SNP_counts, 2 * sizeof(int), cudaMemcpyDeviceToHost);
+
+    cudaFree(cuda_full_Char);
+    cudaFree(cuda_site_Index);
+    cudaFree(cuda_core_SNP_alleles);
+    cudaFree(cuda_SNP_counts);
+    cudaFree(cuda_Hap_array);
+
+    cout << "STEP 3 OF 4: Collecting haplotypes" << endl;
+
+    string haplotypes(Hap_array);
+    vector<string> Haplotypes_0, Haplotypes_1;
+
+    int N_count = 0;
+    for (int i = 0; i < (num_segregrating_Sites * N); i = i + num_segregrating_Sites)
+    {
+        // cout << core_SNP_alleles[N_count];
+        if (core_SNP_alleles[N_count] == 0)
+        {
+            Haplotypes_0.push_back(haplotypes.substr(i, num_segregrating_Sites));
+        }
+        else
+        {
+            Haplotypes_1.push_back(haplotypes.substr(i, num_segregrating_Sites));
+        }
+
+        N_count++;
+    }
+
+    cout << "STEP 4 OF 4: Calculating EHH" << endl;
+
+    // cout << Haplotypes_0[0].size() << endl;
+
+    int combo_Zero = (SNP_counts[0] * (SNP_counts[0] - 1)) / 2;
+    int combo_One = (SNP_counts[1] * (SNP_counts[1] - 1)) / 2;
+
+    for (size_t i = 0; i < num_segregrating_Sites; i++)
+    {
+        if (i < SNPs_above)
+        {
+            EHH_0_up.push_back("");
+            EHH_1_up.push_back("");
+        }
+        else
+        {
+            EHH_0_down.push_back("");
+            EHH_1_down.push_back("");
+        }
+    }
+
+    vector<thread> threads_vec;
+
+    cout << "             Calculating upper bound EHH 0" << endl;
+
+    int SNPs_in_thread = SNPs_above / CPU_cores;
+    int remainder = SNPs_above % CPU_cores;
+
+    for (size_t i = 0; i < CPU_cores; i++)
+    {
+        int start = i * SNPs_in_thread;
+        threads_vec.push_back(thread{&ehh::calc_EHH_0_1_up, this, Haplotypes_0, SNP_Index_in_FULL, start, start + SNPs_in_thread, combo_Zero, 0});
+    }
+
+    for (thread &t : threads_vec)
+    {
+        if (t.joinable())
+        {
+            t.join();
+        }
+    }
+
+    threads_vec.clear();
+
+    // cout << "             Calculating upper bound EHH 0" << endl;
+
+    if (remainder != 0)
+    {
+        int start = SNPs_above - CPU_cores + 1;
+        threads_vec.push_back(thread{&ehh::calc_EHH_0_1_up, this, Haplotypes_0, SNP_Index_in_FULL, start, SNPs_above, combo_Zero, 0});
+
+        for (thread &t : threads_vec)
+        {
+            if (t.joinable())
+            {
+                t.join();
+            }
+        }
+
+        threads_vec.clear();
+    }
+
+    cout << "             Calculating upper bound EHH 1" << endl;
+
+    for (size_t i = 0; i < CPU_cores; i++)
+    {
+        int start = i * SNPs_in_thread;
+        threads_vec.push_back(thread{&ehh::calc_EHH_0_1_up, this, Haplotypes_1, SNP_Index_in_FULL, start, start + SNPs_in_thread, combo_One, 1});
+    }
+
+    for (thread &t : threads_vec)
+    {
+        if (t.joinable())
+        {
+            t.join();
+        }
+    }
+
+    threads_vec.clear();
+
+    if (remainder != 0)
+    {
+        int start = SNPs_above - CPU_cores + 1;
+        threads_vec.push_back(thread{&ehh::calc_EHH_0_1_up, this, Haplotypes_1, SNP_Index_in_FULL, start, SNPs_above, combo_One, 1});
+
+        for (thread &t : threads_vec)
+        {
+            if (t.joinable())
+            {
+                t.join();
+            }
+        }
+
+        threads_vec.clear();
+    }
+
+    cout << "             Calculating lower bound EHH 0" << endl;
+
+    SNPs_in_thread = (SNPs_below + 1) / CPU_cores;
+    remainder = (SNPs_below + 1) % CPU_cores;
+
+    for (size_t i = 0; i < CPU_cores; i++)
+    {
+        int start = i * SNPs_in_thread;
+        threads_vec.push_back(thread{&ehh::calc_EHH_0_1_down, this, Haplotypes_0, SNP_Index_in_FULL, start, start + SNPs_in_thread, combo_Zero, 0});
+    }
+
+    for (thread &t : threads_vec)
+    {
+        if (t.joinable())
+        {
+            t.join();
+        }
+    }
+
+    threads_vec.clear();
+
+    if (remainder != 0)
+    {
+        int start = (SNPs_below + 1) - CPU_cores + 1;
+        threads_vec.push_back(thread{&ehh::calc_EHH_0_1_down, this, Haplotypes_0, SNP_Index_in_FULL, start, SNPs_below + 1, combo_Zero, 0});
+
+        for (thread &t : threads_vec)
+        {
+            if (t.joinable())
+            {
+                t.join();
+            }
+        }
+
+        threads_vec.clear();
+    }
+
+    cout << "             Calculating lower bound EHH 1" << endl;
+
+    for (size_t i = 0; i < CPU_cores; i++)
+    {
+        int start = i * SNPs_in_thread;
+        threads_vec.push_back(thread{&ehh::calc_EHH_0_1_down, this, Haplotypes_1, SNP_Index_in_FULL, start, start + SNPs_in_thread, combo_One, 1});
+    }
+
+    for (thread &t : threads_vec)
+    {
+        if (t.joinable())
+        {
+            t.join();
+        }
+    }
+
+    threads_vec.clear();
+
+    if (remainder != 0)
+    {
+        int start = SNPs_below + 1 - CPU_cores + 1;
+        threads_vec.push_back(thread{&ehh::calc_EHH_0_1_down, this, Haplotypes_1, SNP_Index_in_FULL, start, SNPs_below + 1, combo_One, 1});
+
+        for (thread &t : threads_vec)
+        {
+            if (t.joinable())
+            {
+                t.join();
+            }
+        }
+
+        threads_vec.clear();
+    }
+
+    free(full_Char);
+    free(Hap_array);
+    free(SNP_counts);
+}
+
 void ehh::process_SNP_EHH(int position, vector<pair<string, string>> &folder_Index, int segment_Position, int SNP_Index_in_file, vector<string> &segment_Segregrating_sites, float N, int num_top, int num_bottom)
 {
     functions function = functions();
 
-    cout << "\nSystem is conducting EHH engine: \n"
+    cout << "\nSystem is initiating EHH engine: \n"
          << endl;
 
     cout << "STEP 1 of 6: Completing SNP collection" << endl;
@@ -979,6 +1515,7 @@ void ehh::process_SNP_EHH(int position, vector<pair<string, string>> &folder_Ind
     cudaFree(cuda_SNP_counts);
     cudaFree(cuda_pos_start_Index);
     cudaFree(cuda_pos_end_Index);
+    cudaFree(cuda_Hap_array);
 
     // free(site_Index);
 
@@ -1282,6 +1819,8 @@ void ehh::process_SNP_EHH(int position, vector<pair<string, string>> &folder_Ind
     free(full_Char);
     free(pos_start_Index);
     free(pos_end_Index);
+    free(Hap_array);
+    free(SNP_counts);
 
     // CLEAR 0 1 up down vectors
 }
@@ -1399,6 +1938,8 @@ void ehh::calc_EHH_0_1_up(vector<string> Haplotypes, int position_of_core_SNP, i
     // cout << augment << endl;
     for (size_t i = augment_start; i < augment_stop; i++)
     {
+        // cout << i << " " << position_of_core_SNP << endl
+        //      << endl;
         int augment = i + 1;
         int pos, length;
 

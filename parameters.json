@@ -117,9 +117,10 @@
     # EHH or Extended Haplotype Homozygosity
     # Define the extended haplotype region specification mode by either using a separate gene list file (FILE mode) or state the standard displacement value (FIXED mode) in bases.
     # Degradation of EHH around a SNP can be calculated by SNP mode.
-    "Range mode":"SNP",
+    "Range mode":"BP",
     "EHH FILE path":"genelist_ehh.txt",
     "FIXED mode":"+1000",
     "SNP default count":100,
+    "SNP BP displacement":100000,
     "EHH CPU cores":10
 }

@@ -808,6 +808,109 @@ int functions::single_segment_retrieval(int SNP_position, vector<pair<string, st
     return segment_Position;
 }
 
+vector<string> functions::compound_interpolationSearch_ordered(vector<pair<string, string>> &folder_Index, int &start_Co, int &end_Co)
+{
+    vector<string> file_List;
+
+    vector<string> line_Data;
+    split(line_Data, folder_Index[0].first, '_');
+    int low_Value = stoi(line_Data[0]);
+    split(line_Data, folder_Index[folder_Index.size() - 1].first, '_');
+    int high_Value = stoi(line_Data[1]);
+
+    int start = 0;
+    int end = folder_Index.size() - 1;
+
+    while (start <= end && start_Co <= high_Value)
+    {
+        vector<string> line_Data_get;
+        int pos = start + ((((double)(end - start) / (high_Value - low_Value)) * (start_Co - low_Value)));
+
+        split(line_Data_get, folder_Index[pos].first, '_');
+        int low_Value_atpos = stoi(line_Data_get[0]);
+        int high_Value_atpos = stoi(line_Data_get[1]);
+
+        // cout << low_Value_atpos << "\t" << high_Value_atpos << endl;
+
+        if ((start_Co >= low_Value_atpos && start_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co <= high_Value_atpos) || (start_Co <= low_Value_atpos && end_Co >= high_Value_atpos))
+        {
+
+            promise<vector<int>> backward;
+            promise<vector<int>> forward;
+
+            future<vector<int>> fut_Backward = backward.get_future();
+            future<vector<int>> fut_Forward = forward.get_future();
+
+            thread backward_thread{&functions::backward_Search, this, pos, folder_Index, start_Co, end_Co, ref(backward)};
+            thread forward_thread{&functions::forward_Search, this, pos, folder_Index, start_Co, end_Co, ref(forward)};
+
+            vector<int> backward_get = fut_Backward.get();
+            vector<int> forward_get = fut_Forward.get();
+
+            backward_thread.join();
+            forward_thread.join();
+
+            // auto backward_thread = async(&functions::backward_Search, this, pos, folder_Index, start_Co, end_Co);
+            // auto forward_thread = async(&functions::forward_Search, this, pos, folder_Index, start_Co, end_Co);
+
+            // backward_get = backward_thread.get();
+            // forward_get = forward_thread.get();
+
+            for (size_t i = backward_get.size() - 1; i <= 0; i--)
+            {
+                file_List.push_back(folder_Index[backward_get[i]].second);
+            }
+
+            // for (auto positions : backward_get)
+            // {
+            //     file_List.push_back(folder_Index[positions].second);
+            // }
+
+            file_List.push_back(folder_Index[pos].second);
+
+            for (auto positions : forward_get)
+            {
+                file_List.push_back(folder_Index[positions].second);
+            }
+
+            break;
+        }
+        else if (start_Co > low_Value_atpos)
+        {
+            // cout << pos << "\t";
+            int new_pos = pos;
+
+            do
+            {
+                new_pos = new_pos + 1;
+            } while (new_pos <= start);
+
+            start = new_pos;
+
+            // cout << start << endl;
+        }
+        else
+        {
+            int new_pos = pos;
+
+            do
+            {
+                new_pos = new_pos - 1;
+            } while (new_pos >= end);
+
+            end = new_pos;
+        }
+
+        split(line_Data_get, folder_Index[start].first, '_');
+        low_Value = stoi(line_Data_get[0]);
+
+        split(line_Data_get, folder_Index[end].first, '_');
+        high_Value = stoi(line_Data_get[1]);
+    }
+
+    return file_List;
+}
+
 vector<string> functions::compound_interpolationSearch(vector<pair<string, string>> &folder_Index, int &start_Co, int &end_Co)
 {
     vector<string> file_List;

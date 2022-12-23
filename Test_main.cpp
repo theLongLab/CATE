@@ -652,44 +652,50 @@ int main(int argc, char *argv[])
                               string fixed_mode_Value = "NA";
 
                               int default_SNP_count = 100;
+                              int default_SNP_BP_count = 100000;
                               int EHH_CPU_cores = 1;
 
                               string GO = "NO";
 
-                              if (mode == "FILE" || mode == "SNP")
+                              /**
+                               * Get the gene file.
+                               **/
+                              file_mode_Path = properties.where("EHH FILE path");
+                              if (file_mode_Path == "universal")
                               {
-                                   /**
-                                    * Get the gene file.
-                                    **/
-                                   file_mode_Path = properties.where("EHH FILE path");
-                                   if (file_mode_Path == "universal")
-                                   {
-                                        file_mode_Path = properties.where("Universal gene list");
-                                   }
+                                   file_mode_Path = properties.where("Universal gene list");
+                              }
 
+                              if (mode != "FIXED")
+                              {
                                    if (mode == "SNP")
                                    {
                                         default_SNP_count = properties.where_Int("SNP default count");
                                         EHH_CPU_cores = properties.where_Int("EHH CPU cores");
-                                        //EHH_cutoff = stod(EHH_cutoff_value);
+                                        // EHH_cutoff = stod(EHH_cutoff_value);
+                                   }
+                                   else if (mode == "BP")
+                                   {
+                                        default_SNP_BP_count = properties.where_Int("SNP BP displacement");
+                                        EHH_CPU_cores = properties.where_Int("EHH CPU cores");
                                    }
 
                                    GO = "YES";
                               }
-                              else if (mode == "FIXED")
+                              else
                               {
-                                   file_mode_Path = properties.where("EHH FILE path");
-                                   if (file_mode_Path == "universal")
-                                   {
-                                        file_mode_Path = properties.where("Universal gene list");
-                                   }
+                                   // file_mode_Path = properties.where("EHH FILE path");
+                                   // if (file_mode_Path == "universal")
+                                   // {
+                                   //      file_mode_Path = properties.where("Universal gene list");
+                                   // }
                                    fixed_mode_Value = properties.where("FIXED mode");
                                    GO = "YES";
                               }
 
                               if (GO == "YES")
                               {
-                                   ehh ehh_ = ehh(mode, file_mode_Path, fixed_mode_Value, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), default_SNP_count, EHH_CPU_cores);
+                                   ehh ehh_ = ehh(mode, file_mode_Path, fixed_mode_Value, properties.where("Input path"), output_Path, properties.where_Int("CUDA Device ID"), intermediate_Path, properties.where_Int("Ploidy"), default_SNP_count, EHH_CPU_cores,default_SNP_BP_count);
                                    ehh_.ingress();
 
                                    cout << "CUDA powered Extended Haplotype Homozygosity (EHH) calculator has been completed." << endl;
