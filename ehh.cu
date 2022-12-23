@@ -270,7 +270,7 @@ void ehh::ingress()
 
                                 // Write to file
                                 string results_File = output_File + "/" +
-                                                      gene_Name + "_" + Core_coordinates[0] + "_" + Core_coordinates[1] + "_" + to_string(this->default_SNP_count) + ".ehh";
+                                                      gene_Name + "_" + Core_coordinates[0] + "_" + Core_coordinates[1] + "_" + to_string(this->default_SNP_count) + "_SNP.ehh";
                                 function.createFile(results_File, "Displacement\tSNP_position\tEHH_0\tEHH_1");
 
                                 cout << "Writing results to file: " << results_File << endl
@@ -435,7 +435,7 @@ void ehh::ingress()
 
                                 // print the results
                                 string results_File = output_File + "/" +
-                                                      gene_Name + "_" + Core_coordinates[0] + "_" + Core_coordinates[1] + "_" + to_string(this->default_SNP_BP_count) + ".ehh";
+                                                      gene_Name + "_" + Core_coordinates[0] + "_" + Core_coordinates[1] + "_" + to_string(this->default_SNP_BP_count) + "_BP.ehh";
                                 function.createFile(results_File, "Displacement\tSNP_position\tEHH_0\tEHH_1");
 
                                 cout << "\nWriting results to file: " << results_File << endl
