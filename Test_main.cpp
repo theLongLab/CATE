@@ -12,6 +12,7 @@
 #include "mk_test.cuh"
 #include "fst.cuh"
 #include "gff2gene.cuh"
+#include "vcf_splitter_2.cuh"
 #include "hap_extract.cuh"
 #include "vcf_splitter.h"
 #include "print_param.h"
@@ -224,12 +225,79 @@ int main(int argc, char *argv[])
                                **/
 
                               // string input = properties.where("Input folder entry");
-                              vcf_splitter split = vcf_splitter(tmp, properties.where("Input path"), properties.where("Population file path"), output_Path, properties.where_Int("Reference allele count"), properties.where_Int("Alternate allele count"), properties.where_Int("SNP count per file"), properties.where_Int("Sample_ID Column number"), properties.where_Int("Population_ID Column number"));
-                              split.index_population();
-                              split.read_File();
-                              cout << endl
-                                   << endl
-                                   << "VCF split has been completed." << endl;
+                              // vcf_splitter split = vcf_splitter(tmp, properties.where("Input path"), properties.where("Population file path"), output_Path, properties.where_Int("Reference allele count"), properties.where_Int("Alternate allele count"), properties.where_Int("SNP count per file"), properties.where_Int("Sample_ID Column number"), properties.where_Int("Population_ID Column number"));
+                              // split.index_population();
+                              // split.read_File();
+
+                              string split_Mode = properties.where("Split mode");
+                              transform(split_Mode.begin(), split_Mode.end(), split_Mode.begin(), ::toupper);
+
+                              if (split_Mode == "CHR")
+                              {
+                                   int summary = 0;
+                                   string summary_Individuals = properties.where("CHR individual summary");
+                                   transform(summary_Individuals.begin(), summary_Individuals.end(), summary_Individuals.begin(), ::toupper);
+
+                                   {
+                                        summary = 1;
+                                   }
+
+                                   // vcf_splitter_2(string input_vcf_Folder, string output_Folder, int cores, int SNPs_per_time_CPU, int SNPs_per_time_GPU, int allele_Count_REF, int allele_Count_ALT);
+                                   vcf_splitter_2 split_CHR = vcf_splitter_2(properties.where_Int("CUDA Device ID"), properties.where("Input path"), output_Path, properties.where_Int("Split cores"), properties.where_Int("Split SNPs per_time_CPU"), properties.where_Int("Split SNPs per_time_GPU"), properties.where_Int("Reference allele count"), properties.where_Int("Alternate allele count"), properties.where_Int("Ploidy"), summary);
+                                   split_CHR.ingress_chr_Split();
+                              }
+                              else if (split_Mode == "CTSPLIT")
+                              {
+                                   string MAF = properties.where("MAF frequency");
+
+                                   // 0 = equal;
+                                   // 1 = greater than
+                                   // 2 = less than
+                                   // 10 = greater than or equal
+                                   // 20 = less than or equal
+
+                                   int MAF_logic = -1;
+                                   string MAF_Logic_string = properties.where("Frequency logic");
+
+                                   if (MAF_Logic_string == "=")
+                                   {
+                                        MAF_logic = 0;
+                                   }
+                                   else if (MAF_Logic_string == ">")
+                                   {
+                                        MAF_logic = 1;
+                                   }
+                                   else if (MAF_Logic_string == "<")
+                                   {
+                                        MAF_logic = 2;
+                                   }
+                                   else if (MAF_Logic_string == ">=")
+                                   {
+                                        MAF_logic = 10;
+                                   }
+                                   else if (MAF_Logic_string == "<=")
+                                   {
+                                        MAF_logic = 20;
+                                   }
+
+                                   if (MAF_logic != -1)
+                                   {
+                                        vcf_splitter_2 CATE_split = vcf_splitter_2(properties.where_Int("CUDA Device ID"), properties.where("Input path"), output_Path, properties.where("Population file path"), properties.where_Int("Sample_ID Column number"), properties.where_Int("Population_ID Column number"), properties.where_Int("Split cores"), properties.where_Int("Split SNPs per_time_CPU"), properties.where_Int("Split SNPs per_time_GPU"), properties.where_Int("Ploidy"), properties.where_Int("SNP count per file"), MAF_logic, stod(MAF));
+                                        CATE_split.ingress_file_hierarchy();
+                                   }
+                                   else
+                                   {
+                                        cout << "ERROR in \"Frequency logic\" type in parameters.json file. PLEASE CHECK.\n"
+                                             << endl;
+                                   }
+                              }
+                              else
+                              {
+                                   cout << "ERROR IN SPLIT MODE:\nTHERE CAN BE ONLY TWO SPLIT MODES: \"CHR\" OR \"CTSPLIT\"\nREFER TO THE HELP MENU FOR THEIR DESCRIPTIONS\n"
+                                        << endl;
+                              }
+
+                              cout << "VCF split has been completed." << endl;
                          }
                          else if (function == "--splitfasta" || function == "-sfasta")
                          {

@@ -2379,11 +2379,11 @@ void ehh::process_EHH(vector<string> &total_Segregrating_sites, vector<int> &cor
     //     snp_N_grid[i] = (int *)malloc(N * sizeof(int));
     // }
 
-    cudaMallocManaged(&cuda_snp_N_grid, N * num_segregrating_Sites * sizeof(char));
+    cudaMallocManaged(&cuda_snp_N_grid, (N + 1) * num_segregrating_Sites * sizeof(char));
     char **tmp = (char **)malloc(num_segregrating_Sites * sizeof(tmp[0]));
     for (int i = 0; i < num_segregrating_Sites; i++)
     {
-        cudaMalloc((void **)&tmp[i], N * sizeof(tmp[0][0]));
+        cudaMalloc((void **)&tmp[i], (N + 1) * sizeof(tmp[0][0]));
     }
     cudaMemcpy(cuda_snp_N_grid, tmp, num_segregrating_Sites * sizeof(char *), cudaMemcpyHostToDevice);
     free(tmp);

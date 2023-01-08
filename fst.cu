@@ -333,7 +333,7 @@ void fst::ingress()
 
             process_FST(pop_ID, test_Pops.size(), Seg_count, Fst_Total, Fst_Avg);
             cout << endl
-                 << "Fst has been caluclated" << endl;
+                 << "Fst has been calculated" << endl;
 
             string FST_out = to_string(Fst_Avg);
             if (isnan(Fst_Avg))
@@ -567,7 +567,7 @@ void fst::sample_location_Index(int num_Pop_Ids, fst_test_pop pop_IDs[])
     for (int i = 0; i < max_Location_Size; i++)
     {
         // PRESENT_or_NOT[i] = (int *)malloc(num_Pop_Ids * sizeof(int));
-        sample_Location_array[i] = (int *)malloc(num_Pop_Ids * sizeof(int));
+        sample_Location_array[i] = (int *)malloc((num_Pop_Ids + 1) * sizeof(int));
     }
 
     for (size_t c = 0; c < num_Pop_Ids; c++)
@@ -584,17 +584,17 @@ void fst::sample_location_Index(int num_Pop_Ids, fst_test_pop pop_IDs[])
     cudaMemcpy(cuda_locations_Size, locations_Size, num_Pop_Ids * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(cuda_pop_seqeunce_Size_Array, pop_seqeunce_Size_Array, num_Pop_Ids * sizeof(int), cudaMemcpyHostToDevice);
 
-    cudaMallocManaged(&cuda_sample_Location_array, max_Location_Size * num_Pop_Ids * sizeof(int));
+    cudaMallocManaged(&cuda_sample_Location_array, max_Location_Size * (num_Pop_Ids + 1) * sizeof(int));
     int **tmp_3 = (int **)malloc(max_Location_Size * sizeof(tmp_3[0]));
     for (size_t i = 0; i < max_Location_Size; i++)
     {
-        cudaMalloc((void **)&tmp_3[i], num_Pop_Ids * sizeof(tmp_3[0][0]));
+        cudaMalloc((void **)&tmp_3[i], (num_Pop_Ids + 1) * sizeof(tmp_3[0][0]));
     }
     cudaMemcpy(cuda_sample_Location_array, tmp_3, max_Location_Size * sizeof(int *), cudaMemcpyHostToDevice);
 
     for (size_t i = 0; i < max_Location_Size; i++)
     {
-        cudaMemcpy(tmp_3[i], sample_Location_array[i], num_Pop_Ids * sizeof(cuda_sample_Location_array[0][0]), cudaMemcpyHostToDevice);
+        cudaMemcpy(tmp_3[i], sample_Location_array[i], (num_Pop_Ids + 1) * sizeof(cuda_sample_Location_array[0][0]), cudaMemcpyHostToDevice);
     }
     free(tmp_3);
 }
@@ -908,12 +908,12 @@ void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_A
     for (int i = 0; i < max_Segs; i++)
     {
         // PRESENT_or_NOT[i] = (int *)malloc(num_Pop_Ids * sizeof(int));
-        seg_Positions[i] = (int *)malloc(num_Pop_Ids * sizeof(int));
+        seg_Positions[i] = (int *)malloc((num_Pop_Ids + 1) * sizeof(int));
     }
 
     for (int i = 0; i < first_Seg_sites; i++)
     {
-        first_match_Relationships[i] = (int *)malloc(num_Pop_Ids * sizeof(int));
+        first_match_Relationships[i] = (int *)malloc((num_Pop_Ids + 1) * sizeof(int));
     }
 
     int **cuda_seg_Positions, *cuda_PRESENT_or_NOT, **cuda_first_match_Relationships;
@@ -925,11 +925,11 @@ void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_A
     cudaMallocManaged(&cuda_pop_Seg_size_Array, num_Pop_Ids * sizeof(int));
 
     // seg_Positions = (int *)malloc(num_Pop_Ids * max_Segs * sizeof(int));
-    cudaMallocManaged(&cuda_seg_Positions, num_Pop_Ids * max_Segs * sizeof(int));
+    cudaMallocManaged(&cuda_seg_Positions, (num_Pop_Ids + 1) * max_Segs * sizeof(int));
     int **tmp_2 = (int **)malloc(max_Segs * sizeof(tmp_2[0]));
     for (size_t i = 0; i < max_Segs; i++)
     {
-        cudaMalloc((void **)&tmp_2[i], num_Pop_Ids * sizeof(tmp_2[0][0]));
+        cudaMalloc((void **)&tmp_2[i], (num_Pop_Ids + 1) * sizeof(tmp_2[0][0]));
     }
     cudaMemcpy(cuda_seg_Positions, tmp_2, max_Segs * sizeof(int *), cudaMemcpyHostToDevice);
 
@@ -943,7 +943,7 @@ void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_A
     // cudaMemcpy(cuda_PRESENT_or_NOT, tmp_3, max_Segs * sizeof(int *), cudaMemcpyHostToDevice);
 
     // first_match_Relationships = (int *)malloc(num_Pop_Ids * first_Seg_sites * sizeof(int));
-    cudaMallocManaged(&cuda_first_match_Relationships, num_Pop_Ids * first_Seg_sites * sizeof(int));
+    cudaMallocManaged(&cuda_first_match_Relationships, (num_Pop_Ids + 1) * first_Seg_sites * sizeof(int));
     // cudaMalloc((void **)&cuda_first_match_Relationships, first_Seg_sites * sizeof(int *));
     // cout << "run" << endl;
     int **tmp = (int **)malloc(first_Seg_sites * sizeof(tmp[0]));
@@ -951,7 +951,7 @@ void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_A
     for (int i = 0; i < first_Seg_sites; i++)
     {
         // cout << i << endl;
-        cudaMalloc((void **)&tmp[i], num_Pop_Ids * sizeof(tmp[0][0]));
+        cudaMalloc((void **)&tmp[i], (num_Pop_Ids + 1) * sizeof(tmp[0][0]));
     }
     // cout << "run" << endl;
     cudaMemcpy(cuda_first_match_Relationships, tmp, first_Seg_sites * sizeof(int *), cudaMemcpyHostToDevice);
@@ -989,7 +989,7 @@ void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_A
     // cudaMemcpy(cuda_seg_Positions, seg_Positions, num_Pop_Ids * max_Segs * sizeof(int), cudaMemcpyHostToDevice);
     for (size_t i = 0; i < max_Segs; i++)
     {
-        cudaMemcpy(tmp_2[i], seg_Positions[i], num_Pop_Ids * sizeof(cuda_seg_Positions[0][0]), cudaMemcpyHostToDevice);
+        cudaMemcpy(tmp_2[i], seg_Positions[i], (num_Pop_Ids + 1) * sizeof(cuda_seg_Positions[0][0]), cudaMemcpyHostToDevice);
     }
 
     free(tmp_2);
@@ -1023,7 +1023,7 @@ void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_A
     for (size_t i = 0; i < first_Seg_sites; i++)
     {
         // cout << i << endl;
-        cudaMemcpy(first_match_Relationships[i], cuda_first_match_Relationships[i], num_Pop_Ids * sizeof(cuda_first_match_Relationships[0][0]), cudaMemcpyDeviceToHost);
+        cudaMemcpy(first_match_Relationships[i], cuda_first_match_Relationships[i], (num_Pop_Ids + 1) * sizeof(cuda_first_match_Relationships[0][0]), cudaMemcpyDeviceToHost);
     }
 
     cout << "           : System has completed performing global merge of " << num_Pop_Ids << " population's segregrating sites" << endl;

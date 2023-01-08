@@ -1502,7 +1502,7 @@ void prometheus::process_Window(string test)
             }
             else
             {
-                cout << "Intitating single read based segregating site search" << endl;
+                cout << "Initiating single read based segregating site search" << endl;
                 for (string files : file_List)
                 {
                     fstream file;

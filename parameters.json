@@ -4,7 +4,7 @@
 
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPARATE PARAMATER FILES WITH SEPARATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
-    "Input path":"split_VCF",
+    "Input path":"/mnt/d/Deshan/Books/University of Calgary/Experiments/1000_Genome/vcf",
     "Output path":"test_snps",
     "Intermediate path":"intermediate_snps",
 
@@ -41,13 +41,23 @@
     "Universal gene list":"genelist.txt",
 
     # VCF split parameters
+    # The type of Split mode can be either CHR or CTSPLIT
+    # The CHR mode will split the VCF file by chromosomes and extract the GT column only
+    # The CTSPLIT mode will create CATE's proprietary file structure. For this the parent VCFs must only contain one chromosome's data and have only the GT column.
     # Column numbers are non zero digits, i.e. Column numbers start with one
-    "Population file path":"Onid.txt",
+    "Split mode":"CTSPLIT",
+    "CHR individual summary":"YES",
+    "Split cores":10,
+    "Split SNPs per_time_CPU":5000,
+    "Split SNPs per_time_GPU":1000,
+    "Population file path":"/mnt/d/Deshan/Books/population/sample_population_codes_2.tsv",
     "Sample_ID Column number":1,
-    "Population_ID Column number":2,
+    "Population_ID Column number":6,
     "Reference allele count":1,
     "Alternate allele count":1,
-    "SNP count per file":1000,
+    "SNP count per file":10000,
+    "MAF frequency":"0",
+    "Frequency logic":">=",
 
     # FASTA split parameters
     # REQUIRES SEPARATE INPUT, SINCE IT IS A SINGULAR INPUT
@@ -111,12 +121,12 @@
     # Indexed population file should be a THREE column tab deliminated *.txt file with headings: Sample_name	population_ID	Super_population.
     # Ensure population_ID values are unique to each super population and do not overlap.
     "Population index file path":"fst_pop/population.txt",
-    "Fst gene list":"universal",
+    "Fst gene list":"genelist2.txt",
     "Population ID":"AFR,XKY,ZXY",
 
     # EHH or Extended Haplotype Homozygosity
     # Define the extended haplotype region specification mode by either using a separate gene list file (FILE mode) or state the standard displacement value (FIXED mode) in bases.
-    # Degradation of EHH around a SNP can be calculated by SNP mode.
+    # Degradation of EHH around a SNP can be calculated by SNP or BP mode.
     "Range mode":"BP",
     "EHH FILE path":"genelist_ehh.txt",
     "FIXED mode":"+1000",
