@@ -14,6 +14,7 @@
 #include "gff2gene.cuh"
 #include "vcf_splitter_2.cuh"
 #include "hap_extract.cuh"
+#include "map2gene.cuh"
 #include "vcf_splitter.h"
 #include "print_param.h"
 #include "gene_extract.h"
@@ -361,7 +362,7 @@ int main(int argc, char *argv[])
                               g2g.ingress();
 
                               cout << endl
-                                   << "Completed GFF to Gene list" << endl;
+                                   << "Completed GFF to Gene list." << endl;
                          }
                          else if (function == "--hapfromvcf" || function == "-hapext")
                          {
@@ -386,7 +387,15 @@ int main(int argc, char *argv[])
                               haplotype_Extractor.ingress();
 
                               cout << endl
-                                   << "Completed CUDA powered Haplotype extractor" << endl;
+                                   << "Completed CUDA powered Haplotype extractor." << endl;
+                         }
+                         else if (function == "--map2gene" || function == "-m2g")
+                         {
+                              map2gene mp2 = map2gene(properties.where("MAP file"), output_Path, properties.where("SNP prefix"));
+                              mp2.ingress();
+
+                              cout << endl
+                                   << "Completed MAP to gene list." << endl;
                          }
                          else if (function == "--tajima" || function == "-t")
                          {
@@ -914,6 +923,8 @@ void print_HELP()
           << "                          IF \"Population out\" is set to \"YES\" then the entire population's FASTA configuration will be generated as well." << endl
           << "                          Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "                          File format is *.hsum (a tab deliminated text file)." << endl
+          << endl
+          << "-m2g or --map2gene\t: Creates the gene list file in a *.txt format from the input MAP file." << endl
           << endl
           << "-pparam or --printparam : Prints a sample layout of the parameter file to the specified location." << endl
           << "                          State the path with the name of the parameter file after the \"-pparam\" function." << endl

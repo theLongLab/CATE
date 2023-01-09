@@ -87,6 +87,11 @@
     "Population out":"Yes",
     "Hap extract gene list":"universal",
 
+    # MAP file to Gene file parameters
+    # REQUIRES SEPERATE INPUT, SINCE IT IS A SINGULAR INPUT
+    "MAP file":"map/wgs.map",
+    "SNP prefix":"S",
+
     # All Neutrality tests
     # Calculates all three neutrality tests (Tajima's D, Fay and Wu's and Fu and Li's) at once
     # File created would have the extension *.nt (tab deliminated text file). File Name: CountryName_GeneListFileName.nt
