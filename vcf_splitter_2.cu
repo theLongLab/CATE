@@ -1757,11 +1757,11 @@ void vcf_splitter_2::process_SNPs_CHR(int N, int augment, string &output_vcf_Fol
         Hap_array = (char *)malloc((((N * ((2 * ploidy) - 1)) * total_Segs) + 1) * sizeof(char));
 
         int **cuda_sample_sequence_Tracker;
-        cudaMallocManaged(&cuda_sample_sequence_Tracker, N * total_Segs * sizeof(int));
+        cudaMallocManaged(&cuda_sample_sequence_Tracker, (N + 1) * total_Segs * sizeof(int));
         int **tmp = (int **)malloc(total_Segs * sizeof(tmp[0]));
         for (int i = 0; i < total_Segs; i++)
         {
-            cudaMalloc((void **)&tmp[i], N * sizeof(tmp[0][0]));
+            cudaMalloc((void **)&tmp[i], (N + 1) * sizeof(tmp[0][0]));
         }
         cudaMemcpy(cuda_sample_sequence_Tracker, tmp, total_Segs * sizeof(int *), cudaMemcpyHostToDevice);
         free(tmp);
@@ -1813,13 +1813,13 @@ void vcf_splitter_2::process_SNPs_CHR(int N, int augment, string &output_vcf_Fol
 
             for (size_t i = 0; i < total_Segs; i++)
             {
-                sample_sequence_Tracker[i] = (int *)malloc(N * sizeof(int));
+                sample_sequence_Tracker[i] = (int *)malloc((N + 1) * sizeof(int));
             }
 
             for (size_t i = 0; i < total_Segs; i++)
             {
                 // cout << i << endl;
-                cudaMemcpy(sample_sequence_Tracker[i], cuda_sample_sequence_Tracker[i], N * sizeof(cuda_sample_sequence_Tracker[0][0]), cudaMemcpyDeviceToHost);
+                cudaMemcpy(sample_sequence_Tracker[i], cuda_sample_sequence_Tracker[i], (N + 1) * sizeof(cuda_sample_sequence_Tracker[0][0]), cudaMemcpyDeviceToHost);
             }
 
             // for (size_t r = 0; r < total_Segs; r++)
