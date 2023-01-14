@@ -4,7 +4,7 @@
 
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPARATE PARAMATER FILES WITH SEPARATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
-    "Input path":"/mnt/d/Deshan/Books/University of Calgary/Experiments/1000_Genome/vcf",
+    "Input path":"/mnt/d/Deshan/Books/University of Calgary/Experiments/1001_Genomes",
     "Output path":"test_snps",
     "Intermediate path":"intermediate_snps",
 
@@ -45,11 +45,11 @@
     # The CHR mode will split the VCF file by chromosomes and extract the GT column only
     # The CTSPLIT mode will create CATE's proprietary file structure. For this the parent VCFs must only contain one chromosome's data and have only the GT column.
     # Column numbers are non zero digits, i.e. Column numbers start with one
-    "Split mode":"CTSPLIT",
+    "Split mode":"CHR",
     "CHR individual summary":"YES",
     "Split cores":10,
-    "Split SNPs per_time_CPU":5000,
-    "Split SNPs per_time_GPU":1000,
+    "Split SNPs per_time_CPU":10000,
+    "Split SNPs per_time_GPU":5000,
     "Population file path":"/mnt/d/Deshan/Books/population/sample_population_codes_2.tsv",
     "Sample_ID Column number":1,
     "Population_ID Column number":6,

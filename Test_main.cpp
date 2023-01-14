@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
                                    int summary = 0;
                                    string summary_Individuals = properties.where("CHR individual summary");
                                    transform(summary_Individuals.begin(), summary_Individuals.end(), summary_Individuals.begin(), ::toupper);
-
+                                   if (summary_Individuals == "YES")
                                    {
                                         summary = 1;
                                    }
