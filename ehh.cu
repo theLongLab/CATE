@@ -313,6 +313,7 @@ void ehh::ingress()
                             int low_Value = stoi(folder_index_Positions[0]);
 
                             int min_Limit = position_SNP - this->default_SNP_BP_count;
+                            // cout << min_Limit << "\t" << low_Value << endl;
 
                             if (min_Limit < low_Value)
                             {
@@ -324,10 +325,15 @@ void ehh::ingress()
 
                             int max_Limit = position_SNP + this->default_SNP_BP_count;
 
+                            // cout << max_Limit << "\t" << high_Value << endl;
+
                             if (max_Limit > high_Value)
                             {
                                 max_Limit = high_Value;
                             }
+
+                            // cout << min_Limit << "\t" << low_Value << endl;
+                            // cout << max_Limit << "\t" << high_Value << endl;
 
                             vector<string> collect_SNP_file;
                             vector<string> SNP_positions;
@@ -382,8 +388,11 @@ void ehh::ingress()
                                 vector<string> seg_Sites_ALL_Positions;
                                 int SNP_Index_in_FULL = -1;
 
+                                //cout << file_List.size();
+
                                 for (string files : file_List)
                                 {
+                                    // cout << files << "\t" << SNP_file_Name << endl;
                                     if (files == SNP_file_Name)
                                     {
                                         // Fill the SNP file data from what was collected
@@ -1048,9 +1057,9 @@ void ehh::process_SNP_EHH_BP(vector<string> &total_Segregrating_sites, int SNP_I
     int combo_Zero = (SNP_counts[0] * (SNP_counts[0] - 1)) / 2;
     int combo_One = (SNP_counts[1] * (SNP_counts[1] - 1)) / 2;
 
-    //cout << SNPs_above << endl;
-    //cout << SNPs_below << endl;
-    //exit(3);
+    // cout << SNPs_above << endl;
+    // cout << SNPs_below << endl;
+    // exit(3);
 
     for (size_t i = 0; i < num_segregrating_Sites; i++)
     {

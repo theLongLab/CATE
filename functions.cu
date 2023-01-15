@@ -856,10 +856,16 @@ vector<string> functions::compound_interpolationSearch_ordered(vector<pair<strin
             // backward_get = backward_thread.get();
             // forward_get = forward_thread.get();
 
-            for (size_t i = backward_get.size() - 1; i <= 0; i--)
+            for (int i = backward_get.size() - 1; i >= 0; i--)
             {
                 file_List.push_back(folder_Index[backward_get[i]].second);
             }
+
+            // cout << backward_get.size() << endl;
+            // cout << pos << endl;
+            // cout << forward_get.size() << endl;
+
+            // cout << folder_Index[pos].second << endl;
 
             // for (auto positions : backward_get)
             // {
