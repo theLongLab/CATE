@@ -1048,6 +1048,10 @@ void ehh::process_SNP_EHH_BP(vector<string> &total_Segregrating_sites, int SNP_I
     int combo_Zero = (SNP_counts[0] * (SNP_counts[0] - 1)) / 2;
     int combo_One = (SNP_counts[1] * (SNP_counts[1] - 1)) / 2;
 
+    //cout << SNPs_above << endl;
+    //cout << SNPs_below << endl;
+    //exit(3);
+
     for (size_t i = 0; i < num_segregrating_Sites; i++)
     {
         if (i < SNPs_above)
@@ -1089,7 +1093,7 @@ void ehh::process_SNP_EHH_BP(vector<string> &total_Segregrating_sites, int SNP_I
 
     if (remainder != 0)
     {
-        int start = SNPs_above - CPU_cores + 1;
+        int start = SNPs_above - remainder;
         threads_vec.push_back(thread{&ehh::calc_EHH_0_1_up, this, Haplotypes_0, SNP_Index_in_FULL, start, SNPs_above, combo_Zero, 0});
 
         for (thread &t : threads_vec)
@@ -1123,7 +1127,7 @@ void ehh::process_SNP_EHH_BP(vector<string> &total_Segregrating_sites, int SNP_I
 
     if (remainder != 0)
     {
-        int start = SNPs_above - CPU_cores + 1;
+        int start = SNPs_above - remainder;
         threads_vec.push_back(thread{&ehh::calc_EHH_0_1_up, this, Haplotypes_1, SNP_Index_in_FULL, start, SNPs_above, combo_One, 1});
 
         for (thread &t : threads_vec)
@@ -1160,7 +1164,7 @@ void ehh::process_SNP_EHH_BP(vector<string> &total_Segregrating_sites, int SNP_I
 
     if (remainder != 0)
     {
-        int start = (SNPs_below + 1) - CPU_cores + 1;
+        int start = (SNPs_below + 1) - remainder;
         threads_vec.push_back(thread{&ehh::calc_EHH_0_1_down, this, Haplotypes_0, SNP_Index_in_FULL, start, SNPs_below + 1, combo_Zero, 0});
 
         for (thread &t : threads_vec)
@@ -1194,7 +1198,7 @@ void ehh::process_SNP_EHH_BP(vector<string> &total_Segregrating_sites, int SNP_I
 
     if (remainder != 0)
     {
-        int start = SNPs_below + 1 - CPU_cores + 1;
+        int start = (SNPs_below + 1) - remainder;
         threads_vec.push_back(thread{&ehh::calc_EHH_0_1_down, this, Haplotypes_1, SNP_Index_in_FULL, start, SNPs_below + 1, combo_One, 1});
 
         for (thread &t : threads_vec)
@@ -1653,7 +1657,7 @@ void ehh::process_SNP_EHH(int position, vector<pair<string, string>> &folder_Ind
 
     if (remainder != 0)
     {
-        int start = SNPs_above - CPU_cores + 1;
+        int start = SNPs_above - remainder;
         threads_vec.push_back(thread{&ehh::calc_EHH_0_1_up, this, Haplotypes_0, SNP_position_in_full, start, SNPs_above, combo_Zero, 0});
 
         for (thread &t : threads_vec)
@@ -1687,7 +1691,7 @@ void ehh::process_SNP_EHH(int position, vector<pair<string, string>> &folder_Ind
 
     if (remainder != 0)
     {
-        int start = SNPs_above - CPU_cores + 1;
+        int start = SNPs_above - remainder;
         threads_vec.push_back(thread{&ehh::calc_EHH_0_1_up, this, Haplotypes_1, SNP_position_in_full, start, SNPs_above, combo_One, 1});
 
         for (thread &t : threads_vec)
@@ -1724,7 +1728,7 @@ void ehh::process_SNP_EHH(int position, vector<pair<string, string>> &folder_Ind
 
     if (remainder != 0)
     {
-        int start = (SNPs_below + 1) - CPU_cores + 1;
+        int start = (SNPs_below + 1) - remainder;
         threads_vec.push_back(thread{&ehh::calc_EHH_0_1_down, this, Haplotypes_0, SNP_position_in_full, start, SNPs_below + 1, combo_Zero, 0});
 
         for (thread &t : threads_vec)
@@ -1758,7 +1762,7 @@ void ehh::process_SNP_EHH(int position, vector<pair<string, string>> &folder_Ind
 
     if (remainder != 0)
     {
-        int start = SNPs_below + 1 - CPU_cores + 1;
+        int start = SNPs_below + 1 - remainder;
         threads_vec.push_back(thread{&ehh::calc_EHH_0_1_down, this, Haplotypes_1, SNP_position_in_full, start, SNPs_below + 1, combo_One, 1});
 
         for (thread &t : threads_vec)

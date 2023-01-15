@@ -4,7 +4,7 @@
 
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPARATE PARAMATER FILES WITH SEPARATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
-    "Input path":"/mnt/d/Deshan/Books/University of Calgary/Experiments/1001_Genomes",
+    "Input path":"vcf_Filtered",
     "Output path":"test_snps",
     "Intermediate path":"intermediate_snps",
 
@@ -132,10 +132,10 @@
     # EHH or Extended Haplotype Homozygosity
     # Define the extended haplotype region specification mode by either using a separate gene list file (FILE mode) or state the standard displacement value (FIXED mode) in bases.
     # Degradation of EHH around a SNP can be calculated by SNP or BP mode.
-    "Range mode":"BP",
+    "Range mode":"SNP",
     "EHH FILE path":"genelist_ehh.txt",
     "FIXED mode":"+1000",
-    "SNP default count":100,
-    "SNP BP displacement":100000,
+    "SNP default count":53,
+    "SNP BP displacement":50000,
     "EHH CPU cores":10
 }
