@@ -44,7 +44,7 @@
     # The type of Split mode can be either CHR or CTSPLIT.
     # The CHR mode will split the VCF file by chromosomes and extract the GT column only.
     # The CTSPLIT mode will create CATE's proprietary file structure. For this the parent VCFs must only contain one chromosome's data and have only the GT column.
-    # Column numbers are non zero digits, i.e. Column numbers start with one
+    # Column numbers are non zero digits, i.e. Column numbers start with one.
     "Split mode":"CHR",
     "CHR individual summary":"YES",
     "Split cores":10,
