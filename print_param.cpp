@@ -79,13 +79,23 @@ void print_param::ingress()
                      << "    \"Universal gene list\":\"sample.txt\n\n";
 
               output << "    # VCF split parameters\n"
-                     << "    # Column numbers are non zero digits, i.e. Column numbers start with one\n"
+                     << "    # The type of Split mode can be either CHR or CTSPLIT.\n"
+                     << "    # The CHR mode will split the VCF file by chromosomes and extract the GT column only.\n"
+                     << "    # The CTSPLIT mode will create CATE's proprietary file structure. For this the parent VCFs must only contain one chromosome's data and have only the GT column.\n"
+                     << "    # Column numbers are non zero digits, i.e. Column numbers start with one.\n"
+                     << "    \"Split mode\":\"CTSPLIT\"\n"
+                     << "    \"CHR individual summary\":\"YES\"\n"
+                     << "    \"Split cores\":10\n"
+                     << "    \"Split SNPs per_time_CPU\":500000\n"
+                     << "    \"Split SNPs per_time_GPU\":100000\n"
                      << "    \"Population file path\":\"sample_population_codes.tsv\",\n"
                      << "    \"Sample_ID Column number\":1,\n"
                      << "    \"Population_ID Column number\":6,\n"
                      << "    \"Reference allele count\":1,\n"
                      << "    \"Alternate allele count\":1,\n"
-                     << "    \"SNP count per file\":10000,\n\n";
+                     << "    \"SNP count per file\":10000,\n"
+                     << "    \"MAF frequency\":\"0.05\"\n"
+                     << "    \"Frequency logic\":\">\"\n\n";
 
               output << "    # FASTA split parameters\n"
                      << "    # REQUIRES SEPARATE INPUT, SINCE IT IS A SINGULAR INPUT\n"
@@ -137,7 +147,7 @@ void print_param::ingress()
                      << "    # GENE mode would require each gene to be separately aligned and the location of each alignment file to be added as a third column to the gene list file.\n"
                      << "    # File created would have the extension *.mk (tab deliminated text file). File Name: CountryName_GeneListFileName.mk\n"
                      << "    # CHROM mode would require the outgroup species chromosome's genome to be aligned with the entire chromosome of the query species reference genome.\n"
-                     << "    File created would have the extension *.mk (tab deliminated text file). File Name: CountryName_GeneListFileName.mk\n"
+                     << "    # File created would have the extension *.mk (tab deliminated text file). File Name: CountryName_GeneListFileName.mk\n"
                      << "    \"Alignment mode\":\"GENE\",\n"
                      << "    \"ORF known\":\"Yes\",\n"
                      << "    \"Reference genome mk\":\"reference/Human_1.fasta\",\n"
@@ -153,9 +163,13 @@ void print_param::ingress()
 
               output << "    # EHH or Extended Haplotype Homozygosity\n"
                      << "    # Define the extended haplotype region specification mode by either using a separate gene list file (FILE mode) or state the standard displacement value (FIXED mode) in bases\n"
+                     << "    # Degradation of EHH around a SNP can be calculated by SNP or BP mode.\n"
                      << "    \"Range mode\":\"FILE\",\n"
                      << "    \"EHH FILE path\":\"universal\",\n"
-                     << "    \"FIXED mode\":\"+1000\"\n";
+                     << "    \"FIXED mode\":\"+1000\"\n"
+                     << "    \"SNP default count\":53\n"
+                     << "    \"SNP BP displacement\":100000\n"
+                     << "    \"EHH CPU cores\":10\n";
 
               output
                   << "}";

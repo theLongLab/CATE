@@ -41,8 +41,8 @@
     "Universal gene list":"genelist.txt",
 
     # VCF split parameters
-    # The type of Split mode can be either CHR or CTSPLIT
-    # The CHR mode will split the VCF file by chromosomes and extract the GT column only
+    # The type of Split mode can be either CHR or CTSPLIT.
+    # The CHR mode will split the VCF file by chromosomes and extract the GT column only.
     # The CTSPLIT mode will create CATE's proprietary file structure. For this the parent VCFs must only contain one chromosome's data and have only the GT column.
     # Column numbers are non zero digits, i.e. Column numbers start with one
     "Split mode":"CHR",
@@ -78,7 +78,7 @@
 
     # GFF to Genes parameters
     # REQUIRES SEPERATE INPUT, SINCE IT IS A SINGULAR INPUT
-    "GFF file":"01.gff",
+    "GFF file":"TAIR10_GFF3_genes.gff",
 
     # Haplotype INFO extract
     # Extract haplotype information from VCFs
@@ -136,6 +136,6 @@
     "EHH FILE path":"genelist_ehh.txt",
     "FIXED mode":"+1000",
     "SNP default count":53,
-    "SNP BP displacement":50000,
+    "SNP BP displacement":100000,
     "EHH CPU cores":10
 }

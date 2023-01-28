@@ -897,9 +897,14 @@ void print_HELP()
           << endl
           << "A set of simple tools used to manipulate and alter VCF and FASTA files." << endl
           << endl
-          << "-svcf or --splitvcf\t: Splits the 1000 Genome's VCF file based on population and a series of pre specified parameters. Mainly used as an indexer." << endl
-          << "            \t\t  Split files are placed in their respective population folders." << endl
-          << "            \t\t  Split files are named as follows: \"CHROMOSOMEnumber_COUNTRY_STARTposition_ENDposition.vcf\"." << endl
+          << "-svcf or --splitvcf\t: Splits VCF file\n."
+          << "            \t\t  There are two major modes, \"CHR\" and \"CTSPLIT\"." << endl
+          << "            \t\t  CHR mode splits a VCF file by chromosome as well as extracts just the GT column data." << endl
+          << "            \t\t  CTSPLIT mode creates CATE's file heirarchy from a vcf file." << endl
+          << "            \t\t  For CTSPLIT the vcf must have only a single chromosome's data only the GT column present." << endl
+          << "            \t\t  CTSPLIT can separate VCF data by population and even carry out by population MAF filtration."<<endl
+          << "            \t\t  CTSPLIT files are placed in their respective population folders." << endl
+          << "            \t\t  CTSPLIT files are named as follows: \"CHROMOSOMEnumber_COUNTRY_STARTposition_ENDposition.vcf\"." << endl
           << endl
           << "-sfasta or --splitfasta\t: Split a user specified FASTA file to individual FASTA files." << endl
           << "             \t\t  Can be used to extract a singular user specified sequence as well." << endl
