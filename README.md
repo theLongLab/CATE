@@ -91,7 +91,7 @@ The __HELP__ menu will list all available functions and how each function can be
 
 CATE is currently being submitted for publication. However, if you halready found its framework or the software solution useful in your analyses, please CITE the preprint available in [bioRxiv](https://doi.org/10.1101/2023.01.31.526501). 
 
-The details of the citation is listed below:
+The details of the citation are listed below:
 
 _Perera, D., Reisenhofer, E., Hussein, S., Higgins, E., Huber, C.D. and Long, Q.   
 (2023) CATE: A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large scale genomic data. bioRxiv,   
