@@ -93,9 +93,9 @@ CATE is currently being submitted for publication. However, if you halready foun
 
 The details of the citation are listed below:
 
-_Perera, D., Reisenhofer, E., Hussein, S., Higgins, E., Huber, C.D. and Long, Q.   
-(2023) CATE: A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large scale genomic data. bioRxiv,   
-10.1101/2023.01.31.526501._
+CATE: A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large scale genomic data.   
+Deshan Perera, Elsa Reisenhofer, Said Hussein, Eve Higgins, Christian D Huber, Quan Long   
+bioRxiv 2023.01.31.526501; doi: https://doi.org/10.1101/2023.01.31.526501
 
 ---
 
