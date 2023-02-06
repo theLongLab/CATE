@@ -21,7 +21,7 @@ echo ""
 # Command
 start=$SECONDS
 module load cuda/11.4
-cd /lustre07/scratch/deshan/prometheus_test/full/$SLURM_ARRAY_TASK_ID
+cd /lustre07/scratch/prometheus_test/full/$SLURM_ARRAY_TASK_ID
 ./CATE -svcf parameters.json
 end=$SECONDS
 echo "duration: $((end-start)) seconds."
