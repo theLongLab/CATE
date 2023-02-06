@@ -21,7 +21,7 @@ echo ""
 # Command
 start=$SECONDS
 module load cuda/11.4
-cd /lustre07/scratch/deshan/1001/split_chr/$SLURM_ARRAY_TASK_ID
+cd /lustre07/scratch/1001/split_chr/$SLURM_ARRAY_TASK_ID
 ./CATE -t parameters.json
 ./CATE -f parameters.json
 ./CATE -w parameters.json
