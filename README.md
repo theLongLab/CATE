@@ -5,12 +5,6 @@
 A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large-scale genomic data.
 
 ---
-
-```diff
-- NOTE: CATE IS CURRENTLY IN IT'S ALPHA PHASE OF DEVELOPMENT
-```
-
----
 #### Description
 
 The CATE software is a CUDA based solution to enable rapid processing of large-scale VCF files to conduct a series of six different tests on evolution.
