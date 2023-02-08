@@ -38,7 +38,7 @@ module load cuda/11.3.0
 
 Finally, compile the project:
 ````
-nvcc -std=c++17 *.cu *.cpp -o "CATE_beta"
+nvcc -std=c++17 *.cu *.cpp -o "CATE"
 ````
 ---
 
