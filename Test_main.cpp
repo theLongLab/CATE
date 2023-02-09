@@ -938,17 +938,17 @@ void print_HELP()
           << endl
           << "Core functions optimized for conducting Evolution tests on VCF files." << endl
           << endl
-          << "-t or --tajima\t: Calculates the Tajima's D statistic (1989) for a predefined gene list using a (split) VCF (indexed) folder." << endl
+          << "-t or --tajima\t: Calculates the Tajima's D statistic (1989) using a (split) VCF (indexed) folder." << endl
           << "              \t  Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "              \t  File format is *.td (a tab deliminated text file)." << endl
           << endl
-          << "-f or --fuli\t: Calculates the Fu and Li's D, D*, F and F* statistics (1993) for a predefined gene list using a (split) VCF (indexed) folder." << endl
+          << "-f or --fuli\t: Calculates the Fu and Li's D, D*, F and F* statistics (1993) using a (split) VCF (indexed) folder." << endl
           << "              \t  ** The D, D* and F statistics are calculated based on the original paper by Fu et al (1993)." << endl
           << "              \t  ** The F* statistic's vf* and uf* are calculated based on the corrected equations in Simonsen et al (1995)." << endl
           << "              \t  Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "              \t  File format is *.fl (a tab deliminated text file)." << endl
           << endl
-          << "-w or --faywu\t: Calculates the Fay and Wu's normalized H and E statistics (2006) for a predefined gene list using a (split) VCF (indexed) folder." << endl
+          << "-w or --faywu\t: Calculates the Fay and Wu's normalized H and E statistics (2006) using a (split) VCF (indexed) folder." << endl
           << "              \t  Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "              \t  File format is *.fw (a tab deliminated text file)." << endl
           << endl
@@ -972,7 +972,7 @@ void print_HELP()
           << "              \t  Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "              \t  File format is *.mc (a tab deliminated text file)." << endl
           << endl
-          << "-x or --fst   \t: Calculates the Fixation Index (Fst) (1965) for a predefined gene list using a (split) vcf (indexed) folder." << endl
+          << "-x or --fst   \t: Calculates the Fixation Index (Fst) (1965) using a (split) vcf (indexed) folder." << endl
           << "              \t  The population index of the sequenced samples must be provided in a tab deliminated *txt format file." << endl
           << "              \t  Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "              \t  File format is *.fst (a tab deliminated text file)." << endl
