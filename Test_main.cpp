@@ -851,7 +851,7 @@ void print_Cate()
 void print_HELP()
 {
      /**
-      * * Prints CATE's complete help menu.
+      * * Prints CATE's complete help menu on the CLI.
       **/
 
      cout << "HELP MENU" << endl
