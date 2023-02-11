@@ -11,6 +11,10 @@ The CATE software is a CUDA based solution to enable rapid processing of large-s
 
 ---
 
+:orange_circle: **Here we have provided only a brief overview of CATE's useablity.**   
+:green_circle: **Please refer to [CATE's wiki](https://github.com/theLongLab/CATE/wiki) to otain a more detailed understaning of its functionality and usability.**
+
+---
 #### Prerequisites
 
 1. CUDA capable hardware
