@@ -55,5 +55,5 @@ public:
     void population_Processing(vector<string> &test_Pops, vector<vector<string>> &super_Pop_per_ID_full, vector<vector<string>> &sample_IDs_per_ID_full);
     void sample_location_Index(int num_Pop_Ids, fst_test_pop pop_IDs[]);
 
-    void process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_All, float &Fst_All, float &Avg_Fst);
+    void process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_All, float &Fst_All, float &Avg_Fst, float &numerator_Avg, float &denominator_Avg, float &ratio_of_Avg);
 };

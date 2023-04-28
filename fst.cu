@@ -206,7 +206,7 @@ void fst::ingress()
 
         if (filesystem::exists(output_File) == 0)
         {
-            function.createFile(output_File, "Coordinates\tTotal_Fst\tTotal_seg_sites\tAverage_Fst");
+            function.createFile(output_File, "Coordinates\tTotal_Fst\tTotal_seg_sites\tAverage_Fst\tAvg_numerator\tAvg_denominator\tRatio_of_Averages");
         }
         else
         {
@@ -262,7 +262,7 @@ void fst::ingress()
 
             for (size_t i = 0; i < test_Pops.size(); i++)
             {
-                cout << "System is collecting segregrating site(s) for " << test_Pops[i] << endl;
+                cout << "System is collecting segregating site(s) for " << test_Pops[i] << endl;
                 if (i == 0)
                 {
                     pop_ID[i].seg_Retrival(start_Co, end_Co);
@@ -317,34 +317,48 @@ void fst::ingress()
             }
 
             // check matching pos in each and combine if present
-            cout << "System is concatanting each population's segregrating sites:" << endl;
+            cout << "System is concatenating each population's segregating sites:" << endl;
             for (size_t i = 0; i < test_Pops.size(); i++)
             {
                 cout << "Processing " << test_Pops[i];
                 pop_ID[i].combine_Segs();
             }
-            cout << "System has completed concatanting each population's segregrating sites" << endl;
+            cout << "System has completed concatenating each population's segregating sites" << endl;
             cout << endl;
 
             // check for matching pos in all
             // make a list and use in the gpu to validate if we want to process it or not based on pos
-            float Fst_Total, Fst_Avg;
+            float Fst_Total, Fst_Avg, numerator_Avg, denominator_Avg, ratio_of_Avg;
             int Seg_count;
 
-            process_FST(pop_ID, test_Pops.size(), Seg_count, Fst_Total, Fst_Avg);
+            process_FST(pop_ID, test_Pops.size(), Seg_count, Fst_Total, Fst_Avg, numerator_Avg, denominator_Avg, ratio_of_Avg);
             cout << endl
                  << "Fst has been calculated" << endl;
 
             string FST_out = to_string(Fst_Avg);
+            string ratio_of_Avg_string = to_string(ratio_of_Avg);
+            string numerator_String = to_string(numerator_Avg);
+            string denominator_String = to_string(denominator_Avg);
+
             if (isnan(Fst_Avg))
             {
                 FST_out = "NaN";
+                ratio_of_Avg_string = "NaN";
+                numerator_String = "NaN";
+                denominator_String = "NaN";
             }
-
+            // if (isnan(Fst_Avg))
+            // {
+            //     FST_out = "NaN";
+            // }
+            //\tAvg_numerator\tAvg_denominator\tRatio_of_Averages
             output << to_string(start_Co) << ":" << to_string(end_Co)
                    << "\t" << Fst_Total
                    << "\t" << Seg_count
-                   << "\t" << FST_out << "\n";
+                   << "\t" << FST_out
+                   << "\t" << numerator_String
+                   << "\t" << denominator_String
+                   << "\t" << ratio_of_Avg_string << "\n";
 
             cout << endl;
 
@@ -372,7 +386,7 @@ void fst::ingress()
             if (filesystem::exists(output_File) == 0)
             {
                 // CHANGE TO FST
-                function.createFile(output_File, "Gene_name\tCoordinates\tTotal_Fst\tTotal_seg_sites\tAverage_Fst");
+                function.createFile(output_File, "Gene_name\tCoordinates\tTotal_Fst\tTotal_seg_sites\tAverage_Fst\tAvg_numerator\tAvg_denominator\tRatio_of_Averages");
                 function.createFile(intermediate_File);
             }
             else
@@ -418,7 +432,7 @@ void fst::ingress()
 
                 for (size_t i = 0; i < test_Pops.size(); i++)
                 {
-                    cout << "System is collecting segregrating site(s) for " << test_Pops[i] << endl;
+                    cout << "System is collecting segregating site(s) for " << test_Pops[i] << endl;
                     if (i == 0)
                     {
                         pop_ID[i].seg_Retrival(start_Co, end_Co);
@@ -473,36 +487,51 @@ void fst::ingress()
                 }
 
                 // check matching pos in each and combine if present
-                cout << "System is concatanting each population's segregrating sites:" << endl;
+                cout << "System is concatenating each population's segregating sites:" << endl;
                 for (size_t i = 0; i < test_Pops.size(); i++)
                 {
                     cout << "Processing " << test_Pops[i];
                     pop_ID[i].combine_Segs();
                 }
-                cout << "System has completed concatanting each population's segregrating sites" << endl;
+                cout << "System has completed concatenating each population's segregating sites" << endl;
                 cout << endl;
 
                 // check for matching pos in all
                 // make a list and use in the gpu to validate if we want to process it or not based on pos
-                float Fst_Total, Fst_Avg;
+                float Fst_Total, Fst_Avg, numerator_Avg, denominator_Avg, ratio_of_Avg;
                 int Seg_count;
                 // process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int Segs_count_All, float Fst_All, float Avg_Fst)
-                process_FST(pop_ID, test_Pops.size(), Seg_count, Fst_Total, Fst_Avg);
+                process_FST(pop_ID, test_Pops.size(), Seg_count, Fst_Total, Fst_Avg, numerator_Avg, denominator_Avg, ratio_of_Avg);
                 cout << endl
-                     << "Fst has been caluclated" << endl;
+                     << "Fst has been calculated" << endl;
 
                 // write to file
                 // Gene_name\tCoordinates\tTotal_Fst\tTotal_seg_sites\tAvg_Fst
                 string FST_out = to_string(Fst_Avg);
+                string ratio_of_Avg_string = to_string(ratio_of_Avg);
+                string numerator_String = to_string(numerator_Avg);
+                string denominator_String = to_string(denominator_Avg);
+
                 if (isnan(Fst_Avg))
                 {
                     FST_out = "NaN";
+                    ratio_of_Avg_string = "NaN";
+                    numerator_String = "NaN";
+                    denominator_String = "NaN";
                 }
+
+                // if (isnan(ratio_of_Avg))
+                // {
+                //     ratio_of_Avg_string = "NaN";
+                // }
                 output << gene_Name
                        << "\t" << coordinates[0] << ":" << to_string(start_Co) << ":" << to_string(end_Co)
                        << "\t" << Fst_Total
                        << "\t" << Seg_count
-                       << "\t" << FST_out << "\n";
+                       << "\t" << FST_out
+                       << "\t" << numerator_String
+                       << "\t" << denominator_String
+                       << "\t" << ratio_of_Avg_string << "\n";
 
                 cout << endl;
 
@@ -661,7 +690,7 @@ __global__ void cuda_position_Filter(int threads_Needed, int *sites_Size_Array, 
     }
 }
 
-__global__ void cuda_process_FST(int segs_Seperate, int num_Pop_Ids, int *pop_Sample_Size_Array, int *pop_seqeunce_Size_Array, int *VALID_or_NOT_ALL, int *VALID_or_NOT_FST, int *REF_Count_all, int *ALT_Count_all, float *Fst)
+__global__ void cuda_process_FST(int segs_Seperate, int num_Pop_Ids, int *pop_Sample_Size_Array, int *pop_seqeunce_Size_Array, int *VALID_or_NOT_ALL, int *VALID_or_NOT_FST, int *REF_Count_all, int *ALT_Count_all, float *Fst, float *CUDA_numerator, float *CUDA_denominators)
 {
     // printf("works\n");
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
@@ -730,6 +759,8 @@ __global__ void cuda_process_FST(int segs_Seperate, int num_Pop_Ids, int *pop_Sa
             // Ht[tid] = Ht_calc;
             // Hs[tid] = Hs_calc;
             Fst[tid] = Fst_Calc;
+            CUDA_numerator[tid] = Ht_calc - Hs_calc;
+            CUDA_denominators[tid] = Ht_calc;
         }
         else
         {
@@ -872,7 +903,7 @@ __global__ void cuda_process_Segs(int total_Segs, char *sites, int *index, int *
     }
 }
 
-void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_All, float &Fst_All, float &Avg_Fst)
+void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_All, float &Fst_All, float &Avg_Fst, float &numerator_Avg, float &denominator_Avg, float &ratio_of_Avg)
 {
     cout << "System is calculating Fst:" << endl
          << endl;
@@ -1184,7 +1215,12 @@ void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_A
         int *cuda_REF_Count, *cuda_ALT_Count;
         float *Fst_per_Seg, *cuda_Fst_per_Seg;
 
+        float *numerator, *denominators;
+        float *CUDA_numerator, *CUDA_denominators;
+
         Fst_per_Seg = (float *)malloc(num_segregrating_Sites * sizeof(float));
+        numerator = (float *)malloc(num_segregrating_Sites * sizeof(float));
+        denominators = (float *)malloc(num_segregrating_Sites * sizeof(float));
         // Ht_per_Seg = (float *)malloc(num_segregrating_Sites * sizeof(float));
         // Hs_per_Seg = (float *)malloc(num_segregrating_Sites * sizeof(float));
 
@@ -1192,6 +1228,8 @@ void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_A
         cudaMallocManaged(&cuda_ALT_Count, tot_num_segregrating_Sites * sizeof(int));
 
         cudaMallocManaged(&cuda_Fst_per_Seg, num_segregrating_Sites * sizeof(float));
+        cudaMallocManaged(&CUDA_numerator, num_segregrating_Sites * sizeof(float));
+        cudaMallocManaged(&CUDA_denominators, num_segregrating_Sites * sizeof(float));
         // cudaMallocManaged(&cuda_Ht_per_Seg, num_segregrating_Sites * sizeof(float));
         // cudaMallocManaged(&cuda_Hs_per_Seg, num_segregrating_Sites * sizeof(float));
 
@@ -1220,18 +1258,23 @@ void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_A
         // cout << num_segregrating_Sites << endl;
         //__global__ void cuda_process_FST(int segs_Seperate, int num_Pop_Ids, int *pop_Sample_Size_Array, int *pop_seqeunce_Size_Array, int *VALID_or_NOT_ALL, int *VALID_or_NOT_FST, int *REF_Count_all, int *ALT_Count_all, float *Fst)
         cout << "STEP 3 OF 3: System is calculating Fst per segregrating site(s)" << endl;
-        cuda_process_FST<<<tot_Blocks, tot_ThreadsperBlock>>>(num_segregrating_Sites, num_Pop_Ids, cuda_locations_Size, cuda_pop_seqeunce_Size_Array, cuda_VALID_or_NOT, cuda_VALID_or_NOT_FST, cuda_REF_Count, cuda_ALT_Count, cuda_Fst_per_Seg);
+        cuda_process_FST<<<tot_Blocks, tot_ThreadsperBlock>>>(num_segregrating_Sites, num_Pop_Ids, cuda_locations_Size, cuda_pop_seqeunce_Size_Array, cuda_VALID_or_NOT, cuda_VALID_or_NOT_FST, cuda_REF_Count, cuda_ALT_Count, cuda_Fst_per_Seg,
+                                                              CUDA_numerator, CUDA_denominators);
         cudaDeviceSynchronize();
 
         cudaMemcpy(VALID_or_NOT_FST, cuda_VALID_or_NOT_FST, num_segregrating_Sites * sizeof(int), cudaMemcpyDeviceToHost);
         // cudaMemcpy(Ht_per_Seg, cuda_Ht_per_Seg, num_segregrating_Sites * sizeof(float), cudaMemcpyDeviceToHost);
         // cudaMemcpy(Hs_per_Seg, cuda_Hs_per_Seg, num_segregrating_Sites * sizeof(float), cudaMemcpyDeviceToHost);
         cudaMemcpy(Fst_per_Seg, cuda_Fst_per_Seg, num_segregrating_Sites * sizeof(float), cudaMemcpyDeviceToHost);
+        cudaMemcpy(numerator, CUDA_numerator, num_segregrating_Sites * sizeof(float), cudaMemcpyDeviceToHost);
+        cudaMemcpy(denominators, CUDA_denominators, num_segregrating_Sites * sizeof(float), cudaMemcpyDeviceToHost);
 
         cout << "           : System has calculated Fst per segregrating site(s)" << endl;
 
         Segs_count_All = 0;
         Fst_All = 0;
+        float numerator_Total = 0;
+        float denominator_Total = 0;
 
         for (size_t i = 0; i < num_segregrating_Sites; i++)
         {
@@ -1240,12 +1283,18 @@ void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_A
             {
                 Segs_count_All = Segs_count_All + 1;
                 Fst_All = Fst_All + Fst_per_Seg[i];
+                numerator_Total = numerator_Total + numerator[i];
+                denominator_Total = denominator_Total + denominators[i];
             }
         }
 
         Avg_Fst = Fst_All / (float)Segs_count_All;
+        numerator_Avg = numerator_Total / (float)Segs_count_All;
+        denominator_Avg = denominator_Total / (float)Segs_count_All;
+        ratio_of_Avg = numerator_Avg / denominator_Avg;
         cout << endl
-             << "Average Fst: " << Avg_Fst << endl;
+             << "Average Fst: " << Avg_Fst
+             << "\nRatio of Averages Fst: " << ratio_of_Avg << endl;
 
         // Seg_count is equal to seg number minus 1!
 
@@ -1266,12 +1315,16 @@ void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_A
         cudaFree(cuda_full_Char);
         cudaFree(cuda_site_Index);
         cudaFree(cuda_seg_Site_pop_ID);
+        cudaFree(CUDA_numerator);
+        cudaFree(CUDA_denominators);
 
         free(seg_Positions);
         free(VALID_or_NOT_FST);
         free(Fst_per_Seg);
         free(full_Char);
         free(seg_Site_pop_ID);
+        free(numerator);
+        free(denominators);
     }
     else
     {

@@ -4,9 +4,9 @@
 
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPARATE PARAMATER FILES WITH SEPARATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
-    "Input path":"vcf_Filtered",
-    "Output path":"test_snps",
-    "Intermediate path":"intermediate_snps",
+    "Input path":"split_VCF",
+    "Output path":"test_fst",
+    "Intermediate path":"intermediate_fst",
 
     # Prometheus settings
     # Prometheus is a high performance mode in CATE. It is greedy on hardware resources but has extremely fast processing speeds.
