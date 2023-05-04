@@ -206,7 +206,7 @@ void fst::ingress()
 
         if (filesystem::exists(output_File) == 0)
         {
-            function.createFile(output_File, "Coordinates\tTotal_Fst\tTotal_seg_sites\tAverage_Fst\tAvg_numerator\tAvg_denominator\tRatio_of_Averages");
+            function.createFile(output_File, "Coordinates\tTotal_Fst\tTotal_seg_sites\tAvg_numerator\tAvg_denominator\tAverage_Fst");
         }
         else
         {
@@ -328,21 +328,21 @@ void fst::ingress()
 
             // check for matching pos in all
             // make a list and use in the gpu to validate if we want to process it or not based on pos
-            float Fst_Total, Fst_Avg, numerator_Avg, denominator_Avg, ratio_of_Avg;
+            float Fst_Total, numerator_Avg, denominator_Avg, ratio_of_Avg;
             int Seg_count;
 
-            process_FST(pop_ID, test_Pops.size(), Seg_count, Fst_Total, Fst_Avg, numerator_Avg, denominator_Avg, ratio_of_Avg);
+            process_FST(pop_ID, test_Pops.size(), Seg_count, Fst_Total, numerator_Avg, denominator_Avg, ratio_of_Avg);
             cout << endl
                  << "Fst has been calculated" << endl;
 
-            string FST_out = to_string(Fst_Avg);
+            //string FST_out = to_string(Fst_Avg);
             string ratio_of_Avg_string = to_string(ratio_of_Avg);
             string numerator_String = to_string(numerator_Avg);
             string denominator_String = to_string(denominator_Avg);
 
-            if (isnan(Fst_Avg))
+            if (Fst_Total==0)
             {
-                FST_out = "NaN";
+               // FST_out = "NaN";
                 ratio_of_Avg_string = "NaN";
                 numerator_String = "NaN";
                 denominator_String = "NaN";
@@ -355,7 +355,7 @@ void fst::ingress()
             output << to_string(start_Co) << ":" << to_string(end_Co)
                    << "\t" << Fst_Total
                    << "\t" << Seg_count
-                   << "\t" << FST_out
+                   //<< "\t" << FST_out
                    << "\t" << numerator_String
                    << "\t" << denominator_String
                    << "\t" << ratio_of_Avg_string << "\n";
@@ -386,7 +386,7 @@ void fst::ingress()
             if (filesystem::exists(output_File) == 0)
             {
                 // CHANGE TO FST
-                function.createFile(output_File, "Gene_name\tCoordinates\tTotal_Fst\tTotal_seg_sites\tAverage_Fst\tAvg_numerator\tAvg_denominator\tRatio_of_Averages");
+                function.createFile(output_File, "Gene_name\tCoordinates\tTotal_Fst\tTotal_seg_sites\tAvg_numerator\tAvg_denominator\tAverage_Fst");
                 function.createFile(intermediate_File);
             }
             else
@@ -498,23 +498,23 @@ void fst::ingress()
 
                 // check for matching pos in all
                 // make a list and use in the gpu to validate if we want to process it or not based on pos
-                float Fst_Total, Fst_Avg, numerator_Avg, denominator_Avg, ratio_of_Avg;
+                float Fst_Total, numerator_Avg, denominator_Avg, ratio_of_Avg;
                 int Seg_count;
                 // process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int Segs_count_All, float Fst_All, float Avg_Fst)
-                process_FST(pop_ID, test_Pops.size(), Seg_count, Fst_Total, Fst_Avg, numerator_Avg, denominator_Avg, ratio_of_Avg);
+                process_FST(pop_ID, test_Pops.size(), Seg_count, Fst_Total, numerator_Avg, denominator_Avg, ratio_of_Avg);
                 cout << endl
                      << "Fst has been calculated" << endl;
 
                 // write to file
                 // Gene_name\tCoordinates\tTotal_Fst\tTotal_seg_sites\tAvg_Fst
-                string FST_out = to_string(Fst_Avg);
+                //string FST_out = to_string(Fst_Avg);
                 string ratio_of_Avg_string = to_string(ratio_of_Avg);
                 string numerator_String = to_string(numerator_Avg);
                 string denominator_String = to_string(denominator_Avg);
 
-                if (isnan(Fst_Avg))
+                if (Fst_Total==0)
                 {
-                    FST_out = "NaN";
+                   // FST_out = "NaN";
                     ratio_of_Avg_string = "NaN";
                     numerator_String = "NaN";
                     denominator_String = "NaN";
@@ -528,7 +528,7 @@ void fst::ingress()
                        << "\t" << coordinates[0] << ":" << to_string(start_Co) << ":" << to_string(end_Co)
                        << "\t" << Fst_Total
                        << "\t" << Seg_count
-                       << "\t" << FST_out
+                       //<< "\t" << FST_out
                        << "\t" << numerator_String
                        << "\t" << denominator_String
                        << "\t" << ratio_of_Avg_string << "\n";
@@ -903,7 +903,7 @@ __global__ void cuda_process_Segs(int total_Segs, char *sites, int *index, int *
     }
 }
 
-void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_All, float &Fst_All, float &Avg_Fst, float &numerator_Avg, float &denominator_Avg, float &ratio_of_Avg)
+void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_All, float &Fst_All, float &numerator_Avg, float &denominator_Avg, float &ratio_of_Avg)
 {
     cout << "System is calculating Fst:" << endl
          << endl;
@@ -1288,13 +1288,13 @@ void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_A
             }
         }
 
-        Avg_Fst = Fst_All / (float)Segs_count_All;
+        //Avg_Fst = Fst_All / (float)Segs_count_All;
         numerator_Avg = numerator_Total / (float)Segs_count_All;
         denominator_Avg = denominator_Total / (float)Segs_count_All;
         ratio_of_Avg = numerator_Avg / denominator_Avg;
         cout << endl
-             << "Average Fst: " << Avg_Fst
-             << "\nRatio of Averages Fst: " << ratio_of_Avg << endl;
+             << "Total Overall Fst: " << Fst_All
+             << "\nAverages Fst (Ratio of Averages): " << ratio_of_Avg << endl;
 
         // Seg_count is equal to seg number minus 1!
 
@@ -1340,7 +1340,7 @@ void fst::process_FST(fst_test_pop pop_IDs[], int num_Pop_Ids, int &Segs_count_A
 
         Segs_count_All = 0;
         Fst_All = 0;
-        Avg_Fst = Fst_All / (float)Segs_count_All;
+        //Avg_Fst = Fst_All / (float)Segs_count_All;
     }
 }
 
