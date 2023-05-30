@@ -85,7 +85,11 @@ The __HELP__ menu will list all available functions and how each function can be
 ---
 #### How to Cite
 
-CATE is currently being submitted for publication. However, if you halready found its framework or the software solution useful in your analyses, please CITE the preprint available in [bioRxiv](https://doi.org/10.1101/2023.01.31.526501). 
+CATE is currently being submitted for publication. However, if you halready found its framework or the software solution useful in your analyses, please CITE the preprint available in [bioRxiv](https://doi.org/10.1101/2023.01.31.526501).
+
+To cite CATE's code please use the Zenodo release:
+
+[![DOI](https://zenodo.org/badge/487117368.svg)](https://zenodo.org/badge/latestdoi/487117368)
 
 The details of the citation are listed below:
 
