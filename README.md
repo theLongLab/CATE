@@ -85,7 +85,7 @@ The __HELP__ menu will list all available functions and how each function can be
 ---
 #### How to Cite
 
-CATE is currently being submitted for publication. However, if you halready found its framework or the software solution useful in your analyses, please CITE the preprint available in [bioRxiv](https://doi.org/10.1101/2023.01.31.526501).
+CATE has been successfully published in the journal Methods in Ecology and Evolution (MEE). If you find this framework or the software solution useful in your analyses, please CITE the published article available in [MEE, CATE: A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large scale genomic data](https://doi.org/10.1111/2041-210X.14168).
 
 To cite CATE's code please use the Zenodo release:
 
@@ -93,9 +93,10 @@ To cite CATE's code please use the Zenodo release:
 
 The details of the citation are listed below:
 
-CATE: A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large scale genomic data.   
-Deshan Perera, Elsa Reisenhofer, Said Hussein, Eve Higgins, Christian D Huber, Quan Long   
-bioRxiv 2023.01.31.526501; doi: https://doi.org/10.1101/2023.01.31.526501
+Perera, D., Reisenhofer, E., Hussein, S., Higgins, E., Huber, C. D., & Long, Q. (2023). 
+CATE: A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large scale genomic data. 
+Methods in Ecology and Evolution, 00, 1–15. 
+[https://doi.org/10.1111/2041-210X.14168](https://doi.org/10.1111/2041-210X.14168).
 
 ---
 
