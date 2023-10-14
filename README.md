@@ -89,7 +89,7 @@ CATE has been successfully published in the journal Methods in Ecology and Evolu
 
 To cite CATE's code please use the Zenodo release:
 
-[![DOI](https://zenodo.org/badge/487117368.svg)](https://zenodo.org/badge/latestdoi/487117368)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7987769.svg)](https://doi.org/10.5281/zenodo.7987769)
 
 The details of the citation are listed below:
 
