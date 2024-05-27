@@ -26,7 +26,11 @@ The CATE software is a CUDA based solution to enable rapid processing of large-s
 
 #### How to INSTALL
 
-To install CATE you may have to compile the code using an nvcc compiler. If so execute the following on the terminal:
+CATE can be used via an on-device executable and also has the ability to run via Goole Colab.
+
+For the Google Colab executable please follow the link to [CATE on Colab](https://colab.research.google.com/drive/1p8I2umE1U2gEB95eKwg0-fdtOLbgR13-?usp=sharing).
+
+Else, if you want to install CATE on device you may have to compile the code using an nvcc compiler. If so execute the following on the terminal:
 
 Download the repository:
 ````
