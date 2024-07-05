@@ -1,0 +1,59 @@
+{
+  # Select network type
+
+  # Random Model is selected by typing Random model
+  # Barabasi Albert Model is selected by typing BA model
+  # Standard Caveman Model is selected by typing SC model
+  # Dynamic Caveman Model is selected by typing DC model
+  # Erdos and Renyi Random Model is selected by ER model
+
+  "Network type":"DC model",
+
+  # Total number of nodes that will be present in the Random network model
+  "Random model number of nodes":250,
+
+  "ER Random model total number of nodes":50,
+  "ER Random model probability of linkage":"0.75",
+
+  # Total number of nodes that will be present in the BA network model
+  "BA model number of nodes":50,
+
+  # FIXED, evey new connection will have a set number of connections to the existing nodes (Standard BA model when set to 1).
+  # Negative binomial, every new node's number of connection will determined by a negative binomial distribution.
+  # Poisson, every new node's number of connection will determined by a Poisson distribution.
+  "BA model standard new connections":"Poisson",
+
+  # Assignment of parameter value for BA model with FIXED new connections
+  "BA model fixed new connections":2,
+
+  # Assignment of parameter values; sucesses and probability for BA model with NEGATIVE BINOMIAL new connections.
+  "BA model Negative binomial sucesses":1,
+  "BA model Negative binomial probability":"0.75",
+
+  # Assignment of parameter value; mean for BA model with POISSON new connections.
+  "BA model Poisson mean":"2",
+
+  # Total number of caves and the number of nodes per cave that will be present in the SC network model
+  "SC_model number of caves":10,
+  "SC_model number of nodes per caves":5,
+
+  # Total number of caves that will be present in the DC network model
+  "DC_model number of caves":5,
+
+  # Determine the number of nodes that will be present in each cave in the network
+  # Negative binomial, every caves number of nodes will determined by a NEGATIVE BINOMIAL distribution.
+  # Poisson, every caves number of nodes will determined by a POISSON distribution.
+  "DC_model node distribution":"Negative binomial",
+
+  # Assignment of parameter values; sucesses and probability for DC model with NEGATIVE BINOMIAL for per cave node distributions.
+  "DC_model node Negative binomial sucesses":10,
+  "DC_model node Negative binomial probability":"0.55",
+
+  # Assignment of parameter values; mean for DC model with POISSON for per cave node distributions.
+  "DC_model node Poisson mean":"1",
+
+  # Determine the percentage of nodes that will take part in forming neighbouring node attachments and from them how many will form global attachments.
+  "DC_model neighbouring nodes percentage":"0.25",
+  "DC_model global nodes percentage":"0.55"
+
+}

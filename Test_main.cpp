@@ -26,6 +26,11 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
+// APOLLO Simulator classes
+#include "parameter_load.h"
+#include "functions_library.cuh"
+#include "simulator_Master.cuh"
+
 using namespace std;
 
 /**
@@ -46,6 +51,7 @@ using namespace std;
  * Function that prints the banner.
  **/
 void print_Cate();
+void print_Apollo();
 
 /**
  * Function that prints the help menu.
@@ -65,6 +71,11 @@ int main(int argc, char *argv[])
      cout << "CATE: CUDA Accelerated Testing of Evolution" << endl;
      cout << "Evolutionary tests for large scale genomic data" << endl
           << "----------------------------------------------" << endl
+          << "HOW TO CITE:\nPerera, D., Reisenhofer, E., Hussein, S., Higgins, E., Huber, C. D., & Long, Q. (2023).\n"
+          << "CATE: A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large scale genomic data.\n"
+          << "Methods in Ecology and Evolution, 00, 1–15.\n"
+          << "https://doi.org/10.1111/2041-210X.14168.\n"
+          << "----------------------------------------------\n"
           << endl;
 
      /**
@@ -159,6 +170,13 @@ int main(int argc, char *argv[])
 
                          cout << endl
                               << "Parameter Print has been completed." << endl;
+                    }
+                    else if (function == "--simulator" || function == "-sim")
+                    {
+                         print_Apollo();
+
+                         simulator_Master simulator = simulator_Master(parameter_File);
+                         simulator.ingress();
                     }
                     else
                     {
@@ -848,6 +866,17 @@ void print_Cate()
      // cout << endl;
 }
 
+void print_Apollo()
+{
+     cout << "    _____\n"
+          << "  (, /  |          /) /)\n"
+          << "    /---| __   ___// // ___\n"
+          << " ) /    |_/_)_(_)(/_(/_(_)\n"
+          << "(_/    .-/\n"
+          << "      (_/\n"
+          << "\nCATE powered viral simulator\n----------------------------------------------\n\n";
+}
+
 void print_HELP()
 {
      /**
@@ -902,7 +931,7 @@ void print_HELP()
           << "            \t\t  CHR mode splits a VCF file by chromosome as well as extracts just the GT column data." << endl
           << "            \t\t  CTSPLIT mode creates CATE's file heirarchy from a vcf file." << endl
           << "            \t\t  For CTSPLIT the vcf must have only a single chromosome's data only the GT column present." << endl
-          << "            \t\t  CTSPLIT can separate VCF data by population and even carry out by population MAF filtration."<<endl
+          << "            \t\t  CTSPLIT can separate VCF data by population and even carry out by population MAF filtration." << endl
           << "            \t\t  CTSPLIT files are placed in their respective population folders." << endl
           << "            \t\t  CTSPLIT files are named as follows: \"CHROMOSOMEnumber_COUNTRY_STARTposition_ENDposition.vcf\"." << endl
           << endl

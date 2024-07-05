@@ -5,7 +5,7 @@
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPARATE PARAMATER FILES WITH SEPARATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
     "Input path":"split_VCF",
-    "Output path":"test_fst",
+    "Output path":"fasta_Split",
     "Intermediate path":"intermediate_fst",
 
     # Prometheus settings
@@ -63,7 +63,7 @@
     # REQUIRES SEPARATE INPUT, SINCE IT IS A SINGULAR INPUT
     # IF ALL IS SET AS SEQUENCE THEN THE WHOLE FILE IS SPLIT. ELSE STATE THE SEQUENCE ID OF THE SEQUENCE THAT NEEDS TO BE SEPARATED
     "Sequence":"All",
-    "Raw FASTA file":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/reference_merge/One.fasta",
+    "Raw FASTA file":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/HIV_sequences/Selected_genomes_concatenated.fna",
 
     # FASTA merge parameters
     # REQUIRES SEPARATE INPUT AND OUTPUT LOCATION

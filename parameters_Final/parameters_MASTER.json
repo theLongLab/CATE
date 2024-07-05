@@ -1,0 +1,68 @@
+{
+  # Configuration of the Cuda device IDs accesible to Apollo
+  # Here only one CUDA device is assigned for Apollo's use
+  "CUDA Device IDs":"0",
+
+  # Hardware configuration parameters
+  "CPU cores":5,
+  "GPU max units":1000,
+  "Process cell rate":10,
+  "Multi read":"YES",
+
+  # Output and Intermediate folder locations.
+  "Output folders":"results",
+  "Intermediate folders":"intermediates",
+
+  # The maximum number of sequences that can be stored in an intermeiate file
+  "Intermediate Sequences per file":1000,
+
+  "Seed":"x",
+
+  # Indicates the start date for the simulation
+  "Start date":"2024-01-10",
+  "First infection":"Random",
+
+  # Indicate whether the user wants to run the simulation for a specified period of time
+  "Stop after generations":"Yes",
+  # Generations or Date can be used to stop the simulation as well
+  "Mode to stop":"Generations",
+  "Number of generations":3,
+  "End date":"2024-01-12",
+
+  # Network profile parameter file location
+  "Network profile":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/parameters_Final/network_Profiles/network_test.json",
+
+  # Node profile parameter file location
+  "Nodes master profile":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/parameters_Final/individual_Profiles/node_Master.json",
+
+  # Sequence profiles parameter file location
+  "Sequence master profile":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/parameters_Final/sequence_Profiles/sequence_Master.json",
+
+  # Folder management controls
+  # Compresses folders to a TAR.GZ or reduces them to a single TAR file
+  "Enable folder management":"Yes",
+  "Compress folders":"No",
+
+  # Haplotype retriever and count extractor
+  # ALL for NODE ID to get the sequence haplotypes for all infected individual_Profiles
+  # OR list the nodes seperated by a comma to get the haplotype frequency for those individuals
+  "Haplotype Node IDs":"8_8",
+
+  # Pedigree search
+  "Pedigree Node ID":"0_0",
+  "Pedigree Tissue":"Plasma",
+  "Pedigree Generation":52,
+  "Pedigree Sequence":"test_Folder/pedigree/one.fasta",
+  "Pedigree get Sequences":"Yes",
+
+  # Base site model or recombination hotspots to JSON script (File has to be tab delimited)
+  "Convert file location":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/Mutation_Site_model_HIV_Full.csv",
+
+  # Convert pedigree folder to R format
+  "Pedigree folder location":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/resultsHIV_2/node_Data/0_0/pedigree_Information/one",
+
+  "Segregating match sequences":"/mnt/d/Deshan/Books/University of Calgary/Experiments/HIV Simulation/patient_14/Full_analysis/Clean_name/last_Gen/merged.fasta",
+  "Segregating match Node ID":"0_0",
+  "Segregating match tissue":"Plasma",
+  "Segregating match cutoff":"0.96875"
+}
