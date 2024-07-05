@@ -30,6 +30,10 @@
 #include "parameter_load.h"
 #include "functions_library.cuh"
 #include "simulator_Master.cuh"
+#include "hap_counter.cuh"
+#include "bfs.cuh"
+#include "mutations_T_json.cuh"
+#include "segmatch.cuh"
 
 using namespace std;
 
@@ -177,6 +181,46 @@ int main(int argc, char *argv[])
 
                          simulator_Master simulator = simulator_Master(parameter_File);
                          simulator.ingress();
+                    }
+                    else if (function == "--hapcounter" || function == "-hc")
+                    {
+                         print_Apollo();
+                         cout << "Haplotype counter with frequencies\n\n";
+
+                         hap_counter hapcount = hap_counter(parameter_File);
+                         hapcount.ingress();
+                    }
+                    else if (function == "--bfspedigree" || function == "-bfs")
+                    {
+                         print_Apollo();
+                         cout << "Pedigree powered by Breath First Search\n\n";
+
+                         bfs breath_first_pedigree = bfs(parameter_File);
+                         breath_first_pedigree.ingress();
+                    }
+                    else if (function == "--sitemodel2json" || function == "-s2j")
+                    {
+                         print_Apollo();
+                         cout << "Converting site model file to JSON script\n\n";
+
+                         mutations_T_json m2j = mutations_T_json(parameter_File);
+                         m2j.ingress("mutations");
+                    }
+                    else if (function == "--recomb2json" || function == "-r2j")
+                    {
+                         print_Apollo();
+                         cout << "Converting recombination file to JSON script\n\n";
+
+                         mutations_T_json m2j = mutations_T_json(parameter_File);
+                         m2j.ingress("recombinations");
+                    }
+                    else if (function == "--segmatch" || function == "-segm")
+                    {
+                         print_Apollo();
+                         cout << "Finding sequences matching segregating sites\n\n";
+
+                         segmatch segM = segmatch(parameter_File);
+                         segM.ingress();
                     }
                     else
                     {
