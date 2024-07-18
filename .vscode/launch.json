@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
             "args": [
-                "-segm",
+                "-h",
                 "/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/parameters_Final/parameters_MASTER.json"
             ],
             "stopAtEntry": false,

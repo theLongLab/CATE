@@ -182,15 +182,15 @@ int main(int argc, char *argv[])
                          simulator_Master simulator = simulator_Master(parameter_File);
                          simulator.ingress();
                     }
-                    else if (function == "--hapcounter" || function == "-hc")
+                    else if (function == "--hapretrieve" || function == "-hr")
                     {
                          print_Apollo();
-                         cout << "Haplotype counter with frequencies\n\n";
+                         cout << "Haplotype retriever with frequencies\n\n";
 
                          hap_counter hapcount = hap_counter(parameter_File);
                          hapcount.ingress();
                     }
-                    else if (function == "--bfspedigree" || function == "-bfs")
+                    else if (function == "--pedretrieve" || function == "-pedr")
                     {
                          print_Apollo();
                          cout << "Pedigree powered by Breath First Search\n\n";
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
                          bfs breath_first_pedigree = bfs(parameter_File);
                          breath_first_pedigree.ingress();
                     }
-                    else if (function == "--sitemodel2json" || function == "-s2j")
+                    else if (function == "--site2json" || function == "-s2j")
                     {
                          print_Apollo();
                          cout << "Converting site model file to JSON script\n\n";
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
                          mutations_T_json m2j = mutations_T_json(parameter_File);
                          m2j.ingress("mutations");
                     }
-                    else if (function == "--recomb2json" || function == "-r2j")
+                    else if (function == "--recom2json" || function == "-r2j")
                     {
                          print_Apollo();
                          cout << "Converting recombination file to JSON script\n\n";
@@ -1065,8 +1065,37 @@ void print_HELP()
           << "              \t  BP mode: \"SNP BP displacement\" is used to specify the number of base pairs that will be displaced on either side of the core SNP." << endl
           << "              \t  Uses a CUDA powered engine, therefore, requires a CUDA capable GPU." << endl
           << "              \t  File format is *.ehh (a tab deliminated text file)." << endl
+          << endl;
+     print_Apollo();
+     cout << "This section covers the Apollo simulator function and its complimentary tools.\n"
           << endl
-          << "EXTRAS:"
+          << "MAIN APOLLO FUNCTION:\n\n"
+          << "-sim or --simulator    : Executes the Apollo simulator. Designed to simulate epidemics in a population." << endl
+          << "                         Simulations are complete with within host dynamics." << endl
+          << "                         Requires the configuration of 4 parameter files (Master, network, host & genome)." << endl
+          << endl
+          << "APOLLO UTILITY TOOLS:\n\n"
+          << "-hr or --hapretrieve   : Retrieves unique sequence configurations complete with the tissue, generation, sequence configuration and frequency.\n"
+          << "                         Three tab-delimited *.csv are created. They contain haplotype information on all virions (all_Haplotype_Frequencies.csv),\n"
+          << "                         virions that survived to the next generation (alive_Haplotype_Frequencies.csv) and,\n"
+          << "                         those that formed progeny by becoming parents (parent_Haplotype_Frequencies.csv).\n"
+          << endl
+          << "-pedr or --pedretrieve : It provides the pedigree of all sequences found in the given generation of the host’s tissues.\n"
+          << "                         The pedigree is traced for each sequence till the initial ancestral genomes are identified.\n"
+          << "                         It creates two tab delimited *.csv files.\n"
+          << "                         pedigree_Relationships.csv: Provides information of the parent progeny relationships.\n"
+          << "                         sequence_Information.csv: Provides the sequence information of each ancestral virion.\n"
+          << endl
+          << "-segm or --segmatch    : In an individual, identifies a given set of query sequences by alignment\n"
+          << "                         to simulated sequences by the given degree of matching segregating sites.\n"
+          << "                         Will create a folder called seg_Match within the nodes results and provide a tab delimited *.csv file\n"
+          << "                         with the complete information of the virions with matching sequences.\n"
+          << endl
+          << "-s2j or --site2json    : Converts the base substitution *.csv to Apollo’s JSON format,\n"
+          << endl
+          << "-r2j or --recom2json   : Converts the recombination hotspots csv to Apollo’s JSON format.\n"
+          << endl;
+     cout << "EXTRAS:"
           << endl
           << endl
           << "-c or --cuda\t: Lists all available CUDA capable devices on machine." << endl

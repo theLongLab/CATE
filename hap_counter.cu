@@ -2,7 +2,7 @@
 
 hap_counter::hap_counter(string parameter_Master_Location)
 {
-    cout << "Intializing Haplotype counter\n";
+    cout << "Intializing Haplotype retriever\n";
 
     //exit(-1);
 
