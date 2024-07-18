@@ -9,10 +9,18 @@ A fast and scalable CUDA implementation to conduct highly parallelized evolution
 
 The CATE software is a CUDA based solution to enable rapid processing of large-scale VCF files to conduct a series of six different tests on evolution.
 
+🔵 **Here we have provided only a brief overview of CATE's useability.**   
+🟢 **Please refer to [CATE's wiki](https://github.com/theLongLab/CATE/wiki) to obtain a more detailed understanding of its functionality and usability.**
+
 ---
 
-:orange_circle: **Here we have provided only a brief overview of CATE's useablity.**   
-:green_circle: **Please refer to [CATE's wiki](https://github.com/theLongLab/CATE/wiki) to otain a more detailed understaning of its functionality and usability.**
+#### News
+
+🔴 **CATE is currently under a major update with the integration of APOLLO.**
+
+*Apollo is our high-performance viral epidemic simulation platform powered by CATE's architecture.*
+
+Apollo is already available in CATE for use. Use the **--simulator** or **-sim** command. Documentation and a preprint of the simulation tool, its capabilities, and how to use Apollo are currently being worked on.
 
 ---
 #### Prerequisites
