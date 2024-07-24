@@ -22,6 +22,8 @@ The CATE software is a CUDA based solution to enable rapid processing of large-s
 
 Apollo is already available in CATE for use. Use the **--simulator** or **-sim** command. Documentation and a preprint of the simulation tool, its capabilities, and how to use Apollo are currently being worked on.
 
+The Wiki for Apollo is currently being written and will be complete soon. 
+
 ---
 #### Prerequisites
 
