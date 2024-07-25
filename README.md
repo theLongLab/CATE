@@ -74,12 +74,13 @@ The six tests on evolution are:
 
 CATE comes equipped with Apollo, our viral simulator that spans from network level to individual virion resolution complete with within-host dynamics. Apollo comes with its main simulation function and five additional utility tools.
 
-* Apollo simulator
-1. Haplotype retriever
-2. Pedigree retriever
-3. Segregating sites matcher
-4. Base substitution model to JSON
-5. Recombination hotspots to JSON
+1. Apollo simulator
+
+2. Haplotype retriever
+3. Pedigree retriever
+4. Segregating sites matcher
+5. Base substitution model to JSON
+6. Recombination hotspots to JSON
 
 ---
 
