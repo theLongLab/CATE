@@ -22,6 +22,8 @@ The CATE software is a CUDA based solution to enable rapid processing of large-s
 
 Apollo is already available in CATE for use. Use the **--simulator** or **-sim** command. Documentation and a preprint of the simulation tool, its capabilities, and how to use Apollo are currently being worked on.
 
+The Wiki for Apollo is currently being written and will be complete soon. 
+
 ---
 #### Prerequisites
 
@@ -69,6 +71,15 @@ The six tests on evolution are:
 4. McDonald–Kreitman test
 5. Fixation Index
 6. Extended Haplotype Homozygosity
+
+CATE comes equipped with Apollo, our viral simulator that spans from network level to individual virion resolution complete with within-host dynamics. Apollo comes with its main simulation function and five additional utility tools.
+
+1. _Apollo simulator_
+2. Haplotype retriever
+3. Pedigree retriever
+4. Segregating sites matcher
+5. Base substitution model to JSON
+6. Recombination hotspots to JSON
 
 ---
 
