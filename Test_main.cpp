@@ -1093,7 +1093,7 @@ void print_HELP()
           << endl
           << "-s2j or --site2json    : Converts the base substitution *.csv to Apollo’s JSON format,\n"
           << endl
-          << "-r2j or --recom2json   : Converts the recombination hotspots csv to Apollo’s JSON format.\n"
+          << "-r2j or --recom2json   : Converts the recombination hotspots *.csv to Apollo’s JSON format.\n"
           << endl;
      cout << "EXTRAS:"
           << endl
