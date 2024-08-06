@@ -16,8 +16,6 @@
   # The maximum number of sequences that can be stored in an intermeiate file
   "Intermediate Sequences per file":1000,
 
-  "Seed":"x",
-
   # Indicates the start date for the simulation
   "Start date":"2024-01-10",
   "First infection":"Random",
