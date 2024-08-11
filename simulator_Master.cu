@@ -1,5 +1,7 @@
 #include "simulator_Master.cuh"
 
+simulator_Master::simulator_Master() {}
+
 simulator_Master::simulator_Master(string parameter_Master_Location)
 {
     cout << "Intializing Apollo\n";

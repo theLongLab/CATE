@@ -278,6 +278,7 @@ private:
 
 public:
     simulator_Master(string parameter_Master_Location);
+    simulator_Master();
 
     void configure_Network_Profile(string network_Profile_File, parameter_load &Parameters);
 

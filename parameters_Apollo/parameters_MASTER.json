@@ -18,6 +18,7 @@
 
   # Indicates the start date for the simulation
   "Start date":"2024-01-10",
+  # Indicates the mode of infecting patient zero's within host environment. FIXED or RANDOM
   "First infection":"Random",
 
   # Indicate whether the user wants to run the simulation for a specified period of time
