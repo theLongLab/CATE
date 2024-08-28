@@ -122,6 +122,26 @@ Methods in Ecology and Evolution, 00, 1–15.
 [https://doi.org/10.1111/2041-210X.14168](https://doi.org/10.1111/2041-210X.14168).
 
 ---
+#### Contact
+
+1. For **CATE** please address your correspondence to:
+
+**Deshan** Perera (duwagedahampriyabala@ucalgary.ca)
+
+Dr. **Quan** Long (quan.long@ucalgary.ca)
+
+Dr. **Christian** D. Huber (cdh5313@psu.edu)
+
+2. For **Apollo** please address your correspondence to:
+
+**Deshan** Perera (duwagedahampriyabala@ucalgary.ca)
+
+Dr. **Quan** Long (quan.long@ucalgary.ca)
+
+Dr. **Alexander** Platt (alexander.platt@pennmedicine.upenn.edu)
+
+---
+#### Software License
 
 MIT License
 
