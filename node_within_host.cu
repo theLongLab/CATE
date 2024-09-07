@@ -2115,7 +2115,7 @@ __global__ void cuda_Progeny_Complete_Configuration(int genome_Length,
                     {
                         int count = 0;
 
-                        int bases_in_Region = cuda_mutation_hotspot_parameters[hotspot][1] - (cuda_mutation_hotspot_parameters[hotspot][0] - 1);
+                        // int bases_in_Region = cuda_mutation_hotspot_parameters[hotspot][1] - (cuda_mutation_hotspot_parameters[hotspot][0] - 1);
 
                         for (int trial = 0; trial < num_Mutations; trial++)
                         {
