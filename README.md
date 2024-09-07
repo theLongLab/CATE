@@ -44,7 +44,7 @@ To install CATE via [**Anaconda**](https://anaconda.org/deshan_CATE/cate):
 
 [![Conda Version](https://img.shields.io/conda/v/deshan_CATE/cate)](https://anaconda.org/deshan_cate/cate)
 [![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/latest_release_date.svg)](https://anaconda.org/deshan_cate/cate)
-[![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/platforms.svg)](https://anaconda.org/deshan_cate/cate)
+[![Conda Platform](https://img.shields.io/conda/pn/deshan_cate/cate)](https://anaconda.org/deshan_cate/cate)
 
 ````
 conda install deshan_cate::cate`
