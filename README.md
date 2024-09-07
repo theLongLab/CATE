@@ -48,6 +48,10 @@ To install CATE via [**Anaconda**](https://anaconda.org/deshan_CATE/cate):
 ````
 conda install deshan_cate::cate`
 ````
+To ensure successful installation try running:
+````
+CATE -h
+````
 Else, if you want to install CATE **on-device** using the GitHub repo you might have to compile the code using an nvcc compiler. If so execute the following on the terminal:
 
 Download the repository:
@@ -65,6 +69,10 @@ module load cuda/11.3.0
 Finally, compile the project:
 ````
 nvcc -std=c++17 *.cu *.cpp -o "CATE"
+````
+To ensure successful installation try running:
+````
+CATE -h
 ````
 ---
 
