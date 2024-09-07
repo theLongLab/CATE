@@ -36,11 +36,23 @@ The Wiki for Apollo is currently being written and will be complete soon.
 
 #### How to INSTALL
 
-CATE can be used via an **on-device** executable and also has the ability to run via **Google Colab**.
+CATE can be used **on-device** via Ananconda or by downloading and building the GitHub repo. It can also be used **online** via **Google Colab**.
 
 For the **Google Colab** notebook please follow the link to [CATE on Colab](https://colab.research.google.com/drive/1p8I2umE1U2gEB95eKwg0-fdtOLbgR13-?usp=sharing).
 
-Else, if you want to install CATE **on-device** you may have to compile the code using an nvcc compiler. If so execute the following on the terminal:
+To install CATE via [**Anaconda**](https://anaconda.org/deshan_CATE/cate):
+
+[![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/version.svg)](https://anaconda.org/deshan_cate/cate)
+[![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/latest_release_date.svg)](https://anaconda.org/deshan_cate/cate)
+[![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/platforms.svg)](https://anaconda.org/deshan_cate/cate)
+````
+conda install deshan_cate::cate`
+````
+To ensure successful installation try running:
+````
+CATE -h
+````
+Else, if you want to install CATE **on-device** using the GitHub repo you might have to compile the code using an nvcc compiler. If so execute the following on the terminal:
 
 Download the repository:
 ````
@@ -57,6 +69,10 @@ module load cuda/11.3.0
 Finally, compile the project:
 ````
 nvcc -std=c++17 *.cu *.cpp -o "CATE"
+````
+To ensure successful installation try running:
+````
+CATE -h
 ````
 ---
 
@@ -122,6 +138,26 @@ Methods in Ecology and Evolution, 00, 1–15.
 [https://doi.org/10.1111/2041-210X.14168](https://doi.org/10.1111/2041-210X.14168).
 
 ---
+#### Contact
+
+1. For **CATE** please address your correspondence to:
+
+**Deshan** Perera (duwagedahampriyabala@ucalgary.ca)
+
+Dr. **Quan** Long (quan.long@ucalgary.ca)
+
+Dr. **Christian** D. Huber (cdh5313@psu.edu)
+
+2. For **Apollo** please address your correspondence to:
+
+**Deshan** Perera (duwagedahampriyabala@ucalgary.ca)
+
+Dr. **Quan** Long (quan.long@ucalgary.ca)
+
+Dr. **Alexander** Platt (alexander.platt@pennmedicine.upenn.edu)
+
+---
+#### Software License
 
 MIT License
 
