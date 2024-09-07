@@ -42,7 +42,7 @@ For the **Google Colab** notebook please follow the link to [CATE on Colab](http
 
 To install CATE via [**Anaconda**](https://anaconda.org/deshan_CATE/cate):
 
-[![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/version.svg)](https://anaconda.org/deshan_cate/cate)
+[![Conda Version](https://img.shields.io/conda/v/deshan_CATE/cate)](https://anaconda.org/deshan_cate/cate)
 [![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/latest_release_date.svg)](https://anaconda.org/deshan_cate/cate)
 [![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/platforms.svg)](https://anaconda.org/deshan_cate/cate)
 
