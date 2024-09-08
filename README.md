@@ -47,9 +47,9 @@ To install CATE via [**Anaconda**](https://anaconda.org/deshan_CATE/cate):
 [![Conda Platform](https://img.shields.io/conda/pn/deshan_cate/cate)](https://anaconda.org/deshan_cate/cate)
 
 ````
-conda install deshan_cate::cate`
+conda install deshan_cate::cate
 ````
-To ensure successful installation try running:
+To ensure successful installation run the following:
 ````
 CATE -h
 ````
