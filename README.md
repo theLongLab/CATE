@@ -22,7 +22,7 @@ The CATE software is a CUDA based solution to enable rapid processing of large-s
 
 Apollo is already available in CATE for use. Use the **--simulator** or **-sim** command. Documentation and a preprint of the simulation tool, its capabilities, and how to use Apollo are currently being worked on.
 
-The Wiki for Apollo is currently being written and will be complete soon. 
+The Wiki for Apollo is currently being written and will be completed soon. 
 
 ---
 #### Prerequisites
@@ -36,7 +36,7 @@ The Wiki for Apollo is currently being written and will be complete soon.
 
 #### How to INSTALL
 
-CATE can be used **on-device** via Ananconda or by downloading and building the GitHub repo. It can also be used **online** via **Google Colab**.
+CATE can be used **on-device** via **Ananconda** or by downloading and building the **GitHub** repo. It can also be used **online** via **Google Colab**.
 
 For the **Google Colab** notebook please follow the link to [CATE on Colab](https://colab.research.google.com/drive/1p8I2umE1U2gEB95eKwg0-fdtOLbgR13-?usp=sharing).
 
