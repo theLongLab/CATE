@@ -1,0 +1,38 @@
+name: C/C++ CUDA CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # Install CUDA
+    - name: Set up NVIDIA CUDA Toolkit
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y software-properties-common
+        sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/3bf863cc.pub
+        sudo sh -c 'echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64 /" > /etc/apt/sources.list.d/cuda.list'
+        sudo apt-get update
+        sudo apt-get install -y cuda-11-7
+
+    # Add CUDA to PATH
+    - name: Add CUDA to PATH
+      run: |
+        echo "/usr/local/cuda-11.7/bin" >> $GITHUB_PATH
+        export PATH=/usr/local/cuda-11.7/bin:$PATH
+
+    # Compile using nvcc
+    - name: Compile
+      run: nvcc -std=c++17 *.cu *.cpp -o CATE
+
+    # Run tests
+    - name: Run Tests
+      run: ./CATE -h
