@@ -22,7 +22,7 @@ The CATE software is a CUDA based solution to enable rapid processing of large-s
 
 Apollo is already available in CATE for use. Use the **--simulator** or **-sim** command. Documentation and a preprint of the simulation tool, its capabilities, and how to use Apollo are currently being worked on.
 
-The Wiki for Apollo is currently being written and will be complete soon. 
+The Wiki for Apollo is currently being written and will be completed soon. 
 
 ---
 #### Prerequisites
@@ -36,19 +36,22 @@ The Wiki for Apollo is currently being written and will be complete soon.
 
 #### How to INSTALL
 
-CATE can be used **on-device** via Ananconda or by downloading and building the GitHub repo. It can also be used **online** via **Google Colab**.
+![C/C++ CUDA CI](https://github.com/theLongLab/CATE/actions/workflows/c-cpp.yml/badge.svg?event=push)
+
+CATE can be used **on-device** via **Ananconda** or by downloading and building the **GitHub** repo. It can also be used **online** via **Google Colab**.
 
 For the **Google Colab** notebook please follow the link to [CATE on Colab](https://colab.research.google.com/drive/1p8I2umE1U2gEB95eKwg0-fdtOLbgR13-?usp=sharing).
 
 To install CATE via [**Anaconda**](https://anaconda.org/deshan_CATE/cate):
 
-[![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/version.svg)](https://anaconda.org/deshan_cate/cate)
+[![Conda Version](https://img.shields.io/conda/v/deshan_CATE/cate)](https://anaconda.org/deshan_cate/cate)
 [![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/latest_release_date.svg)](https://anaconda.org/deshan_cate/cate)
-[![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/platforms.svg)](https://anaconda.org/deshan_cate/cate)
+[![Conda Platform](https://img.shields.io/conda/pn/deshan_cate/cate)](https://anaconda.org/deshan_cate/cate)
+
 ````
-conda install deshan_cate::cate`
+conda install deshan_cate::cate
 ````
-To ensure successful installation try running:
+To ensure successful installation run the following:
 ````
 CATE -h
 ````
