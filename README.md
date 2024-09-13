@@ -40,9 +40,9 @@ The Wiki for Apollo is currently being written and will be completed soon.
 
 CATE can be used **on-device** via **Ananconda** or by downloading and building the **GitHub** repo. It can also be used **online** via **Google Colab**.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/theLongLab/CATE/blob/main/Colab_CATE/CATE_on_Colab.ipynb)
-
 For the **Google Colab** notebook please follow the link to [CATE on Colab](https://colab.research.google.com/drive/1p8I2umE1U2gEB95eKwg0-fdtOLbgR13-?usp=sharing).
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/theLongLab/CATE/blob/main/Colab_CATE/CATE_on_Colab.ipynb)
 
 To install CATE via [**Anaconda**](https://anaconda.org/deshan_CATE/cate):
 
