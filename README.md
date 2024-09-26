@@ -142,6 +142,8 @@ CATE: A fast and scalable CUDA implementation to conduct highly parallelized evo
 Methods in Ecology and Evolution, 00, 1–15. 
 [https://doi.org/10.1111/2041-210X.14168](https://doi.org/10.1111/2041-210X.14168).
 
+[![Static Badge](https://img.shields.io/badge/DOI-Methods%20in%20Ecology%20and%20Evolution-%23db0f14)](https://doi.org/10.1111/2041-210X.14168)
+
 ---
 #### Contact
 
