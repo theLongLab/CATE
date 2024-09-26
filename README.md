@@ -75,7 +75,7 @@ Finally, compile the project:
 ````
 nvcc -std=c++17 *.cu *.cpp -o "CATE"
 ````
-To ensure successful installation try running:
+To ensure successful installation try running the following:
 ````
 CATE -h
 ````
