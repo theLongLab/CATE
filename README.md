@@ -16,13 +16,14 @@ The CATE software is a CUDA based solution to enable rapid processing of large-s
 
 #### News
 
-🔴 **CATE is currently under a major update with the integration of APOLLO.**
+**_CATE now comes with APOLLO_** 
 
-*Apollo is our high-performance viral epidemic simulation platform powered by CATE's architecture.*
+Apollo is our high-performance viral epidemic simulation platform powered by CATE's architecture.
 
-Apollo is already available in CATE for use. Use the **--simulator** or **-sim** command. Documentation and a preprint of the simulation tool, its capabilities, and how to use Apollo are currently being worked on.
+Apollo is already available in CATE for use. Use the **-- simulator ** or **- sim ** command. 
+Documentation on Apollo is available in our [wiki](https://github.com/theLongLab/CATE/wiki/Apollo), and a [user manual](https://github.com/theLongLab/CATE/tree/main/Apollo_User_Manual) has also been provided to get you up and running on our all-new tool.
 
-The Wiki for Apollo is currently being written and will be completed soon. 
+Preprint is currently being finalised and ready for upload followed by publication.
 
 ---
 #### Prerequisites
