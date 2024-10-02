@@ -42,11 +42,13 @@ CATE can be used **on-device** via **Ananconda** or by downloading and building 
 
 For the **Google Colab** notebook please follow the link to [CATE on Colab](https://colab.research.google.com/drive/1p8I2umE1U2gEB95eKwg0-fdtOLbgR13-?usp=sharing).
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/theLongLab/CATE/blob/main/Colab_CATE/CATE_on_Colab.ipynb)
+
 To install CATE via [**Anaconda**](https://anaconda.org/deshan_CATE/cate):
 
-[![Conda Version](https://img.shields.io/conda/v/deshan_CATE/cate)](https://anaconda.org/deshan_cate/cate)
+[![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/version.svg)](https://anaconda.org/deshan_cate/cate)
 [![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/latest_release_date.svg)](https://anaconda.org/deshan_cate/cate)
-[![Conda Platform](https://img.shields.io/conda/pn/deshan_cate/cate)](https://anaconda.org/deshan_cate/cate)
+[![Anaconda-Server Badge](https://anaconda.org/deshan_cate/cate/badges/platforms.svg)](https://anaconda.org/deshan_cate/cate)
 
 ````
 conda install deshan_cate::cate
@@ -73,7 +75,7 @@ Finally, compile the project:
 ````
 nvcc -std=c++17 *.cu *.cpp -o "CATE"
 ````
-To ensure successful installation try running:
+To ensure successful installation try running the following:
 ````
 CATE -h
 ````
@@ -139,6 +141,8 @@ Perera, D., Reisenhofer, E., Hussein, S., Higgins, E., Huber, C. D., & Long, Q. 
 CATE: A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large scale genomic data. 
 Methods in Ecology and Evolution, 00, 1–15. 
 [https://doi.org/10.1111/2041-210X.14168](https://doi.org/10.1111/2041-210X.14168).
+
+[![Static Badge](https://img.shields.io/badge/DOI-Methods%20in%20Ecology%20and%20Evolution-%23db0f14)](https://doi.org/10.1111/2041-210X.14168)
 
 ---
 #### Contact
