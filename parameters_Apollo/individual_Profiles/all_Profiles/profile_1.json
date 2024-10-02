@@ -55,11 +55,9 @@
       "Cell limit Binomial trials":100000,
       "Cell limit Binomial probability":"0.10",
 
-      "Viral distribution type":"Gamma",
+      "Viral distribution type":"Binomial",
       "Viral distribution Binomial trials":10,
       "Viral distribution Binomial probability":"0.5",
-      "Viral distribution Gamma shape":"3",
-      "Viral distribution Gamma scale":"3.33",
 
       "Replication phases":{
 
@@ -73,15 +71,13 @@
     },
 
     "Tissue 3":{
-      "Cell limit":"NO",
+      "Cell limit":"Yes",
       "Cell limit Binomial trials":100000,
       "Cell limit Binomial probability":"0.10",
 
       "Viral distribution type":"Binomial",
       "Viral distribution Binomial trials":10,
       "Viral distribution Binomial probability":"0.5",
-      "Viral distribution Gamma shape":"3",
-      "Viral distribution Gamma scale":"3.33",
 
       "Replication phases":{
 

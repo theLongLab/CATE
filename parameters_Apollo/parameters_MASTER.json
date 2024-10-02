@@ -4,9 +4,9 @@
   "CUDA Device IDs":"0",
 
   # Hardware configuration parameters
-  "CPU cores":5,
+  "CPU cores":10,
   "GPU max units":1000,
-  "Process cell rate":10,
+  "Process cell rate":100,
   "Multi read":"YES",
 
   # Output and Intermediate folder locations.
@@ -16,30 +16,31 @@
   # The maximum number of sequences that can be stored in an intermeiate file
   "Intermediate Sequences per file":1000,
 
+  "Seed":"x",
+
   # Indicates the start date for the simulation
-  "Start date":"2024-01-10",
-  # Indicates the mode of infecting patient zero's within host environment. FIXED or RANDOM
+  "Start date":"2024-01-01",
   "First infection":"Random",
 
   # Indicate whether the user wants to run the simulation for a specified period of time
   "Stop after generations":"Yes",
   # Generations or Date can be used to stop the simulation as well
-  "Mode to stop":"Generations",
+  "Mode to stop":"Date",
   "Number of generations":3,
-  "End date":"2024-01-12",
+  "End date":"2024-04-01",
 
   # Network profile parameter file location
-  "Network profile":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/parameters_Final/network_Profiles/network_test.json",
+  "Network profile":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/parameters_Apollo/network_Profiles/network_test.json",
 
   # Node profile parameter file location
-  "Nodes master profile":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/parameters_Final/individual_Profiles/node_Master.json",
+  "Nodes master profile":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/parameters_Apollo/individual_Profiles/node_Master.json",
 
   # Sequence profiles parameter file location
-  "Sequence master profile":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/parameters_Final/sequence_Profiles/sequence_Master.json",
+  "Sequence master profile":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/parameters_Apollo/sequence_Profiles/sequence_Master.json",
 
   # Folder management controls
   # Compresses folders to a TAR.GZ or reduces them to a single TAR file
-  "Enable folder management":"Yes",
+  "Enable folder management":"No",
   "Compress folders":"No",
 
   # Haplotype retriever and count extractor

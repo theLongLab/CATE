@@ -14,11 +14,11 @@
   "Reinfection availability":"No",
 
   # IF LOCATIONS EQUAL NA THEN NO PROFILES WILL BE CREATED
-  "Fitness profile file":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/parameters_Final/sequence_Profiles/profiles/sequence_Fitness_Profile.csv",
-  "Survivability profile file":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/parameters_Final/sequence_Profiles/profiles/sequence_Survivability_Profile.csv",
+  "Fitness profile file":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/parameters_Apollo/sequence_Profiles/profiles/sequence_Fitness_Profile.csv",
+  "Survivability profile file":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/parameters_Apollo/sequence_Profiles/profiles/sequence_Survivability_Profile.csv",
 
   "Proof reading availability":"Yes",
-  "Proof reading profile file":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/parameters_Final/sequence_Profiles/profiles/sequence_Proof_Reading_Profile.csv",
+  "Proof reading profile file":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/parameters_Apollo/sequence_Profiles/profiles/sequence_Proof_Reading_Profile.csv",
 
   "Recombination availability":"Yes",
 
@@ -32,7 +32,7 @@
 
     "Hotspot 1":{
 
-      "Region":"100_2000",
+      "Region":"5_10",
       # Clock model, can follow a Poisson or Negative Binomial distribution or be Fixed.
       "Clock model":"Poisson",
 
@@ -64,7 +64,7 @@
 
     "Hotspot 2":{
 
-      "Region":"10000_20000",
+      "Region":"25_50",
       # Clock model, can follow a Poisson or Negative Binomial distribution or be Fixed.
       "Clock model":"Negative Binomial",
 
@@ -97,8 +97,8 @@
 
   "Recombination":{
 
-    "Number of hotspots":3,
-    "Recombination profiles folder":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/parameters_Final/sequence_Profiles/recombination_profiles",
+    "Number of hotspots":2,
+    "Recombination profiles folder":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/parameters_Apollo/sequence_Profiles/recombination_profiles",
 
     "Hotspot 1":{
       "Region":"100_200"
@@ -112,11 +112,6 @@
       "Reference selectivity":"1",
     },
 
-    "Hotspot 3":{
-      "Region":"10000_20000"
-      "Reference probability of recombination":"0.05",
-      "Reference selectivity":"1",
-    },
   },
 
 }
