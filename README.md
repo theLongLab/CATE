@@ -23,7 +23,7 @@ Apollo is our high-performance viral epidemic simulation platform powered by CAT
 Apollo is already available in CATE for use. Use the **--simulator** or **-sim** command. 
 Documentation on Apollo is available in our [wiki](https://github.com/theLongLab/CATE/wiki/Apollo), and a [user manual](https://github.com/theLongLab/CATE/tree/main/Apollo_User_Manual) has also been provided to get you up and running on our all-new tool.
 
-Preprint is currently being finalised and ready for upload followed by publication.
+Preprint is currently being finalized and ready for upload followed by publication.
 
 ---
 #### Prerequisites
