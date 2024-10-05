@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
           << "HOW TO CITE:\nPerera, D., Reisenhofer, E., Hussein, S., Higgins, E., Huber, C. D., & Long, Q. (2023).\n"
           << "CATE: A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large scale genomic data.\n"
           << "Methods in Ecology and Evolution, 00, 1–15.\n"
-          << "https://doi.org/10.1111/2041-210X.14168.\n"
+          << "https://doi.org/10.1111/2041-210X.14168\n"
           << "----------------------------------------------\n"
           << endl;
 
