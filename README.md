@@ -149,8 +149,7 @@ Methods in Ecology and Evolution, 00, 1–15.
 
 Apollo: A comprehensive GPU-powered within-host simulator for viral evolution and infection dynamics across population, tissue, and cell
 Deshan Perera, Evan Li, Frank van der Meer, Tarah Lynch, John Gill, Deirdre L Church, Christian D. Huber, Guido van Marle, Alexander Platt, Quan Long
-bioRxiv 2024.10.07.617101; 
-[doi: https://doi.org/10.1101/2024.10.07.617101](https://doi.org/10.1101/2024.10.07.617101)
+bioRxiv 2024.10.07.617101; [doi: https://doi.org/10.1101/2024.10.07.617101](https://doi.org/10.1101/2024.10.07.617101)
 
 [![Static Badge](https://img.shields.io/badge/preprint-bioRxiv-black?labelColor=black&color=%23bc2232)](https://doi.org/10.1101/2024.10.07.617101)
 
