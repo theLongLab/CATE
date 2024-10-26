@@ -153,6 +153,10 @@ bioRxiv 2024.10.07.617101; [doi: https://doi.org/10.1101/2024.10.07.617101](http
 
 [![Static Badge](https://img.shields.io/badge/preprint-bioRxiv-black?labelColor=black&color=%23bc2232)](https://doi.org/10.1101/2024.10.07.617101)
 
+To cite CATE's code with Apollo's integration please cite the Zenodo release:
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13917864.svg)](https://doi.org/10.5281/zenodo.13917864)
+
 ---
 #### Contact
 
