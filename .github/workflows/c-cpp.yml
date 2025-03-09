@@ -14,11 +14,18 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Install CUDA Dependencies
+    - name: Install Required Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential g++ wget
-        sudo apt-get install -y libtinfo5  # Fix missing dependency
+
+    - name: Manually Install libtinfo5
+      run: |
+        wget http://archive.ubuntu.com/ubuntu/pool/main/n/ncurses/libtinfo5_6.2-0ubuntu2_amd64.deb
+        sudo dpkg -i libtinfo5_6.2-0ubuntu2_amd64.deb
+
+    - name: Install CUDA Toolkit 11.7
+      run: |
         wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.0-1_all.deb
         sudo dpkg -i cuda-keyring_1.0-1_all.deb
         sudo apt-get update
