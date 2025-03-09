@@ -38,7 +38,7 @@ jobs:
       run: nvcc --version
 
     - name: Compile CUDA Code
-      run: nvcc -std=c++17 -o CATE *.cu *.cpp -lcudart
+      run: nvcc -std=c++17 *.cu *.cpp -o CATE
 
     - name: Run Tests
       run: ./CATE -h
