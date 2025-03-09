@@ -58,6 +58,10 @@ To ensure successful installation run the following:
 ````
 CATE -h
 ````
+**To note:** The conda install, by default, will __not install the latest gcc compiler__ for system stability reasons. If you get a libgcc error, please use the command below to install conda's libgcc and run the above CATE install.
+```
+conda install -c conda-forge libgcc
+```
 Else, if you want to install CATE **on-device** using the GitHub repo you might have to compile the code using an nvcc compiler. If so execute the following on the terminal:
 
 Download the repository:
