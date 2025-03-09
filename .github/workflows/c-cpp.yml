@@ -44,5 +44,5 @@ jobs:
     - name: Compile CUDA Code
       run: nvcc -std=c++17 -o CATE *.cu *.cpp -lcudart
 
-    - name: Run Tests
+    - name: Run Tests (help)
       run: ./CATE -h
