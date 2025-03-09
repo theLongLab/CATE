@@ -19,10 +19,9 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y build-essential g++ wget
 
-    - name: Manually Install libtinfo5
+    - name: Install libncurses5 (Alternative to libtinfo5)
       run: |
-        wget http://archive.ubuntu.com/ubuntu/pool/main/n/ncurses/libtinfo5_6.2-0ubuntu2_amd64.deb
-        sudo dpkg -i libtinfo5_6.2-0ubuntu2_amd64.deb
+        sudo apt-get install -y libncurses5
 
     - name: Install CUDA Toolkit 11.7
       run: |
@@ -44,5 +43,5 @@ jobs:
     - name: Compile CUDA Code
       run: nvcc -std=c++17 -o CATE *.cu *.cpp -lcudart
 
-    - name: Run Tests (help)
+    - name: Run Tests
       run: ./CATE -h
