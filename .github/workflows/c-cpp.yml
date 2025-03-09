@@ -14,14 +14,11 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Install Required Dependencies
+    - name: Install libtinfo5 Manually
       run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential g++ wget
-
-    - name: Install libncurses5 (Alternative to libtinfo5)
-      run: |
-        sudo apt-get install -y libncurses5
+        sudo apt update
+        wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
+        sudo apt install -y ./libtinfo5_6.3-2ubuntu0.1_amd64.deb
 
     - name: Install CUDA Toolkit 11.7
       run: |
