@@ -697,7 +697,7 @@ void tajima::ingress()
                                         //                 {
                                         //                     MAF = 1 - MAF;
                                         //                 }
-                                        //                 //cout << split_info[0] << "\t: " << MAF << endl;;
+                                        //                 //cout << split_info[0] << "\t: " << MAF << endl;
                                         //                 break;
                                         //             }
                                         //         }

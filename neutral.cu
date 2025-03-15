@@ -1603,7 +1603,7 @@ void neutral::process_Segs(vector<string> &total_Segregrating_sites, float N, in
      }
 
      Total_iEi = total_iTheta;
-     theta_L = (float)total_iTheta / (float)(N);
+     theta_L = (float)total_iTheta / (float)(N - 1);
 
      free(Theta_partials);
      free(MA_Count);
