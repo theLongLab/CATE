@@ -904,7 +904,7 @@ void node_within_host::run_Generation(functions_library &functions, string &mult
                 //          << current_Viral_load_per_Tissue[tissue] << endl;
                 // }
 
-                //exit(-1);
+                // exit(-1);
 
                 if (viral_Migration == "YES")
                 {
@@ -3110,6 +3110,7 @@ void node_within_host::process_Sequences_get_Configuration(functions_library &fu
     {
         cudaSetDevice(CUDA_device_IDs[gpu]);
         // (start_stop_Per_GPU[gpu].second - start_stop_Per_GPU[gpu].first, cuda_Sequence[gpu], genome_Length, cuda_full_Char[gpu]);
+
         cuda_Parent_configuration<<<functions.tot_Blocks_array[gpu], functions.tot_ThreadsperBlock_array[gpu], 0, streams[gpu]>>>(start_stop_Per_GPU[gpu].second - start_stop_Per_GPU[gpu].first, cuda_Sequence[gpu], genome_Length, cuda_full_Char[gpu], cuda_sequence_Configuration_standard[gpu],
                                                                                                                                   cuda_Reference_fitness_survivability_proof_reading[gpu], cuda_num_effect_Segregating_sites[gpu],
                                                                                                                                   cuda_sequence_Fitness_changes[gpu], cuda_sequence_Proof_reading_changes[gpu],

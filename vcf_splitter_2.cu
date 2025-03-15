@@ -1065,8 +1065,22 @@ void vcf_splitter_2::process_SNPs_Hierarchy(int N, int num_Populations, int augm
         cudaFree(cuda_full_Char);
         cudaFree(cuda_site_Index);
 
+        //free(VALID_or_NOT_populations);
+
+        for (int i = 0; i < total_Segs; i++)
+        {
+            free(VALID_or_NOT_populations[i]);
+        }
         free(VALID_or_NOT_populations);
+        
         cudaFree(cuda_VALID_or_NOT_populations);
+
+        // for (int row = 0; row < total_Segs; row++)
+        // {
+        //     cudaFree(cuda_VALID_or_NOT_populations[row]);
+        // }
+        // // see
+        // cudaFree(cuda_VALID_or_NOT_populations);
 
         free(chr_start_Index);
         free(chr_end_Index);
@@ -1098,6 +1112,12 @@ void vcf_splitter_2::process_SNPs_Hierarchy(int N, int num_Populations, int augm
         cudaFree(cuda_six_9_start_Index);
         cudaFree(cuda_six_9_stop_Index);
 
+        // for (int row = 0; row < total_Segs; row++)
+        // {
+        //     cudaFree(cuda_REF_populations[row]);
+        //     cudaFree(cuda_ALT_populations[row]);
+        // }
+        
         cudaFree(cuda_REF_populations);
         cudaFree(cuda_ALT_populations);
 

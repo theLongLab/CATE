@@ -1664,14 +1664,14 @@ float fay_wu::calc_theta_L(vector<string> &total_Segregrating_sites, float N_tot
                real_segregrating_Sites = real_segregrating_Sites + 1;
                float MAF = (float)MA_Count[i] / N_tot;
                tot_pairwise_Differences = tot_pairwise_Differences + (MAF * (1 - MAF) * pow(N_tot, 2));
-               total_iTheta = total_iTheta + Theta_partials[i];
+               total_iTheta = total_iTheta + (Theta_partials[i]);
           }
      }
      // cout << "GPU DONE" << endl;
      // cout << "total iTheta: " << total_iTheta << endl;
 
      Total_iEi = total_iTheta;
-     theta_L = (float)(1 / (N_tot - 1)) * (float)total_iTheta;
+     theta_L = (float)total_iTheta / (float)(N_tot - 1);
 
      // cout << "Theta_L: " << theta_L << endl;
 

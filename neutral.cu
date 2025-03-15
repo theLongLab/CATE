@@ -1309,8 +1309,8 @@ void neutral::Fay_wu_thread(promise<string> &Fay_Wu_H, promise<string> &Fay_Wu_E
      float VAR_pi_MINUS_theta_L = (float)(((N_float - 2.0) / (6.0 * (N_float - 1.0))) * theta_W) + ((((18.0 * pow(N_float, 2) * ((3.0 * N_float) + 2.0) * bn_plus1) - ((88.0 * pow(N_float, 3)) + (9.0 * pow(N_float, 2)) - (13.0 * N_float) + 6.0)) / (9.0 * N_float * pow(N_float - 1, 2))) * theta_squared);
      float VAR_theta_L_MINUS_theta_W = (float)(((N_float / (2.0 * (N_float - 1.0))) - (1.0 / an)) * theta_W) + (((bn / (pow(an, 2))) + (2.0 * pow((N_float / (N_float - 1.0)), 2) * bn) - ((2.0 * ((N_float * bn) - N_float + 1.0)) / ((N_float - 1.0) * an)) - (((3.0 * N_float) + 1) / (N_float - 1.0))) * theta_squared);
 
-     float H = (float)(pi - theta_L) / (sqrt(VAR_pi_MINUS_theta_L));
-     float E = (float)(theta_L - theta_W) / (sqrt(VAR_theta_L_MINUS_theta_W));
+     float H = ((float)(pi - theta_L)) / (sqrt(VAR_pi_MINUS_theta_L));
+     float E = ((float)(theta_L - theta_W)) / (sqrt(VAR_theta_L_MINUS_theta_W));
 
      Fay_Wu_H.set_value(to_string(H));
      Fay_Wu_E.set_value(to_string(E));
@@ -1603,7 +1603,7 @@ void neutral::process_Segs(vector<string> &total_Segregrating_sites, float N, in
      }
 
      Total_iEi = total_iTheta;
-     theta_L = (float)(1 / (N - 1)) * (float)total_iTheta;
+     theta_L = (float)total_iTheta / (float)(N);
 
      free(Theta_partials);
      free(MA_Count);

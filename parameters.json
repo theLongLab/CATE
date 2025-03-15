@@ -4,23 +4,23 @@
 
     # IO directory listings and universal file paths
     # RECOMMENDS THE CREATION OF SEPARATE PARAMATER FILES WITH SEPARATE OUTPUT AND INTERMEDIATE PATHS FOR INDIVIDUAL PROJECTS
-    "Input path":"split_VCF",
-    "Output path":"fasta_Split",
-    "Intermediate path":"intermediate_fst",
+    "Input path":"ON_neutral",
+    "Output path":"fa_test",
+    "Intermediate path":"intermediate_test",
 
     # Prometheus settings
     # Prometheus is a high performance mode in CATE. It is greedy on hardware resources but has extremely fast processing speeds.
     # User is capable of determining the number of gene combinations and number of SNPs to be processed by CATE.
     # When setting these parameters be mindful of system hardware availability.
     # WARNING: Multi read CAN CAUSE A BOTTLENECK IF HARDWARE DOES NOT SUPPORT IT. NVMe DRIVES CONNECTED VIA PCIe BUS WILL SUPPORT MULTI READ. TYPICAL HDD DRIVES DO NOT.
-    "Prometheus activate":"Yes",
+    "Prometheus activate":"No",
     "CPU cores":10,
     "SNPs per time":1000,
     "Number of genes":2,
     "Multi read":"Yes",
 
     # VCF sample details
-    "Ploidy":2,
+    "Ploidy":1,
 
     # Protein information
     # DNA INTERPRETATION SHOULD BE USED FOR START AND STOP CODONS
@@ -38,7 +38,7 @@
 
     # FILE mode parameters
     # Any tab-deliminated text based formats such as but not limited to (*.txt, *.csv)
-    "Universal gene list":"genelist.txt",
+    "Universal gene list":"cov.txt",
 
     # VCF split parameters
     # The type of Split mode can be either CHR or CTSPLIT.
