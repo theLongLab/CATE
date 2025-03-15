@@ -23,7 +23,7 @@ Apollo is our high-performance viral epidemic simulation platform powered by CAT
 Apollo is already available in CATE for use. Use the **--simulator** or **-sim** command. 
 Documentation on Apollo is available in our [wiki](https://github.com/theLongLab/CATE/wiki/Apollo), and a [user manual](https://github.com/theLongLab/CATE/tree/main/Apollo_User_Manual) has also been provided to get you up and running on our all-new tool.
 
-Preprint is currently being finalized and ready for upload followed by publication.
+[Apollo's preprint is now available on bioRxiv](https://doi.org/10.1101/2024.10.07.617101).
 
 ---
 #### Prerequisites
@@ -58,6 +58,10 @@ To ensure successful installation run the following:
 ````
 CATE -h
 ````
+**To note:** The conda install, by default, will __not install the latest gcc compiler__ for system stability reasons. If you get a libgcc error, please use the command below to install conda's libgcc and run the above CATE install.
+```
+conda install -c conda-forge libgcc
+```
 Else, if you want to install CATE **on-device** using the GitHub repo you might have to compile the code using an nvcc compiler. If so execute the following on the terminal:
 
 Download the repository:
@@ -130,7 +134,7 @@ The __HELP__ menu will list all available functions and how each function can be
 ---
 #### How to Cite
 
-CATE has been successfully published in the journal Methods in Ecology and Evolution (MEE). If you find this framework or the software solution useful in your analyses, please CITE the published article available in [MEE, CATE: A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large scale genomic data](https://doi.org/10.1111/2041-210X.14168).
+**CATE** has been successfully published in the journal Methods in Ecology and Evolution (MEE). If you find this framework or the software solution useful in your analyses, please CITE the published article available in [MEE, CATE: A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large scale genomic data](https://doi.org/10.1111/2041-210X.14168).
 
 To cite CATE's code please use the Zenodo release:
 
@@ -144,6 +148,18 @@ Methods in Ecology and Evolution, 00, 1–15.
 [https://doi.org/10.1111/2041-210X.14168](https://doi.org/10.1111/2041-210X.14168).
 
 [![Static Badge](https://img.shields.io/badge/DOI-Methods%20in%20Ecology%20and%20Evolution-%23db0f14)](https://doi.org/10.1111/2041-210X.14168)
+
+**Apollo** is currently being submitted for review. Its preprint is available on *bioRxiv* and the citation details are as follows:
+
+Apollo: A comprehensive GPU-powered within-host simulator for viral evolution and infection dynamics across population, tissue, and cell
+Deshan Perera, Evan Li, Frank van der Meer, Tarah Lynch, John Gill, Deirdre L Church, Christian D. Huber, Guido van Marle, Alexander Platt, Quan Long
+bioRxiv 2024.10.07.617101; [doi: https://doi.org/10.1101/2024.10.07.617101](https://doi.org/10.1101/2024.10.07.617101)
+
+[![Static Badge](https://img.shields.io/badge/preprint-bioRxiv-black?labelColor=black&color=%23bc2232)](https://doi.org/10.1101/2024.10.07.617101)
+
+To cite CATE's code with Apollo's integration please cite the Zenodo release:
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13917864.svg)](https://doi.org/10.5281/zenodo.13917864)
 
 ---
 #### Contact
