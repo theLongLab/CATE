@@ -2189,6 +2189,11 @@ void vcf_splitter_2::process_SNPs_CHR(int N, int augment, string &output_vcf_Fol
         cudaFree(cuda_sample_sequence_Tracker);
         if (summary_Individuals != 0)
         {
+            for (int i = 0; i < total_Segs; i++)
+            {
+                free(sample_sequence_Tracker[i]);
+            }
+            // free(VALID_or_NOT_populations);
             free(sample_sequence_Tracker);
         }
 
