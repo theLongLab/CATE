@@ -26,7 +26,7 @@
   "Stop after generations":"Yes",
   # Generations or Date can be used to stop the simulation as well
   "Mode to stop":"Date",
-  "Number of generations":3,
+  "Number of generations":2,
   "End date":"2024-04-01",
 
   # Network profile parameter file location

@@ -62,26 +62,26 @@
 
       "1_2":{
         "Start generation":2,
-        "Cell migration Binomial trials":100,
-        "Cell migration Binomial probability":"0.10",
+        "Viral migration Binomial trials":100,
+        "Viral migration Binomial probability":"0.10",
       },
 
       "2_1":{
         "Start generation":10,
-        "Cell migration Binomial trials":100,
-        "Cell migration Binomial probability":"0.10",
+        "Viral migration Binomial trials":100,
+        "Viral migration Binomial probability":"0.10",
       },
 
       "2_3":{
         "Start generation":10,
-        "Cell migration Binomial trials":50,
-        "Cell migration Binomial probability":"0.01",
+        "Viral migration Binomial trials":50,
+        "Viral migration Binomial probability":"0.01",
       },
 
       "3_1":{
         "Start generation":2,
-        "Cell migration Binomial trials":10,
-        "Cell migration Binomial probability":"0.9",
+        "Viral migration Binomial trials":10,
+        "Viral migration Binomial probability":"0.9",
       },
 
     },

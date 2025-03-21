@@ -2845,11 +2845,11 @@ void simulator_Master::node_Master_Manager(functions_library &functions)
                     cout << "From " << tissue_Names[source] << " to " << tissue_Names[destination] << endl;
                     for (int i = 0; i < block_Migration.size(); i++)
                     {
-                        if (Parameters.get_STRING(block_Migration[i].first) == "Cell migration Binomial trials")
+                        if (Parameters.get_STRING(block_Migration[i].first) == "Viral migration Binomial trials")
                         {
                             viral_Migration_Values[migration_Check][0] = Parameters.get_INT(block_Migration[i].second);
                         }
-                        else if (Parameters.get_STRING(block_Migration[i].first) == "Cell migration Binomial probability")
+                        else if (Parameters.get_STRING(block_Migration[i].first) == "Viral migration Binomial probability")
                         {
                             viral_Migration_Values[migration_Check][1] = Parameters.get_FLOAT(block_Migration[i].second);
                         }

@@ -463,6 +463,8 @@ void fst::ingress()
                                 }
                             }
 
+                            // remove the caught ones to prevent redundancy
+
                             for (string remover : found_Pops)
                             {
                                 query_Super_pops.erase(remove(query_Super_pops.begin(), query_Super_pops.end(), remover), query_Super_pops.end());

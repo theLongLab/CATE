@@ -2193,7 +2193,7 @@ void vcf_splitter_2::process_SNPs_CHR(int N, int augment, string &output_vcf_Fol
             {
                 free(sample_sequence_Tracker[i]);
             }
-            // free(VALID_or_NOT_populations);
+            
             free(sample_sequence_Tracker);
         }
 

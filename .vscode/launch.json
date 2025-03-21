@@ -10,8 +10,8 @@
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
             "args": [
-                "-h",
-                "/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/parameters.json"
+                "-sim",
+                "/mnt/d/Deshan/Books/University of Calgary/Experiments/Neutrality_Linux/parameters_Apollo/parameters_Master.json"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
