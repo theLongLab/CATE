@@ -1540,6 +1540,21 @@ void node_within_host::thread_Sequence_to_String(int start, int stop, int **prog
     }
 }
 
+__global__ void cuda_Fill_2D_array_Float_in_Line(int total, int columns, float fill_Value, float **array_2D)
+{
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+
+    while (tid < total)
+    {
+        int row = tid / columns;
+        int column = tid % columns;
+
+        array_2D[row][column] = fill_Value;
+
+        tid += blockDim.x * gridDim.x;
+    }
+}
+
 void node_within_host::simulate_Cell_replication(functions_library &functions, string &multi_Read, int &gpu_Limit, int *CUDA_device_IDs, int &num_Cuda_devices, string &source_sequence_Data_folder, vector<pair<int, int>> &indexed_Tissue_Folder,
                                                  int &CPU_cores, int &max_sequences_per_File,
                                                  int &genome_Length,
@@ -1795,7 +1810,58 @@ void node_within_host::simulate_Cell_replication(functions_library &functions, s
     int total_Progeny = 0;
     // // clear 2d array
     // float *totals_Progeny_Selectivity = (float *)malloc(sizeof(float) * (1 + recombination_Hotspots));
-    float **totals_Progeny_Selectivity = functions.create_Fill_2D_array_FLOAT(num_Cells, recombination_Hotspots, 0);
+
+    // float **totals_Progeny_Selectivity = functions.create_Fill_2D_array_FLOAT(num_Cells, recombination_Hotspots, 0);
+
+    float **totals_Progeny_Selectivity;
+    cudaSetDevice(CUDA_device_IDs[0]);
+    float **cuda_Array_2D;
+
+    totals_Progeny_Selectivity = (float **)malloc(num_Cells * sizeof(float *));
+    cudaMallocManaged(&cuda_Array_2D, num_Cells * sizeof(float *));
+
+    for (int row = 0; row < num_Cells; row++)
+    {
+        totals_Progeny_Selectivity[row] = (float *)malloc((recombination_Hotspots) * sizeof(float));
+        cudaMalloc((void **)&(cuda_Array_2D[row]), (recombination_Hotspots) * sizeof(float));
+    }
+
+    cuda_Fill_2D_array_Float_in_Line<<<functions.tot_Blocks_array[0], functions.tot_ThreadsperBlock_array[0]>>>((num_Cells * recombination_Hotspots), recombination_Hotspots, 0, cuda_Array_2D);
+
+    cudaError_t err = cudaGetLastError();
+
+    if (err != cudaSuccess)
+    {
+        printf("CUDA Error: %s\n", cudaGetErrorString(err));
+        exit(-1);
+        // Possibly: exit(-1) if program cannot continue....
+    }
+    cudaDeviceSynchronize();
+
+    for (int row = 0; row < num_Cells; row++)
+    {
+        cudaMemcpy(totals_Progeny_Selectivity[row], cuda_Array_2D[row], (recombination_Hotspots) * sizeof(float), cudaMemcpyDeviceToHost);
+    }
+
+    for (int row = 0; row < num_Cells; row++)
+    {
+        cudaFree(cuda_Array_2D[row]);
+    }
+    cudaFree(cuda_Array_2D);
+
+    // // Do a quick test
+
+    // for (int row = 0; row < num_Cells; row++)
+    // {
+    //     for (int column = 0; column < recombination_Hotspots; column++)
+    //     {
+    //         cout << totals_Progeny_Selectivity[row][column] << "\t";
+    //     }
+    //     cout << endl;
+    // }  
+
+    // exit(-1);
+
     ////  clear 1d array
     int *progeny_Stride = (int *)malloc(sizeof(int) * (Total_seqeunces_to_Process + 1));
     progeny_Stride[0] = 0;
@@ -1969,9 +2035,27 @@ void node_within_host::simulate_Cell_replication(functions_library &functions, s
     }
 
     cout << "Unloading memory data points\n";
-    functions.clear_Array_int_CPU(parent_Sequences, Total_seqeunces_to_Process);
-    functions.clear_Array_float_CPU(sequence_Configuration_standard, Total_seqeunces_to_Process);
-    functions.clear_Array_int_CPU(parent_IDs, 2);
+
+    //! Do a quick test
+
+    // functions.clear_Array_int_CPU(parent_Sequences, Total_seqeunces_to_Process);
+    // functions.clear_Array_float_CPU(sequence_Configuration_standard, Total_seqeunces_to_Process);
+
+    for (int row = 0; row < Total_seqeunces_to_Process; row++)
+    {
+        free(parent_Sequences[row]);
+        free(sequence_Configuration_standard[row]);
+    }
+    free(parent_Sequences);
+    free(sequence_Configuration_standard);
+
+    // functions.clear_Array_int_CPU(parent_IDs, 2);
+
+    for (int row = 0; row < 2; row++)
+    {
+        free(parent_IDs[row]);
+    }
+    free(parent_IDs);
 
     free(cell_Index);
 
@@ -1982,7 +2066,13 @@ void node_within_host::simulate_Cell_replication(functions_library &functions, s
     }
     free(totals_Progeny_Selectivity);
 
-    functions.clear_Array_int_CPU(progeny_Configuration, total_Progeny);
+    // functions.clear_Array_int_CPU(progeny_Configuration, total_Progeny);
+
+    for (int row = 0; row < total_Progeny; row++)
+    {
+        free(progeny_Configuration[row]);
+    }
+    free(progeny_Configuration);
 }
 
 __global__ void cuda_Progeny_Complete_Configuration(int genome_Length,
