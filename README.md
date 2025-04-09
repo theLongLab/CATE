@@ -167,7 +167,7 @@ To cite CATE's code with Apollo's integration please cite the Zenodo release:
 
 1. For **CATE** please address your correspondence to:
 
-**Deshan** Perera (duwagedahampriyabala@ucalgary.ca)
+Dr. **Deshan** Perera (duwagedahampriyabala@ucalgary.ca)
 
 Dr. **Quan** Long (quan.long@ucalgary.ca)
 
@@ -175,7 +175,7 @@ Dr. **Christian** D. Huber (cdh5313@psu.edu)
 
 2. For **Apollo** please address your correspondence to:
 
-**Deshan** Perera (duwagedahampriyabala@ucalgary.ca)
+Dr. **Deshan** Perera (duwagedahampriyabala@ucalgary.ca)
 
 Dr. **Quan** Long (quan.long@ucalgary.ca)
 
