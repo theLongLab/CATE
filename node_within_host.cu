@@ -2036,7 +2036,7 @@ void node_within_host::simulate_Cell_replication(functions_library &functions, s
 
     cout << "Unloading memory data points\n";
 
-    //! Do a quick test
+    // // Do a quick test
 
     // functions.clear_Array_int_CPU(parent_Sequences, Total_seqeunces_to_Process);
     // functions.clear_Array_float_CPU(sequence_Configuration_standard, Total_seqeunces_to_Process);

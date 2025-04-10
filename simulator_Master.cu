@@ -345,7 +345,7 @@ void simulator_Master::ingress()
 
     network_Manager(functions);
 
-   // exit(-1);
+    // exit(-1);
 
     cout << "STEP 2: Configuring node profiles and within host mechanics\n\n";
     node_Master_Manager(functions);
@@ -1084,6 +1084,14 @@ void simulator_Master::apollo(functions_library &functions, vector<node_within_h
             }
         }
 
+        if (max_Infected != 0)
+        {
+            if ((infected_Population.size() + removed_Count + dead_Count) >= max_Infected)
+            {
+                stop = 6;
+            }
+        }
+
         // stop = 1;
 
         // cudaError_t err = cudaGetLastError();
@@ -1128,6 +1136,10 @@ void simulator_Master::apollo(functions_library &functions, vector<node_within_h
     else if (stop == 5)
     {
         cout << "Maximum date of " << stop_Date << " has been reached\n";
+    }
+    else if (stop == 6)
+    {
+        cout << "Maximum number of host have been infected: " << this->max_Infected << " host(s)\n";
     }
 
     // uniform_int_distribution<int> distribution(0, Total_number_of_Nodes - 1);
@@ -2488,7 +2500,8 @@ void simulator_Master::node_Master_Manager(functions_library &functions)
         "\"Progeny distribution type\"",
         "\"Number of node profiles\"",
         "\"Location of node profiles\"",
-        "\"Infected to Recovered\""};
+        "\"Infected to Recovered\"",
+        "\"Limit infected hosts\""};
 
     vector<string> found_Parameters = Parameters.get_parameters(node_Master_location, parameters_List);
     parameters_List.clear();
@@ -2514,6 +2527,27 @@ void simulator_Master::node_Master_Manager(functions_library &functions)
         }
 
         cout << "SIRS status: " << infected_to_Recovered << endl;
+
+        if (functions.to_Upper_Case(Parameters.get_STRING(found_Parameters[9])) == "YES")
+        {
+            cout << "Maximum number of hosts that can be infected is limited to ";
+
+            parameters_List = {"\"Host limit\""};
+            vector<string> host_limit_Parameters = Parameters.get_parameters(node_Master_location, parameters_List);
+            parameters_List.clear();
+
+            max_Infected = Parameters.get_INT(host_limit_Parameters[0]);
+
+            cout << max_Infected << " host(s)\n";
+
+            if (max_Infected <= 0)
+            {
+                cout << "ERROR: HOST LIMIT HAS TO BE A VALUE GREATER THAN ZERO.\nCURRENT VALUE SET TO: " << max_Infected << endl;
+                exit(-1);
+            }
+        }
+
+        // exit(-1);
 
         cout << "\nSampling status: ";
         if (functions.to_Upper_Case(Parameters.get_STRING(found_Parameters[4])) == "YES")

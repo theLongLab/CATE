@@ -276,6 +276,8 @@ private:
     int stop_generations_Count = 0;
     float stop_Date = 0;
 
+    int max_Infected = 0;
+
 public:
     simulator_Master(string parameter_Master_Location);
     simulator_Master();
