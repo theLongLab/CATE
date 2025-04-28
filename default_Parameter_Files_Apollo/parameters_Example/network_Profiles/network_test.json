@@ -13,7 +13,7 @@
   "Random model number of nodes":250,
 
   "ER Random model total number of nodes":250,
-  "ER Random model probability of linkage":"0.75",
+  "ER Random model probability of linkage":"0.50",
 
   # Total number of nodes that will be present in the BA network model
   "BA model number of nodes":50,

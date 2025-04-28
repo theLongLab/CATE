@@ -1,7 +1,7 @@
 {
   "Profile name":"Children",
 
-  "Probability of occurence":"0.15",
+  "Probability of occurence":"0.25",
   # Sampled individuals can be REMOVED from the infectious population or become LESS INFECTIOUS or NO CHANGE to infectivity
   "Sampling effect":"No change",
   "Sampling less infectious effect Alpha":"5",

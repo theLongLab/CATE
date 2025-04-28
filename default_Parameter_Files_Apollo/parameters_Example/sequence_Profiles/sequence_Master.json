@@ -97,7 +97,7 @@
 
   "Recombination":{
 
-    "Number of hotspots":2,
+    "Number of hotspots":1,
     "Recombination profiles folder":"parameters_Example/sequence_Profiles/recombination_profiles",
 
     "Hotspot 1":{
