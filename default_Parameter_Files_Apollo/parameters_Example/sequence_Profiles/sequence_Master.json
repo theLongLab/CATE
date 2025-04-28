@@ -1,0 +1,117 @@
+{
+  # Contains all intial sequences
+  "Parent sequences folder":"reference_Genomes",
+
+  "Mutation availability":"Yes",
+
+  # Control the viral transmission bottleneck from one host to another
+  "Transmitted sequence distribution":"Fixed",
+  "Transmitted sequence Binomial trials":2,
+  "Transmitted sequence Binomial probability":"0.5",
+  "Transmitted sequence Fixed":2,
+
+  # Can an already infected host be reinfected
+  "Reinfection availability":"No",
+
+  # IF LOCATIONS EQUAL NA THEN NO PROFILES WILL BE CREATED
+  "Fitness profile file":"parameters_Example/sequence_Profiles/profiles/sequence_Fitness_Profile.csv",
+  "Survivability profile file":"parameters_Example/sequence_Profiles/profiles/sequence_Survivability_Profile.csv",
+
+  "Proof reading availability":"Yes",
+  "Proof reading profile file":"parameters_Example/sequence_Profiles/profiles/sequence_Proof_Reading_Profile.csv",
+
+  "Recombination availability":"Yes",
+
+  "Reference Fitness":"1",
+  "Reference Survivability":"0.5",
+  "Reference Proof Reading":"0.75",
+
+  "Mutations":{
+
+    "Number of hotspots":2,
+
+    "Hotspot 1":{
+
+      "Region":"5_10",
+      # Clock model, can follow a Poisson or Negative Binomial distribution or be Fixed.
+      "Clock model":"Poisson",
+
+      "Clock model Poisson mean":"2",
+      "Clock model Negative Binomial sucesses":"10",
+      "Clock model Negative Binomial probability":"0.5",
+      "Clock model Fixed probability":"0.5",
+
+      "AA":"0.25",
+      "AG":"0.25",
+      "AT":"0.25",
+      "AC":"0.25",
+
+      "GA":"0.25",
+      "GG":"0.25",
+      "GT":"0.25",
+      "GC":"0.25",
+
+      "TT":"0.25",
+      "TC":"0.25",
+      "TA":"0.25",
+      "TG":"0.25",
+
+      "CT":"0.25",
+      "CC":"0.25",
+      "CA":"0.25",
+      "CG":"0.25"
+    },
+
+    "Hotspot 2":{
+
+      "Region":"25_25",
+      # Clock model, can follow a Poisson or Negative Binomial distribution or be Fixed.
+      "Clock model":"Negative Binomial",
+
+      "Clock model Poisson mean":"2",
+      "Clock model Negative Binomial sucesses":"10",
+      "Clock model Negative Binomial probability":"0.5",
+      "Clock model Fixed probability":"0.5",
+
+      "AA":"0.25",
+      "AG":"0.25",
+      "AT":"0.25",
+      "AC":"0.25",
+
+      "GA":"0.25",
+      "GG":"0.25",
+      "GT":"0.25",
+      "GC":"0.25",
+
+      "TT":"0.25",
+      "TC":"0.25",
+      "TA":"0.25",
+      "TG":"0.25",
+
+      "CT":"0.10",
+      "CC":"0.40",
+      "CA":"0.20",
+      "CG":"0.30"
+    },
+  },
+
+  "Recombination":{
+
+    "Number of hotspots":2,
+    "Recombination profiles folder":"parameters_Example/sequence_Profiles/recombination_profiles",
+
+    "Hotspot 1":{
+      "Region":"1_10"
+      "Reference probability of recombination":"0.5",
+      "Reference selectivity":"1",
+    },
+
+    "Hotspot 2":{
+      "Region":"20_50"
+      "Reference probability of recombination":"0.75",
+      "Reference selectivity":"1",
+    },
+
+  },
+
+}

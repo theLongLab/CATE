@@ -1,0 +1,66 @@
+{
+  # Configuration of the Cuda device IDs accesible to Apollo
+  # Here only one CUDA device is assigned for Apollo's use
+  "CUDA Device IDs":"0",
+
+  # Hardware configuration parameters
+  "CPU cores":10,
+  "GPU max units":100000,
+  "Process cell rate":1000,
+  "Multi read":"YES",
+
+  # Output and Intermediate folder locations.
+  "Output folders":"results",
+  "Intermediate folders":"intermediates",
+
+  # The maximum number of sequences that can be stored in an intermeiate file
+  "Intermediate Sequences per file":1000,
+
+  # Indicates the start date for the simulation
+  "Start date":"2024-01-01",
+  "First infection":"Random",
+
+  # Indicate whether the user wants to run the simulation for a specified period of time
+  "Stop after generations":"Yes",
+  # Generations or Date can be used to stop the simulation as well
+  "Mode to stop":"Date",
+  "Number of generations":100,
+  "End date":"2024-04-01",
+
+  # Network profile parameter file location
+  "Network profile":"parameters_Example/network_Profiles/network_test.json",
+
+  # Node profile parameter file location
+  "Nodes master profile":"parameters_Example/individual_Profiles/node_Master.json",
+
+  # Sequence profiles parameter file location
+  "Sequence master profile":"parameters_Example/sequence_Profiles/sequence_Master.json",
+
+  # Folder management controls
+  # Compresses folders to a TAR.GZ or reduces them to a single TAR file
+  "Enable folder management":"No",
+  "Compress folders":"No",
+
+  # Haplotype retriever and count extractor
+  # ALL for NODE ID to get the sequence haplotypes for all infected individual_Profiles
+  # OR list the nodes seperated by a comma to get the haplotype frequency for those individuals
+  "Haplotype Node IDs":"8_8",
+
+  # Pedigree search
+  "Pedigree Node ID":"0_0",
+  "Pedigree Tissue":"Plasma",
+  "Pedigree Generation":52,
+  "Pedigree Sequence":"test_Folder/pedigree/one.fasta",
+  "Pedigree get Sequences":"Yes",
+
+  # Base site model or recombination hotspots to JSON script (File has to be tab delimited)
+  "Convert file location":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/Mutation_Site_model_covid_full.csv",
+
+  # Convert pedigree folder to R format
+  "Pedigree folder location":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/resultsHIV_2/node_Data/0_0/pedigree_Information/one",
+
+  "Segregating match sequences":"/mnt/d/Deshan/Books/University of Calgary/Experiments/HIV Simulation/patient_14/Full_analysis/Clean_name/last_Gen/merged.fasta",
+  "Segregating match Node ID":"0_0",
+  "Segregating match tissue":"Plasma",
+  "Segregating match cutoff":"0.96875"
+}

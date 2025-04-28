@@ -1,0 +1,105 @@
+{
+  "Profile name":"Children",
+
+  "Probability of occurence":"0.15",
+  # Sampled individuals can be REMOVED from the infectious population or become LESS INFECTIOUS or NO CHANGE to infectivity
+  "Sampling effect":"No change",
+  "Sampling less infectious effect Alpha":"5",
+  "Sampling less infectious effect Beta":"10",
+
+  # TERMINAL AND INFECTIOUS AMOUNTS
+
+  "Infectious load distribution type":"Fixed",
+  "Infectious load Binomial trials":100,
+  "Infectious load Binomial probability":"0.75",
+  "Infectious load Fixed":1,
+
+  "Terminal load distribution type":"Fixed",
+  "Terminal load Binomial trials":100000,
+  "Terminal load Binomial probability":"0.75",
+  "Terminal load Fixed":1000,
+
+  # Control the number of hosts that will be infected
+  "Infection sequence distribution":"Fixed",
+  "Infection sequence Binomial trials":2,
+  "Infection sequence Binomial probability":"0.5",
+  "Infection sequence Fixed":2,
+
+  "Tissue profiles":{
+
+    "Tissue 1":{
+      "Cell limit":"YES",
+      "Cell limit Binomial trials":100000,
+      "Cell limit Binomial probability":"0.50",
+
+      "Viral distribution type":"Gamma",
+      "Viral distribution Binomial trials":10,
+      "Viral distribution Binomial probability":"0.5",
+      "Viral distribution Gamma shape":"3",
+      "Viral distribution Gamma scale":"3.33",
+
+      "Replication phases":{
+
+        "Number of phases":1,
+
+        "Phase 1 Mode":"Neutral",
+        "Phase 1 Time ratio":"1",
+        "Phase 1 Variance":"100",
+        "Phase 1 Alpha":"100",
+        "Phase 1 Beta":"100",
+      },
+    },
+
+    "Tissue 2":{
+      "Cell limit":"No",
+      "Cell limit Binomial trials":100000,
+      "Cell limit Binomial probability":"0.10",
+
+      "Viral distribution type":"Binomial",
+      "Viral distribution Binomial trials":10,
+      "Viral distribution Binomial probability":"0.5",
+      "Viral distribution Gamma shape":"3",
+      "Viral distribution Gamma scale":"3.33",
+
+      "Replication phases":{
+
+        "Number of phases":1,
+
+        "Phase 1 Mode":"Stationary",
+        "Phase 1 Time ratio":"1",
+        "Phase 1 Variance":"100",
+      },
+    },
+
+    "Tissue 3":{
+      "Cell limit":"NO",
+      "Cell limit Binomial trials":100000,
+      "Cell limit Binomial probability":"0.10",
+
+      "Viral distribution type":"Binomial",
+      "Viral distribution Binomial trials":10,
+      "Viral distribution Binomial probability":"0.5",
+      "Viral distribution Gamma shape":"3",
+      "Viral distribution Gamma scale":"3.33",
+
+      "Replication phases":{
+
+        "Number of phases":3,
+
+        "Phase 1 Mode":"Neutral",
+        "Phase 1 Time ratio":"0.2",
+
+        "Phase 2 Mode":"Stationary",
+        "Phase 2 Time ratio":"0.5",
+        "Phase 2 Variance":"100",
+
+        "Phase 3 Mode":"Depriciation",
+        "Phase 3 Time ratio":"0.3",
+        "Phase 3 Alpha":"100",
+        "Phase 3 Beta":"100",
+      },
+    },
+
+  },
+
+}
