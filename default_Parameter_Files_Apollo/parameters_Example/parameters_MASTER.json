@@ -44,22 +44,22 @@
   # Haplotype retriever and count extractor
   # ALL for NODE ID to get the sequence haplotypes for all infected individual_Profiles
   # OR list the nodes seperated by a comma to get the haplotype frequency for those individuals
-  "Haplotype Node IDs":"8_8",
+  "Haplotype Node IDs":"0_0",
 
   # Pedigree search
   "Pedigree Node ID":"0_0",
   "Pedigree Tissue":"Plasma",
   "Pedigree Generation":52,
-  "Pedigree Sequence":"test_Folder/pedigree/one.fasta",
+  "Pedigree Sequence":"reference_Genomes/reference_1.fasta",
   "Pedigree get Sequences":"Yes",
 
   # Base site model or recombination hotspots to JSON script (File has to be tab delimited)
-  "Convert file location":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/Mutation_Site_model_covid_full.csv",
+  "Convert file location":"convert_Files/Recombination_hotspots_to_JSON.csv",
 
   # Convert pedigree folder to R format
-  "Pedigree folder location":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/resultsHIV_2/node_Data/0_0/pedigree_Information/one",
+  "Pedigree folder location":"results/node_Data/0_0/pedigree_Information/one",
 
-  "Segregating match sequences":"/mnt/d/Deshan/Books/University of Calgary/Experiments/HIV Simulation/patient_14/Full_analysis/Clean_name/last_Gen/merged.fasta",
+  "Segregating match sequences":"reference_Genomes/reference_1.fasta",
   "Segregating match Node ID":"0_0",
   "Segregating match tissue":"Plasma",
   "Segregating match cutoff":"0.96875"
