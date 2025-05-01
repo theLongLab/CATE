@@ -5,11 +5,26 @@
 A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large-scale genomic data.
 
 ---
+
+### Contents
+
+- 1️⃣[Description](#description)
+- 2️⃣[News](#news)
+- 3️⃣[Prerequisites](#prerequisites)
+- 4️⃣[Installation Guide](#how-to-install)
+- 5️⃣[Running CATE](#how-to-run)
+- 6️⃣[Documentation & Help](https://github.com/theLongLab/CATE/wiki)
+- 7️⃣[How to Cite](#how-to-cite)
+- 8️⃣[Contact](#contact)
+- 9️⃣[License](#software-license)
+
+---
+
 #### Description
 
-The CATE software is a CUDA based solution to enable rapid processing of large-scale VCF files to conduct a series of six different tests on evolution.
+The CATE software is a CUDA-based solution to enable rapid processing of large-scale VCF files to conduct a series of six different tests on evolution.
 
-🔵 **Here we have provided only a brief overview of CATE's useability.**   
+🔵 **Here we have provided only a brief overview of CATE's usability.**   
 🟢 **Please refer to [CATE's wiki](https://github.com/theLongLab/CATE/wiki) to obtain a more detailed understanding of its functionality and usability.**
 
 ---
