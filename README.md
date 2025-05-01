@@ -12,11 +12,10 @@ A fast and scalable CUDA implementation to conduct highly parallelized evolution
 2️⃣ [News](#news)  
 3️⃣ [Prerequisites](#prerequisites)  
 4️⃣ [Installation Guide](#how-to-install)  
-5️⃣ [Running CATE](#how-to-run)  
-6️⃣ [Documentation & Help](https://github.com/theLongLab/CATE/wiki)  
-7️⃣ [How to Cite](#how-to-cite)  
-8️⃣ [Contact](#contact)  
-9️⃣ [License](#software-license)
+5️⃣ [Running CATE](#how-to-run)    
+6️⃣ [How to Cite](#how-to-cite)  
+7️⃣ [Contact](#contact)  
+8️⃣ [License](#software-license)
 
 ---
 
