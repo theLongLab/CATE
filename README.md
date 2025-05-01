@@ -8,15 +8,15 @@ A fast and scalable CUDA implementation to conduct highly parallelized evolution
 
 ### Contents
 
-- 1️⃣[Description](#description)
-- 2️⃣[News](#news)
-- 3️⃣[Prerequisites](#prerequisites)
-- 4️⃣[Installation Guide](#how-to-install)
-- 5️⃣[Running CATE](#how-to-run)
-- 6️⃣[Documentation & Help](https://github.com/theLongLab/CATE/wiki)
-- 7️⃣[How to Cite](#how-to-cite)
-- 8️⃣[Contact](#contact)
-- 9️⃣[License](#software-license)
+1️⃣ [Description](#description)  
+2️⃣ [News](#news)  
+3️⃣ [Prerequisites](#prerequisites)  
+4️⃣ [Installation Guide](#how-to-install)  
+5️⃣ [Running CATE](#how-to-run)  
+6️⃣ [Documentation & Help](https://github.com/theLongLab/CATE/wiki)  
+7️⃣ [How to Cite](#how-to-cite)  
+8️⃣ [Contact](#contact)  
+9️⃣ [License](#software-license)
 
 ---
 
@@ -26,6 +26,8 @@ The CATE software is a CUDA-based solution to enable rapid processing of large-s
 
 🔵 **Here we have provided only a brief overview of CATE's usability.**   
 🟢 **Please refer to [CATE's wiki](https://github.com/theLongLab/CATE/wiki) to obtain a more detailed understanding of its functionality and usability.**
+
+[_Return to contents_](#contents)
 
 ---
 
@@ -42,6 +44,8 @@ Apollo also comes with a video tutorial. You can either download and watch it us
 
 [Apollo's preprint is now available on bioRxiv](https://doi.org/10.1101/2024.10.07.617101).
 
+[_Return to contents_](#contents)
+
 ---
 #### Prerequisites
 
@@ -49,6 +53,8 @@ Apollo also comes with a video tutorial. You can either download and watch it us
 2. LINUX or UNIX based kernel
 3. NVIDIA's CUDA toolkit (nvcc compiler)
 4. C++ compiler (gcc compiler)
+
+[_Return to contents_](#contents)
 
 ---
 
@@ -102,6 +108,9 @@ To ensure successful installation try running the following:
 ````
 CATE -h
 ````
+
+[_Return to contents_](#contents)
+
 ---
 
 #### How to RUN
@@ -149,6 +158,8 @@ The __HELP__ menu will list all available functions and how each function can be
 
 > ./Test_Main -h
 
+[_Return to contents_](#contents)
+
 ---
 #### How to Cite
 
@@ -179,6 +190,8 @@ To cite CATE's code with Apollo's integration please cite the Zenodo release:
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15299962.svg)](https://doi.org/10.5281/zenodo.15299962)
 
+[_Return to contents_](#contents)
+
 ---
 #### Contact
 
@@ -190,13 +203,15 @@ Dr. **Quan** Long (quan.long@ucalgary.ca)
 
 Dr. **Christian** D. Huber (cdh5313@psu.edu)
 
-2. For **Apollo** please address your correspondence to:
+2. For **Apollo**, please address your correspondence to:
 
 Dr. **Deshan** Perera (duwagedahampriyabala@ucalgary.ca)
 
 Dr. **Quan** Long (quan.long@ucalgary.ca)
 
 Dr. **Alexander** Platt (alexander.platt@pennmedicine.upenn.edu)
+
+[_Return to contents_](#contents)
 
 ---
 #### Software License
@@ -222,5 +237,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+[_Return to contents_](#contents)
 
 ---
