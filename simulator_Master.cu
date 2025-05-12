@@ -1717,7 +1717,14 @@ vector<node_within_host> simulator_Master::node_Profile_assignment_Manager(funct
                                << "\t" << all_node_IDs[node].first
                                << "\t" << profile_names[each_Node_Profile_Configuration[node][0]];
 
-            Hosts[Hosts.size() - 1].setHost(node, all_node_IDs[node].first, all_node_IDs[node].second, (int)each_Node_Profile_Configuration[node][0], num_tissues_per_Node);
+            Hosts[Hosts.size() - 1].setHost(node, all_node_IDs[node].first, all_node_IDs[node].second, (int)each_Node_Profile_Configuration[node][0], num_tissues_per_Node,
+                                            num_Cuda_devices,
+                                            Hosts[0].block_size_cuda_Fill_2D_array_Float_in_Line,
+                                            Hosts[0].block_size_cuda_Progeny_Complete_Configuration,
+                                            Hosts[0].block_size_cuda_Progeny_Configurator,
+                                            Hosts[0].block_size_cuda_Parent_configuration,
+                                            Hosts[0].maxGridSizeX,
+                                            CUDA_device_IDs);
 
             for (int col = 1; col < 4; col++)
             {
@@ -1766,6 +1773,8 @@ vector<node_within_host> simulator_Master::node_Profile_assignment_Manager(funct
         cout << "ERROR CANNOT FIND NODE CONFIGURATION FILE LOCATION: " << standard_Node_File_location << endl;
         exit(-1);
     }
+
+    // exit(-1);
 
     cout << "\nPurging network memory\n";
 

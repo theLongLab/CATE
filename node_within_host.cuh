@@ -67,9 +67,24 @@ private:
     vector<string> converted_Sequences;
 
 public:
+    int *maxGridSizeX;
+
+    int *block_size_cuda_Fill_2D_array_Float_in_Line;
+    int *block_size_cuda_Progeny_Complete_Configuration;
+    int *block_size_cuda_Progeny_Configurator;
+    int *block_size_cuda_Parent_configuration;
+
     node_within_host();
 
-    void setHost(int host_Index, int cave_ID, int host_ID, int profile_ID, int num_Tissues);
+    void setHost(int host_Index, int cave_ID, int host_ID, int profile_ID, int num_Tissues,
+                 int &num_Cuda_devices,
+                 int *block_size_cuda_Fill_2D_array_Float_in_Line_host_0,
+                 int *block_size_cuda_Progeny_Complete_Configuration_host_0,
+                 int *block_size_cuda_Progeny_Configurator_host_0,
+                 int *block_size_cuda_Parent_configuration_host_0,
+                 int *maxGridSizeX_0,
+                 int *CUDA_device_IDs);
+
     void setNum_Generation(int num_Generation);
     void setInfectious_Load(int infectious_Load);
     void setTerminal_Load(int terminal_Load);
@@ -290,4 +305,8 @@ public:
     void set_Infection_prob_Zero(string source_sequence_Data_folder,
                                  string enable_Folder_management,
                                  string enable_Compression);
+
+    void calibrate_Functions(int &device, int &device_ID);
+
+    int get_grid_Size(int gpu_Load, int &blockSize, int &maxGridSizeX_gpu);
 };
