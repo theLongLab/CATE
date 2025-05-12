@@ -5,12 +5,28 @@
 A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large-scale genomic data.
 
 ---
+
+### Contents
+
+1️⃣ [Description](#description)  
+2️⃣ [News](#news)  
+3️⃣ [Prerequisites](#prerequisites)  
+4️⃣ [Installation Guide](#how-to-install)  
+5️⃣ [Running CATE](#how-to-run)    
+6️⃣ [Citations](#how-to-cite)  
+7️⃣ [Contact](#contact)  
+8️⃣ [License](#software-license)
+
+---
+
 #### Description
 
-The CATE software is a CUDA based solution to enable rapid processing of large-scale VCF files to conduct a series of six different tests on evolution.
+The CATE software is a CUDA-based solution to enable rapid processing of large-scale VCF files to conduct a series of six different tests on evolution.
 
-🔵 **Here we have provided only a brief overview of CATE's useability.**   
+🔵 **Here we have provided only a brief overview of CATE's usability.**   
 🟢 **Please refer to [CATE's wiki](https://github.com/theLongLab/CATE/wiki) to obtain a more detailed understanding of its functionality and usability.**
+
+[_Return to contents_](#contents)
 
 ---
 
@@ -21,9 +37,13 @@ The CATE software is a CUDA based solution to enable rapid processing of large-s
 Apollo is our high-performance viral epidemic simulation platform powered by CATE's architecture.
 
 Apollo is already available in CATE for use. Use the **--simulator** or **-sim** command. 
-Documentation on Apollo is available in our [wiki](https://github.com/theLongLab/CATE/wiki/Apollo), and a [user manual](https://github.com/theLongLab/CATE/tree/main/Apollo_User_Manual) has also been provided to get you up and running on our all-new tool.
+
+Documentation on Apollo is available in our [wiki](https://github.com/theLongLab/CATE/wiki/Apollo), and a [user manual](https://github.com/theLongLab/CATE/tree/main/Apollo_User_Manual) has also been provided. 
+Apollo also comes with a video tutorial. You can either download and watch it using the [GitHub repo tutorial](https://github.com/theLongLab/CATE/blob/main/Apollo_User_Manual/Apollo_video_tutorial.mp4) or watch it online via the [Vimeo link](https://vimeo.com/1079571253/571b3b6fd3). We hope these resources help you get up and running with our all-new tool.
 
 [Apollo's preprint is now available on bioRxiv](https://doi.org/10.1101/2024.10.07.617101).
+
+[_Return to contents_](#contents)
 
 ---
 #### Prerequisites
@@ -32,6 +52,8 @@ Documentation on Apollo is available in our [wiki](https://github.com/theLongLab
 2. LINUX or UNIX based kernel
 3. NVIDIA's CUDA toolkit (nvcc compiler)
 4. C++ compiler (gcc compiler)
+
+[_Return to contents_](#contents)
 
 ---
 
@@ -85,6 +107,9 @@ To ensure successful installation try running the following:
 ````
 CATE -h
 ````
+
+[_Return to contents_](#contents)
+
 ---
 
 #### How to RUN
@@ -132,6 +157,8 @@ The __HELP__ menu will list all available functions and how each function can be
 
 > ./Test_Main -h
 
+[_Return to contents_](#contents)
+
 ---
 #### How to Cite
 
@@ -160,7 +187,9 @@ bioRxiv 2024.10.07.617101; [doi: https://doi.org/10.1101/2024.10.07.617101](http
 
 To cite CATE's code with Apollo's integration please cite the Zenodo release:
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13917864.svg)](https://doi.org/10.5281/zenodo.13917864)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15299962.svg)](https://doi.org/10.5281/zenodo.15299962)
+
+[_Return to contents_](#contents)
 
 ---
 #### Contact
@@ -173,13 +202,15 @@ Dr. **Quan** Long (quan.long@ucalgary.ca)
 
 Dr. **Christian** D. Huber (cdh5313@psu.edu)
 
-2. For **Apollo** please address your correspondence to:
+2. For **Apollo**, please address your correspondence to:
 
 Dr. **Deshan** Perera (duwagedahampriyabala@ucalgary.ca)
 
 Dr. **Quan** Long (quan.long@ucalgary.ca)
 
 Dr. **Alexander** Platt (alexander.platt@pennmedicine.upenn.edu)
+
+[_Return to contents_](#contents)
 
 ---
 #### Software License
@@ -205,5 +236,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+[_Return to contents_](#contents)
 
 ---
