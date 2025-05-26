@@ -1868,6 +1868,9 @@ void node_within_host::simulate_Cell_replication(functions_library &functions, s
 
     int grid_Size = get_grid_Size(num_Cells * recombination_Hotspots, block_size_cuda_Fill_2D_array_Float_in_Line[0], maxGridSizeX[0]);
 
+    cout << "grid_Size: " << grid_Size << endl;
+    cout << "block_size: " << block_size_cuda_Fill_2D_array_Float_in_Line[0] << endl;
+
     cuda_Fill_2D_array_Float_in_Line<<<grid_Size, block_size_cuda_Fill_2D_array_Float_in_Line[0]>>>((num_Cells * recombination_Hotspots), recombination_Hotspots, 0, cuda_Array_2D);
 
     cudaError_t err = cudaGetLastError();
@@ -3761,6 +3764,11 @@ int node_within_host::get_grid_Size(int gpu_Load, int &blockSize, int &maxGridSi
 {
     int gridSize = (gpu_Load + blockSize - 1) / blockSize;
     gridSize = min(gridSize, maxGridSizeX_gpu);
+
+    if (gridSize <= 0)
+    {
+        gridSize = 1;
+    }
 
     return gridSize;
 }
