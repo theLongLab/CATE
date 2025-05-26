@@ -61,9 +61,9 @@ Apollo also comes with a video tutorial. You can either download and watch it us
 
 ![C/C++ CUDA CI](https://github.com/theLongLab/CATE/actions/workflows/c-cpp.yml/badge.svg?event=push)
 
-CATE can be used **on-device** via **Ananconda** or by downloading and building the **GitHub** repo. It can also be used **online** via **Google Colab**.
+CATE can be used **on-device** via **Anaconda** or by downloading and building the **GitHub** repo. It can also be used **online** via **Google Colab**.
 
-For the **Google Colab** notebook please follow the link to [CATE on Colab](https://colab.research.google.com/drive/1p8I2umE1U2gEB95eKwg0-fdtOLbgR13-?usp=sharing).
+For the **Google Colab** notebook, please follow the link to [CATE on Colab](https://colab.research.google.com/drive/1p8I2umE1U2gEB95eKwg0-fdtOLbgR13-?usp=sharing).
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/theLongLab/CATE/blob/main/Colab_CATE/CATE_on_Colab.ipynb)
 
@@ -77,7 +77,7 @@ To install CATE via [**Anaconda**](https://anaconda.org/deshan_CATE/cate):
 ````
 conda install deshan_cate::cate
 ````
-To ensure successful installation run the following:
+To ensure a successful installation, run the following:
 ````
 CATE -h
 ````
@@ -85,7 +85,7 @@ CATE -h
 ```
 conda install -c conda-forge libgcc
 ```
-Else, if you want to install CATE **on-device** using the GitHub repo you might have to compile the code using an nvcc compiler. If so execute the following on the terminal:
+Else, if you want to install CATE **on-device** using the GitHub repo, you might have to compile the code using an nvcc compiler. If so, execute the following on the terminal:
 
 Download the repository:
 ````
@@ -103,7 +103,7 @@ Finally, compile the project:
 ````
 nvcc -std=c++17 *.cu *.cpp -o "CATE"
 ````
-To ensure successful installation try running the following:
+To ensure a successful installation, try running the following:
 ````
 CATE -h
 ````
@@ -124,7 +124,7 @@ The six tests on evolution are:
 5. Fixation Index
 6. Extended Haplotype Homozygosity
 
-CATE comes equipped with Apollo, our viral simulator that spans from network level to individual virion resolution complete with within-host dynamics. Apollo comes with its main simulation function and five additional utility tools.
+CATE comes equipped with Apollo, our viral simulator that spans from network level to individual virion resolution, complete with within-host dynamics. Apollo comes with its main simulation function and five additional utility tools.
 
 1. _Apollo simulator_
 2. Haplotype retriever
@@ -138,7 +138,7 @@ CATE comes equipped with Apollo, our viral simulator that spans from network lev
 Currently, the program's executable is called:  
 >Test_Main
 
-To run the software you need a JSON-style parameters file. An example is provided above:
+To run the software, you need a JSON-style parameters file. An example is provided above:
 
 > *parameters.json*.
 
@@ -153,7 +153,7 @@ __Example:__
 
 >./Test_Main -t parameters.json
 
-The __HELP__ menu will list all available functions and how each function can be executed. It can be accessed by simply typing -h as the function as shown below:
+The __HELP__ menu will list all available functions and how each can be executed. It can be accessed by simply typing -h as the function, as shown below:
 
 > ./Test_Main -h
 
@@ -164,7 +164,7 @@ The __HELP__ menu will list all available functions and how each function can be
 
 **CATE** has been successfully published in the journal Methods in Ecology and Evolution (MEE). If you find this framework or the software solution useful in your analyses, please CITE the published article available in [MEE, CATE: A fast and scalable CUDA implementation to conduct highly parallelized evolutionary tests on large scale genomic data](https://doi.org/10.1111/2041-210X.14168).
 
-To cite CATE's code please use the Zenodo release:
+To cite CATE's code, please use the Zenodo release:
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7987769.svg)](https://doi.org/10.5281/zenodo.7987769)
 
@@ -177,7 +177,7 @@ Methods in Ecology and Evolution, 00, 1–15.
 
 [![Static Badge](https://img.shields.io/badge/DOI-Methods%20in%20Ecology%20and%20Evolution-%23db0f14)](https://doi.org/10.1111/2041-210X.14168)
 
-**Apollo** is currently being submitted for review. Its preprint is available on *bioRxiv* and the citation details are as follows:
+**Apollo** is currently being submitted for review. Its preprint is available on *bioRxiv*, and the citation details are as follows:
 
 Apollo: A comprehensive GPU-powered within-host simulator for viral evolution and infection dynamics across population, tissue, and cell
 Deshan Perera, Evan Li, Frank van der Meer, Tarah Lynch, John Gill, Deirdre L Church, Christian D. Huber, Guido van Marle, Alexander Platt, Quan Long
@@ -185,16 +185,16 @@ bioRxiv 2024.10.07.617101; [doi: https://doi.org/10.1101/2024.10.07.617101](http
 
 [![Static Badge](https://img.shields.io/badge/preprint-bioRxiv-black?labelColor=black&color=%23bc2232)](https://doi.org/10.1101/2024.10.07.617101)
 
-To cite CATE's code with Apollo's integration please cite the Zenodo release:
+To cite CATE's code with Apollo's integration, please cite the Zenodo release:
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15299962.svg)](https://doi.org/10.5281/zenodo.15299962)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15391841.svg)](https://doi.org/10.5281/zenodo.15391841)
 
 [_Return to contents_](#contents)
 
 ---
 #### Contact
 
-1. For **CATE** please address your correspondence to:
+1. For **CATE**, please address your correspondence to:
 
 Dr. **Deshan** Perera (duwagedahampriyabala@ucalgary.ca)
 
