@@ -187,7 +187,7 @@ bioRxiv 2024.10.07.617101; [doi: https://doi.org/10.1101/2024.10.07.617101](http
 
 To cite CATE's code with Apollo's integration, please cite the Zenodo release:
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15391841.svg)](https://doi.org/10.5281/zenodo.15391841)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15515468.svg)](https://doi.org/10.5281/zenodo.15515468)
 
 [_Return to contents_](#contents)
 
