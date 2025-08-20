@@ -919,6 +919,7 @@ void print_Apollo()
           << "(_/    .-/\n"
           << "      (_/\n"
           << "\nCATE powered viral simulator\n----------------------------------------------\n"
+          << "HOW TO CITE:\n"
           << "Perera, D., Li, E., Gordon, P.M., van der Meer, F., Lynch, T., Gill, J., Church, D.L.,\nde Koning, A.P.J., Huber, C.D., van Marle, G., Platt, A., Long, Q. (2025)\n"
           << "Apollo: a comprehensive GPU-powered within-host simulator for viral evolution and infection dynamics across population, tissue, and cell.\n"
           << "Nature Communications 2025 16:1 16, 1–17.\n"
