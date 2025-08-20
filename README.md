@@ -41,7 +41,7 @@ Apollo is already available in CATE for use. Use the **--simulator** or **-sim**
 Documentation on Apollo is available in our [wiki](https://github.com/theLongLab/CATE/wiki/Apollo), and a [user manual](https://github.com/theLongLab/CATE/tree/main/Apollo_User_Manual) has also been provided. 
 Apollo also comes with a video tutorial. You can either download and watch it using the [GitHub repo tutorial](https://github.com/theLongLab/CATE/blob/main/Apollo_User_Manual/Apollo_video_tutorial.mp4) or watch it online via the [Vimeo link](https://vimeo.com/1079571253/571b3b6fd3). We hope these resources help you get up and running with our all-new tool.
 
-[Apollo's preprint is now available on bioRxiv](https://doi.org/10.1101/2024.10.07.617101).
+[Apollo has been published in Nature Communications](https://doi.org/10.1038/s41467-025-60988-8).
 
 [_Return to contents_](#contents)
 
@@ -177,17 +177,18 @@ Methods in Ecology and Evolution, 00, 1–15.
 
 [![Static Badge](https://img.shields.io/badge/DOI-Methods%20in%20Ecology%20and%20Evolution-%23db0f14)](https://doi.org/10.1111/2041-210X.14168)
 
-**Apollo** is currently being submitted for review. Its preprint is available on *bioRxiv*, and the citation details are as follows:
+**Apollo** has been successfully published in Nature Communications, the citation details are as follows:
 
-Apollo: A comprehensive GPU-powered within-host simulator for viral evolution and infection dynamics across population, tissue, and cell
-Deshan Perera, Evan Li, Frank van der Meer, Tarah Lynch, John Gill, Deirdre L Church, Christian D. Huber, Guido van Marle, Alexander Platt, Quan Long
-bioRxiv 2024.10.07.617101; [doi: https://doi.org/10.1101/2024.10.07.617101](https://doi.org/10.1101/2024.10.07.617101)
+Perera, D., Li, E., Gordon, P.M., van der Meer, F., Lynch, T., Gill, J., Church, D.L., de Koning, A.P.J., Huber, C.D., van Marle, G., Platt, A., Long, Q., 2025.
+Apollo: a comprehensive GPU-powered within-host simulator for viral evolution and infection dynamics across population, tissue, and cell. 
+Nature Communications 2025 16:1 16, 1–17.
+[https://doi.org/10.1038/s41467-025-60988-8](https://doi.org/10.1038/s41467-025-60988-8)
 
-[![Static Badge](https://img.shields.io/badge/preprint-bioRxiv-black?labelColor=black&color=%23bc2232)](https://doi.org/10.1101/2024.10.07.617101)
+[![Static Badge](https://img.shields.io/badge/DOI-Nature_Communications-e53b2e)](https://doi.org/10.1038/s41467-025-60988-8)
 
 To cite CATE's code with Apollo's integration, please cite the Zenodo release:
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15391841.svg)](https://doi.org/10.5281/zenodo.15391841)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15515468.svg)](https://doi.org/10.5281/zenodo.15515468)
 
 [_Return to contents_](#contents)
 
