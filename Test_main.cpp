@@ -918,7 +918,13 @@ void print_Apollo()
           << " ) /    |_/_)_(_)(/_(/_(_)\n"
           << "(_/    .-/\n"
           << "      (_/\n"
-          << "\nCATE powered viral simulator\n----------------------------------------------\n\n";
+          << "\nCATE powered viral simulator\n----------------------------------------------\n"
+          << "Perera, D., Li, E., Gordon, P.M., van der Meer, F., Lynch, T., Gill, J., Church, D.L.,\nde Koning, A.P.J., Huber, C.D., van Marle, G., Platt, A., Long, Q. (2025)\n"
+          << "Apollo: a comprehensive GPU-powered within-host simulator for viral evolution and infection dynamics across population, tissue, and cell.\n"
+          << "Nature Communications 2025 16:1 16, 1–17.\n"
+          << "https://doi.org/10.1038/s41467-025-60988-8\n"
+          << "----------------------------------------------" << endl
+          << endl;
 }
 
 void print_HELP()

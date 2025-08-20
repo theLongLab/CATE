@@ -10,7 +10,7 @@
   "Multi read":"YES",
 
   # Output and Intermediate folder locations.
-  "Output folders":"WHV",
+  "Output folders":"cancer",
   "Intermediate folders":"intermediates",
 
   # The maximum number of sequences that can be stored in an intermeiate file
@@ -56,7 +56,7 @@
   "Pedigree get Sequences":"Yes",
 
   # Base site model or recombination hotspots to JSON script (File has to be tab delimited)
-  "Convert file location":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/mutations_WHV.csv",
+  "Convert file location":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/mutations_cancer.csv",
 
   # Convert pedigree folder to R format
   "Pedigree folder location":"/mnt/d/Deshan/Books/University of Calgary/Experiments/Simulator_Linux/resultsHIV_2/node_Data/0_0/pedigree_Information/one",
