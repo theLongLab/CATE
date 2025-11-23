@@ -61,7 +61,7 @@ Apollo also comes with a video tutorial. You can either download and watch it us
 
 ![C/C++ CUDA CI](https://github.com/theLongLab/CATE/actions/workflows/c-cpp.yml/badge.svg?event=push)
 
-CATE can be used **on-device** via **Anaconda** or by downloading and building the **GitHub** repo. It can also be used **online** via **Google Colab**.
+CATE can be used **on-device** via **Anaconda** or by downloading and building the **GitHub** repo. It can also be used **online** via **Google Colab** and **NVIDIA Launchables**.
 
 For the **Google Colab** notebook, please follow the link to [CATE on Colab](https://colab.research.google.com/drive/1p8I2umE1U2gEB95eKwg0-fdtOLbgR13-?usp=sharing).
 
@@ -85,6 +85,11 @@ CATE -h
 ```
 conda install -c conda-forge libgcc
 ```
+
+To install CATE via [NVIDIA Launchables](https://brev.nvidia.com/launchable/deploy?launchableID=env-35fDI20oNdPrIRZQyZXwF5IkDIz):
+
+[![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-35fDI20oNdPrIRZQyZXwF5IkDIz)
+
 Else, if you want to install CATE **on-device** using the GitHub repo, you might have to compile the code using an nvcc compiler. If so, execute the following on the terminal:
 
 Download the repository:
